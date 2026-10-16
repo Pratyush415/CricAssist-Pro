@@ -38,11 +38,11 @@ Answer: numbers only from stats tools, context quoted with Cricinfo links
 ### Fri Oct 16: Data layer (R2, R3)
 - [x] Project structure, packaging, tests
 - [x] Dataset `schema.json` and `manifest.json` committed
-- [ ] DuckDB loader (`stats/db.py`, `stats/ingest.py`)
-- [ ] Verify CSVs against manifest checksums and schema columns
-- [ ] Tiny test dataset (2–3 matches) in `tests/`
-- [ ] `cricassist build-db` command
-- [ ] **Done when:** full database builds locally and row counts match the manifest
+- [x] DuckDB loader (`stats/db.py`, `stats/ingest.py`)
+- [x] Verify CSVs against manifest checksums and schema columns
+- [x] Tiny test dataset (2–3 matches) in `tests/`
+- [x] `cricassist build-db` command
+- [x] **Done when:** full database builds locally and row counts match the manifest
 
 ### Sat Oct 17: Stats engine, part 1 (R1)
 - [ ] Batting innings and bowling figures views
@@ -97,8 +97,8 @@ Demo:
 ## Inputs needed
 | When | What |
 |---|---|
-| Oct 16 | Small CSVs + 20,000-row samples of the two large CSVs |
-| Oct 16–17 | Run `cricassist build-db` locally on the full dataset |
+| ~~Oct 16~~ | ~~Small CSVs + 20,000-row samples of the two large CSVs~~ (full dataset provided) |
+| ~~Oct 16–17~~ | ~~Run `cricassist build-db` locally on the full dataset~~ (done Oct 16: about a minute, all row counts match) |
 | By Oct 19 | Anthropic API key in local `.env` (never committed) |
 | By Oct 19 | Demo questions you want to show, to drive the curated scrape list |
 | By Oct 20 | Confirmation that scraping fits ESPNcricinfo's terms of use for this submission |

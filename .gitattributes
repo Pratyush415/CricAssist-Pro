@@ -1,0 +1,4 @@
+# The dataset files are checked against SHA-256 checksums, so git must never
+# rewrite their line endings (core.autocrlf would on Windows).
+src/cricassist/stats/dataset/*.json -text
+tests/data/** -text

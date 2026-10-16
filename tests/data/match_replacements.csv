@@ -1,0 +1,3 @@
+match_id,innings,delivery_number,replacement_number,kind,team,role,player_in,player_in_id,player_out,player_out_id,reason
+1473469,2,1,1,match,Delhi Capitals,,Mukesh Kumar,2cffab74,Abishek Porel,ad3b6e95,impact_player
+1473469,4,1,1,match,Rajasthan Royals,,SB Dubey,6b2ff18f,M Theekshana,f24c6701,impact_player

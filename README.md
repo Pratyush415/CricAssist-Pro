@@ -38,3 +38,25 @@ pip install -e ".[dev]"
 cp .env.example .env
 pytest
 ```
+
+## Building the stats database
+
+1. Unzip the dataset CSVs into `data/raw/` (see `src/cricassist/stats/dataset/README.md`).
+2. Run:
+
+   ```bash
+   cricassist build-db
+   ```
+
+   This checks every CSV against the sizes, SHA-256 checksums and column
+   headers in `manifest.json` and `schema.json`, loads them into DuckDB at
+   `data/processed/cricassist.db`, then checks row counts and keys. It takes
+   about a minute for the full dataset. Use `--skip-checksums` to check file
+   sizes only.
+
+Each CSV becomes a table of the same name. Column names are lowercased with
+spaces replaced by underscores, so `striker balls faced` becomes
+`striker_balls_faced`.
+
+Tests run on a three-match subset in `tests/data/`, made with
+`scripts/make_test_dataset.py`.

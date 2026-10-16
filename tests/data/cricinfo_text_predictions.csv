@@ -1,0 +1,20 @@
+match_id,innings,delivery_number,line,line_confidence,line_explicit,length,length_confidence,length_explicit,shot,shot_confidence,shot_explicit,direction,direction_confidence,direction_explicit
+1439892,1,48,,,,,,,,,,fine leg,0.997,0
+1439892,1,150,,,,,,,,,,cover,0.387,0
+1439892,1,273,,,,,,,,,,square leg,0.387,1
+1439892,3,44,,,,,,,,,,cover,0.667,1
+1448396,2,41,,,,,,,paddle sweep,0.894,0,,,
+1448396,2,67,,,,,,,sweep shot,0.894,0,,,
+1473469,1,30,,,,,,,,,,mid wicket,0.465,0
+1473469,1,113,,,,,,,ramp,0.894,0,,,
+1473469,2,105,,,,,,,pull,0.894,0,,,
+1473469,3,1,down leg,0.546,0,yorker,0.826,1,flick,0.52,0,,,
+1473469,3,2,on the stumps,0.756,1,full,0.457,1,slog shot,0.46,0,,,
+1473469,3,3,on the stumps,0.638,0,full toss,0.846,0,on drive,0.619,0,,,
+1473469,3,4,outside offstump,0.626,1,full toss,0.903,1,cover drive,0.382,0,,,
+1473469,3,5,on the stumps,0.561,0,good length,0.549,0,slog shot,0.52,0,,,
+1473469,3,6,on the stumps,0.621,1,full toss,0.846,1,flick,0.396,0,,,
+1473469,4,1,outside offstump,0.567,0,short,0.752,1,pull,0.857,1,,,
+1473469,4,2,outside offstump,0.657,0,short,0.678,1,cut shot,0.857,0,,,
+1473469,4,3,outside offstump,0.511,0,yorker,0.783,1,square drive,0.228,0,,,
+1473469,4,4,outside offstump,0.796,1,short,0.626,1,pull,0.829,0,,,
