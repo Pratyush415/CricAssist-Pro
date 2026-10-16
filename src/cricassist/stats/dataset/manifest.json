@@ -1,0 +1,396 @@
+{
+ "dataset": "The Ultimate Ball-by-Ball Cricket Dataset",
+ "built_at_utc": "2026-10-10 05:07:31",
+ "snapshot_date": "2026-10-10",
+ "cricsheet": {
+  "source": "https://cricsheet.org/",
+  "licence": "Open Data Commons Attribution License 1.0",
+  "snapshot_date": "2026-10-10",
+  "match_counts": {
+   "archive_match_entries": 14585,
+   "unique_matches": 14585,
+   "cross_archive_duplicates": 0,
+   "matches_in_more_than_one_archive": {}
+  },
+  "archives": [
+   {
+    "name": "tests_csv2.zip",
+    "collection": "tests",
+    "bytes": 13773741,
+    "sha256": "69589b5086f3aa2874fa4d19c422262d4c6d7fc7e892fff7eaf33adc58ed0573",
+    "downloaded": "2026-10-09",
+    "matches": 919,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "odis_csv2.zip",
+    "collection": "odis",
+    "bytes": 18012539,
+    "sha256": "f215dda981883a31695bebea578f55c86afa7324e82a3dd45235983336a00a3c",
+    "downloaded": "2026-10-09",
+    "matches": 3203,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "t20s_csv2.zip",
+    "collection": "t20s",
+    "bytes": 19222057,
+    "sha256": "e363e6d50878b67be16d34853458e920f36951ea00aa8840501f3ef01df50a2e",
+    "downloaded": "2026-10-09",
+    "matches": 5775,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "ipl_csv2.zip",
+    "collection": "ipl",
+    "bytes": 6834880,
+    "sha256": "cd8c118293337ae074ebd36a2bb0d0bbc40ab34f090ff46f3c73a695b028ca81",
+    "downloaded": "2026-10-09",
+    "matches": 1243,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "wpl_csv2.zip",
+    "collection": "wpl",
+    "bytes": 484579,
+    "sha256": "bc6447191ce8cfb6f05fa2265333a6d5a14d32f79caf77c4163d519c50aa4923",
+    "downloaded": "2026-10-09",
+    "matches": 88,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "bbl_csv2.zip",
+    "collection": "bbl",
+    "bytes": 3577527,
+    "sha256": "c8f4871f62d5d1aba70c34be2cf76e0ccc2eadca0fe8b5b37dd11efa7b6fab94",
+    "downloaded": "2026-10-09",
+    "matches": 662,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "wbb_csv2.zip",
+    "collection": "wbb",
+    "bytes": 2718930,
+    "sha256": "6347d31a6e67043fcc465aec7a994bad423e02870564b4593d009c0eacb36783",
+    "downloaded": "2026-10-09",
+    "matches": 519,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "cpl_csv2.zip",
+    "collection": "cpl",
+    "bytes": 2436320,
+    "sha256": "2f5252cb506f23856617d341e56500d124295b36c1e99fc03b73082f5da9ee97",
+    "downloaded": "2026-10-09",
+    "matches": 445,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "psl_csv2.zip",
+    "collection": "psl",
+    "bytes": 1955042,
+    "sha256": "b903fa3ca203ab2b187c5093e8e63c7a269c8967137e4665f013e8f7a7b3a738",
+    "downloaded": "2026-10-09",
+    "matches": 357,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "sat_csv2.zip",
+    "collection": "sat",
+    "bytes": 693162,
+    "sha256": "700a8ed4b11865bba374d55c16671da8c64802acf7e6fb34bddef5b15b86d3fd",
+    "downloaded": "2026-10-09",
+    "matches": 130,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "ilt_csv2.zip",
+    "collection": "ilt",
+    "bytes": 751912,
+    "sha256": "1568f3d248351f123ff66fddc9e3e0989b6f915e2411b459d642dc5bb43a7409",
+    "downloaded": "2026-10-09",
+    "matches": 134,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "hnd_csv2.zip",
+    "collection": "hnd",
+    "bytes": 1877142,
+    "sha256": "52ec44ce0812f43b6694c5773fe865a91fba6f4da6f6ef72fe76d5297d469dd4",
+    "downloaded": "2026-10-09",
+    "matches": 389,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "mlc_csv2.zip",
+    "collection": "mlc",
+    "bytes": 610608,
+    "sha256": "622fc7863169e7173df8a3cf52549a728259ad909dc42b32affc8e5e44eac778",
+    "downloaded": "2026-10-09",
+    "matches": 109,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "lpl_csv2.zip",
+    "collection": "lpl",
+    "bytes": 800835,
+    "sha256": "646c6bc2d0fd6afe2f6f3ed7189ff0a8a7817715bfc97bc8be80aefb459315af",
+    "downloaded": "2026-10-09",
+    "matches": 143,
+    "format_version": "2.3.0"
+   },
+   {
+    "name": "bpl_csv2.zip",
+    "collection": "bpl",
+    "bytes": 2634088,
+    "sha256": "544a8e02fd3d52014596c46dc0aa6a279bc93ae6c9a205c164c681159e426b0f",
+    "downloaded": "2026-10-09",
+    "matches": 469,
+    "format_version": "2.3.0"
+   }
+  ],
+  "json_archives": [
+   {
+    "name": "tests_json.zip",
+    "collection": "tests",
+    "bytes": 17292207,
+    "sha256": "dd921c0e20c46990a33dc5ffdcd60bd6a5488e908932aeb095bf7ef6cb050316",
+    "downloaded": "2026-10-10",
+    "matches": 919
+   },
+   {
+    "name": "odis_json.zip",
+    "collection": "odis",
+    "bytes": 21611846,
+    "sha256": "75e1aff7f9cd0f49fab965c7de4b23771d07e1353408354b4859a9a04c81cc5e",
+    "downloaded": "2026-10-10",
+    "matches": 3203
+   },
+   {
+    "name": "t20s_json.zip",
+    "collection": "t20s",
+    "bytes": 22934250,
+    "sha256": "3b35ddaaa2fd9ac914a640a8511389682f7f1ea3876b13f07f4416c7f9e987da",
+    "downloaded": "2026-10-10",
+    "matches": 5775
+   },
+   {
+    "name": "ipl_json.zip",
+    "collection": "ipl",
+    "bytes": 5187770,
+    "sha256": "5757e04287179767ff8495f02902bd13812b9572ec8fa2ac1347ec2e9c6d4709",
+    "downloaded": "2026-10-10",
+    "matches": 1243
+   },
+   {
+    "name": "wpl_json.zip",
+    "collection": "wpl",
+    "bytes": 371495,
+    "sha256": "533e7937056b47f169418b06d995ca85b193415390e750964e0a22982a07e6cc",
+    "downloaded": "2026-10-10",
+    "matches": 88
+   },
+   {
+    "name": "bbl_json.zip",
+    "collection": "bbl",
+    "bytes": 2706940,
+    "sha256": "7946b113c55ff4be695b2f0f7fccd12b8ce8afd652a67784a81bd6109f9b5907",
+    "downloaded": "2026-10-10",
+    "matches": 662
+   },
+   {
+    "name": "wbb_json.zip",
+    "collection": "wbb",
+    "bytes": 2058048,
+    "sha256": "8323e16ab4d0da168a10942339de7c18a5ea5951a538e0cd85dfe59909d6e99b",
+    "downloaded": "2026-10-10",
+    "matches": 519
+   },
+   {
+    "name": "cpl_json.zip",
+    "collection": "cpl",
+    "bytes": 1831622,
+    "sha256": "4b2f090bea0d3fe3f710cf2331b2f8f4c3435a70675518528d5d0bd234440463",
+    "downloaded": "2026-10-10",
+    "matches": 445
+   },
+   {
+    "name": "psl_json.zip",
+    "collection": "psl",
+    "bytes": 1501787,
+    "sha256": "f925b6cc0e0233b8282a6b7ebb38107810ca9a1865df23f10760989eafab26b8",
+    "downloaded": "2026-10-10",
+    "matches": 357
+   },
+   {
+    "name": "sat_json.zip",
+    "collection": "sat",
+    "bytes": 530439,
+    "sha256": "d9a9ec2dc54a54d2ef6c4d4f83f52054fdd923388587cfea4f863ad2ece9e14c",
+    "downloaded": "2026-10-10",
+    "matches": 130
+   },
+   {
+    "name": "ilt_json.zip",
+    "collection": "ilt",
+    "bytes": 582830,
+    "sha256": "3d3776c37d04d5faba14848d5b7853c5bfbb50343587f321466a07f32f99829a",
+    "downloaded": "2026-10-10",
+    "matches": 134
+   },
+   {
+    "name": "hnd_json.zip",
+    "collection": "hnd",
+    "bytes": 1467502,
+    "sha256": "9d70759fa15f4b79b1cc6f1c6ae353c7a5fecf8cdf32ee9d1caa8eb5b48761fe",
+    "downloaded": "2026-10-10",
+    "matches": 389
+   },
+   {
+    "name": "mlc_json.zip",
+    "collection": "mlc",
+    "bytes": 465100,
+    "sha256": "3d7383be5d149b77a7b40610fc862eb4f1782cd53c8c87cd6fd8c9a23f6d43df",
+    "downloaded": "2026-10-10",
+    "matches": 109
+   },
+   {
+    "name": "lpl_json.zip",
+    "collection": "lpl",
+    "bytes": 615198,
+    "sha256": "050dad1bd47d42a790630a17b5d3b6f862e537f144aedfb47ea3d9a560026882",
+    "downloaded": "2026-10-10",
+    "matches": 143
+   },
+   {
+    "name": "bpl_json.zip",
+    "collection": "bpl",
+    "bytes": 1991173,
+    "sha256": "ce80c63efd1e822cf66f38678e34e0686befc629067cc1e87644d484c335cabc",
+    "downloaded": "2026-10-10",
+    "matches": 469
+   }
+  ],
+  "people_register": {
+   "name": "people.csv",
+   "bytes": 1183027,
+   "sha256": "b946d3abe9db626761f7439e015cbe123e38d7dacf91c806124999d6275d699c",
+   "downloaded": "2026-10-09"
+  }
+ },
+ "files": [
+  {
+   "name": "ball_by_ball_data.csv",
+   "rows": 5852078,
+   "bytes": 1809123258,
+   "sha256": "81a646e4465cb9451d87c8c5dd922ae7b3585ca7edde3a769a9be2b9177990e4"
+  },
+  {
+   "name": "cricinfo_tracking.csv",
+   "rows": 4468782,
+   "bytes": 442533837,
+   "sha256": "eaea40ae00606e8ff5009208c55725858e62bf9f026c8ade0a222990f1c3bf29"
+  },
+  {
+   "name": "players.csv",
+   "rows": 9374,
+   "bytes": 1823158,
+   "sha256": "2e2197a509126eaa5aab2db97d0f6e98ea3dd1531df41e5873442fb36789425d"
+  },
+  {
+   "name": "matches.csv",
+   "rows": 14585,
+   "bytes": 4047453,
+   "sha256": "e71adc3183cf47829c104fdf108df66bf265f4a979a9b6791866c1e27cb28086"
+  },
+  {
+   "name": "coverage_report.csv",
+   "rows": 14585,
+   "bytes": 1134846,
+   "sha256": "92e57eea72a10cbbd5b7f68444b1005f8c9af1f0d098626771f8f1d0b50bf42b"
+  },
+  {
+   "name": "cricinfo_text_predictions.csv",
+   "rows": 1654041,
+   "bytes": 111167258,
+   "sha256": "d83d069d44c252556e3719ebffd6c0f87a8fd0ce7a8d790b3e1d321caa27ed96"
+  },
+  {
+   "name": "wickets.csv",
+   "rows": 205902,
+   "bytes": 8748799,
+   "sha256": "417a7920807d209432ab2690c72a1f9cca1d4441b7ff56ef7a83f35c7ee01b1b"
+  },
+  {
+   "name": "wicket_fielders.csv",
+   "rows": 141706,
+   "bytes": 6127373,
+   "sha256": "5ecd92b3ae3c0bc71cb505d2e4933f3d170cd78f97898aa4317e2e8121e5e69d"
+  },
+  {
+   "name": "match_people.csv",
+   "rows": 385974,
+   "bytes": 18692495,
+   "sha256": "8872883eb021b332aac6fea45dce301bfe190d4ba80a3b8d8d453392baa62884"
+  },
+  {
+   "name": "innings.csv",
+   "rows": 30745,
+   "bytes": 1315452,
+   "sha256": "e6aeb1b6099704cbc3ea5acd90b938bc65dfebe200b59603f2b2f89cb874a74a"
+  },
+  {
+   "name": "powerplays.csv",
+   "rows": 35422,
+   "bytes": 1561011,
+   "sha256": "6cddb8fc8841b6d1787b7c2609e53383e7d34ddc14c83ac04921044bd5f85952"
+  },
+  {
+   "name": "reviews.csv",
+   "rows": 16923,
+   "bytes": 1453736,
+   "sha256": "e788796fc7ccd08f751970a59ea569f15a80b979a5fd78ff969254c85e978ad5"
+  },
+  {
+   "name": "match_replacements.csv",
+   "rows": 1902,
+   "bytes": 161212,
+   "sha256": "b9ea35920c1a3ade7a9e3042e7c06d7dd837c8e5275a4d0f21a9292a7235f066"
+  },
+  {
+   "name": "match_missing.csv",
+   "rows": 1577,
+   "bytes": 41275,
+   "sha256": "cd251b6ce62928a8dfae3ef702a687dc7102565af13f74bd27368ac4a14397d8"
+  },
+  {
+   "name": "miscounted_overs.csv",
+   "rows": 395,
+   "bytes": 9924,
+   "sha256": "291d63845d5b67d34124119f091377f3e1b5fb5cbc6b3e90ff203986806d9764"
+  },
+  {
+   "name": "innings_absent_hurt.csv",
+   "rows": 185,
+   "bytes": 5576,
+   "sha256": "3c8b6518d3a888c9f33da3d83f6cfbbb53f8c44b0f3a68b51da291dfe74d1287"
+  },
+  {
+   "name": "match_dates.csv",
+   "rows": 17683,
+   "bytes": 365550,
+   "sha256": "c55e7470461f177f130ffad622f8444ec1799f53deedea1ea18e23a167979c7c"
+  },
+  {
+   "name": "player_external_ids.csv",
+   "rows": 5653,
+   "bytes": 168988,
+   "sha256": "33dd86abb76143e98ec876d17f41560436ac5bbfdef3542e6012cde440c67b3a"
+  },
+  {
+   "name": "schema.json",
+   "bytes": 75105,
+   "sha256": "96a021a2788323879f6dbd8b2730e146ca741bd361763c530424e0c30a972bb4"
+  }
+ ]
+}
