@@ -1,0 +1,119 @@
+{
+ "dataset": "The Ultimate Ball-by-Ball Cricket Dataset (test subset)",
+ "snapshot_date": "2026-10-10",
+ "matches": [
+  1439892,
+  1448396,
+  1473469
+ ],
+ "files": [
+  {
+   "name": "ball_by_ball_data.csv",
+   "rows": 1510,
+   "bytes": 471574,
+   "sha256": "d65de9c483bb333bf3694b32b7656ce76eb43206475707a8e6f3c8fbed292e74"
+  },
+  {
+   "name": "cricinfo_tracking.csv",
+   "rows": 1500,
+   "bytes": 183589,
+   "sha256": "1b49e2d84ee8687ad1e9e9e4141920b821539c33bc54c29beb56f92a7610b647"
+  },
+  {
+   "name": "players.csv",
+   "rows": 66,
+   "bytes": 21189,
+   "sha256": "3ef6e0656f402b5b946857c7d0ea3a637081c3ad0b2d21ce597db10216f1759b"
+  },
+  {
+   "name": "matches.csv",
+   "rows": 3,
+   "bytes": 1257,
+   "sha256": "f08ba69a7b531c6e960614a6d5bb56e19311d4545d26d42754f8d61d02b67049"
+  },
+  {
+   "name": "coverage_report.csv",
+   "rows": 3,
+   "bytes": 512,
+   "sha256": "4920721bd2c7fc08e40bc8bc6c403939f7609e4f47b25ab38bc1628445480e18"
+  },
+  {
+   "name": "cricinfo_text_predictions.csv",
+   "rows": 19,
+   "bytes": 1246,
+   "sha256": "4d85b44497e4db58cd0f3243f81f1becf744710af5154a7f4f19648f4c8d5e42"
+  },
+  {
+   "name": "wickets.csv",
+   "rows": 53,
+   "bytes": 2414,
+   "sha256": "038d24560879a0ffb31b2d6e4bfccff9c3717288318afbb0ed7b23c276664101"
+  },
+  {
+   "name": "wicket_fielders.csv",
+   "rows": 31,
+   "bytes": 1470,
+   "sha256": "6d21428d3a7763b8c909a5044f035f7ccb46feb6ef28cce88bd5e4e8bc8a72a1"
+  },
+  {
+   "name": "match_people.csv",
+   "rows": 83,
+   "bytes": 4056,
+   "sha256": "6ed13b1288a1ef12264e2cd526cac5588d541c772020cf8738f4b07c59e28a27"
+  },
+  {
+   "name": "innings.csv",
+   "rows": 10,
+   "bytes": 522,
+   "sha256": "980d8ef3fdc850bda282694ca46a3856c456d1fcf996632687c261a31fa1fad6"
+  },
+  {
+   "name": "powerplays.csv",
+   "rows": 4,
+   "bytes": 333,
+   "sha256": "4e195dca0662785da410f7eb9af2914a042913b9ee69a953f59ed225e6c8be68"
+  },
+  {
+   "name": "reviews.csv",
+   "rows": 24,
+   "bytes": 2269,
+   "sha256": "a4706b32ed9d30f26e0c32f7bd75799ec2c7281d18569a9b503d88d05785c4bb"
+  },
+  {
+   "name": "match_replacements.csv",
+   "rows": 2,
+   "bytes": 309,
+   "sha256": "125035469bebc0d3e5e120da900034f911044b309e7b5d4acd1b2de3bff9487f"
+  },
+  {
+   "name": "match_missing.csv",
+   "rows": 0,
+   "bytes": 60,
+   "sha256": "40114ecc8a64886775b323aa96447c752a1d2127eb4c250693b118b997a14d13"
+  },
+  {
+   "name": "miscounted_overs.csv",
+   "rows": 0,
+   "bytes": 45,
+   "sha256": "67ef62648bd3a084ede3cce79951a1decbf1421ea22daed3b77a55bf16b1ce33"
+  },
+  {
+   "name": "innings_absent_hurt.csv",
+   "rows": 0,
+   "bytes": 34,
+   "sha256": "342b22764bf9dc0889618418d259fd962dcf100f68ac41ce3a4a15a324524896"
+  },
+  {
+   "name": "match_dates.csv",
+   "rows": 7,
+   "bytes": 173,
+   "sha256": "9e77d8b1d3c89a1aba8bf84d21c9088ed8482d0fd1b8a8758536087c7fb59a1a"
+  },
+  {
+   "name": "player_external_ids.csv",
+   "rows": 136,
+   "bytes": 4404,
+   "sha256": "e3409d479093c06e61206bf06c10000fb7f272c4241b033ad0622d348a19ae7a"
+  }
+ ]
+}

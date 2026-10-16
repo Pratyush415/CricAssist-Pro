@@ -1,0 +1,4 @@
+archive,year,match_id,rows,captured,no_commentary,ball_line,ball_length,shot_played,shot_control,wagon_x,wagon_y,wagon_zone,wagon_angle,wagon_distance,wagon_in_ring,shot_direction,ball_timestamp,win_probability,predicted_score,ball_events
+tests,2024,1439892,1047,True,False,1047,1047,1047,1047,836,836,836,836,836,836,836,1047,0,0,21
+odis,2025,1448396,201,True,False,201,201,199,194,166,166,166,166,166,166,166,201,0,0,4
+ipl,2025,1473469,262,True,False,252,252,250,245,221,221,221,221,221,221,221,252,252,252,10

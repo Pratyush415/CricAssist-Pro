@@ -1,0 +1,25 @@
+match_id,innings,delivery_number,review_by,umpire,umpire_id,batter,batter_id,decision,review_type,umpires_call
+1439892,1,73,India,RA Kettleborough,4017868f,Shadman Islam,246d11a2,upheld,wicket,False
+1439892,1,82,India,CM Brown,448f4f1c,Nazmul Hossain Shanto,1274d7ab,struck down,wicket,False
+1439892,1,113,India,RA Kettleborough,4017868f,Mominul Haque,de0a3209,struck down,wicket,True
+1439892,1,174,Bangladesh,RA Kettleborough,4017868f,Nazmul Hossain Shanto,1274d7ab,struck down,wicket,False
+1439892,1,204,India,CM Brown,448f4f1c,Mominul Haque,de0a3209,struck down,wicket,False
+1439892,1,273,Bangladesh,CM Brown,448f4f1c,Mominul Haque,de0a3209,upheld,wicket,False
+1439892,1,436,Bangladesh,RA Kettleborough,4017868f,Hasan Mahmud,80ad39ac,struck down,wicket,False
+1439892,2,23,India,RA Kettleborough,4017868f,RG Sharma,740742ef,upheld,wicket,False
+1439892,2,95,India,RA Kettleborough,4017868f,RR Pant,919a3be2,upheld,wicket,False
+1439892,2,107,Bangladesh,RA Kettleborough,4017868f,RR Pant,919a3be2,struck down,wicket,False
+1439892,2,209,Bangladesh,CM Brown,448f4f1c,Akash Deep,0a67aec0,struck down,wicket,False
+1439892,3,10,India,CM Brown,448f4f1c,Shadman Islam,246d11a2,struck down,wicket,False
+1439892,3,43,Bangladesh,CM Brown,448f4f1c,Zakir Hasan,e3e09091,struck down,wicket,False
+1439892,3,158,India,RA Kettleborough,4017868f,Shadman Islam,246d11a2,struck down,wicket,True
+1439892,3,246,Bangladesh,RA Kettleborough,4017868f,Taijul Islam,9d1d34bd,struck down,wicket,False
+1439892,3,249,Bangladesh,CM Brown,448f4f1c,Mushfiqur Rahim,a94e08ea,upheld,wicket,False
+1439892,3,259,India,RA Kettleborough,4017868f,Khaled Ahmed,5dbdecf1,struck down,wicket,False
+1439892,4,29,India,RA Kettleborough,4017868f,Shubman Gill,b4b99816,struck down,wicket,False
+1439892,4,65,India,RA Kettleborough,4017868f,V Kohli,ba607b88,upheld,wicket,False
+1448396,1,22,West Indies,S Redfern,5b038989,SR Taylor,92cf79a8,struck down,,True
+1448396,2,36,England,CA Polosak,26a360d2,SIR Dunkley,3a9e9cb2,struck down,wicket,False
+1473469,1,107,Rajasthan Royals,A Totre,b1d7d7bc,Ashutosh Sharma,84d9c311,struck down,wicket,False
+1473469,2,77,Delhi Capitals,K Kelkar,1d88908d,N Rana,fb2d1dda,struck down,wicket,False
+1473469,2,98,Rajasthan Royals,A Totre,b1d7d7bc,Dhruv Jurel,bcf325d2,upheld,wicket,False

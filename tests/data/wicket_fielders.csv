@@ -1,0 +1,32 @@
+match_id,innings,delivery_number,wicket_number,fielder_number,fielder,fielder_id,substitute
+1439892,1,51,1,1,YBK Jaiswal,6c19c6e5,False
+1439892,1,300,1,1,RG Sharma,740742ef,False
+1439892,1,338,1,1,Mohammed Siraj,2f49c897,False
+1439892,1,420,1,1,Shubman Gill,b4b99816,False
+1439892,2,104,1,1,Hasan Mahmud,80ad39ac,False
+1439892,2,118,1,1,Hasan Mahmud,80ad39ac,False
+1439892,2,196,1,1,Nazmul Hossain Shanto,1274d7ab,False
+1439892,2,207,1,1,Liton Das,0404d43c,False
+1439892,2,210,1,1,Khaled Ahmed,5dbdecf1,False
+1439892,3,81,1,1,KL Rahul,b17e2f24,False
+1439892,3,173,1,1,YBK Jaiswal,6c19c6e5,False
+1439892,3,181,1,1,RR Pant,919a3be2,False
+1439892,3,221,1,1,RR Pant,919a3be2,False
+1439892,4,13,1,1,Hasan Mahmud,80ad39ac,False
+1439892,4,96,1,1,Shakib Al Hasan,7dc35884,False
+1448396,1,3,1,1,AE Jones,b05e45e4,False
+1448396,1,79,1,1,AE Jones,b05e45e4,False
+1448396,1,96,1,1,AN Davidson-Richards,35828bdd,False
+1448396,1,125,1,1,SIR Dunkley,3a9e9cb2,False
+1448396,1,130,1,1,SIR Dunkley,3a9e9cb2,False
+1473469,1,15,1,1,YBK Jaiswal,6c19c6e5,False
+1473469,1,19,1,1,PWH de Silva,a97c8ec2,False
+1473469,1,19,1,2,Sandeep Sharma,ce820073,False
+1473469,1,77,1,1,SO Hetmyer,48a1d7b7,False
+1473469,1,84,1,1,R Parag,04a418e8,False
+1473469,1,103,1,1,Dhruv Jurel,bcf325d2,False
+1473469,2,83,1,1,MA Starc,3fb19989,False
+1473469,2,124,1,1,KL Rahul,b17e2f24,False
+1473469,2,124,1,2,AR Patel,2e171977,False
+1473469,3,5,1,1,KL Rahul,b17e2f24,False
+1473469,3,6,1,1,J Fraser-McGurk,9b6e1b3f,False

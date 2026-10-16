@@ -1,0 +1,54 @@
+match_id,innings,delivery_number,wicket_number,player_dismissed,player_dismissed_id,wicket_type
+1439892,1,51,1,Zakir Hasan,e3e09091,caught
+1439892,1,73,1,Shadman Islam,246d11a2,lbw
+1439892,1,174,1,Nazmul Hossain Shanto,1274d7ab,lbw
+1439892,1,243,1,Mushfiqur Rahim,a94e08ea,bowled
+1439892,1,300,1,Liton Das,0404d43c,caught
+1439892,1,338,1,Shakib Al Hasan,7dc35884,caught
+1439892,1,420,1,Mehedi Hasan Miraz,c58b0108,caught
+1439892,1,429,1,Taijul Islam,9d1d34bd,bowled
+1439892,1,436,1,Hasan Mahmud,80ad39ac,lbw
+1439892,1,448,1,Khaled Ahmed,5dbdecf1,caught and bowled
+1439892,2,24,1,RG Sharma,740742ef,bowled
+1439892,2,87,1,YBK Jaiswal,6c19c6e5,bowled
+1439892,2,104,1,Shubman Gill,b4b99816,caught
+1439892,2,118,1,RR Pant,919a3be2,caught
+1439892,2,177,1,V Kohli,ba607b88,bowled
+1439892,2,196,1,RA Jadeja,fe93fd9d,caught
+1439892,2,203,1,R Ashwin,495d42a5,bowled
+1439892,2,207,1,KL Rahul,b17e2f24,stumped
+1439892,2,210,1,Akash Deep,0a67aec0,caught
+1439892,3,43,1,Zakir Hasan,e3e09091,lbw
+1439892,3,58,1,Hasan Mahmud,80ad39ac,bowled
+1439892,3,81,1,Mominul Haque,de0a3209,caught
+1439892,3,165,1,Nazmul Hossain Shanto,1274d7ab,bowled
+1439892,3,173,1,Shadman Islam,246d11a2,caught
+1439892,3,181,1,Liton Das,0404d43c,caught
+1439892,3,189,1,Shakib Al Hasan,7dc35884,caught and bowled
+1439892,3,221,1,Mehedi Hasan Miraz,c58b0108,caught
+1439892,3,246,1,Taijul Islam,9d1d34bd,lbw
+1439892,3,285,1,Mushfiqur Rahim,a94e08ea,bowled
+1439892,4,13,1,RG Sharma,740742ef,caught
+1439892,4,29,1,Shubman Gill,b4b99816,lbw
+1439892,4,96,1,YBK Jaiswal,6c19c6e5,caught
+1448396,1,3,1,RMAU Grimmond,5215d4c3,caught
+1448396,1,11,1,Z James,816af623,bowled
+1448396,1,22,1,SR Taylor,92cf79a8,lbw
+1448396,1,79,1,SA Campbelle,a7cd72b2,stumped
+1448396,1,85,1,S Gajnabi,c35739a1,bowled
+1448396,1,96,1,J Glasgow,a2632c7c,caught
+1448396,1,125,1,Q Joseph,d6164dc0,caught
+1448396,1,130,1,AA Alleyne,4b0e3049,caught
+1448396,2,36,1,SIR Dunkley,3a9e9cb2,lbw
+1473469,1,15,1,J Fraser-McGurk,9b6e1b3f,caught
+1473469,1,19,1,KK Nair,944533a5,run out
+1473469,1,77,1,KL Rahul,b17e2f24,caught
+1473469,1,84,1,Abishek Porel,ad3b6e95,caught
+1473469,1,103,1,AR Patel,2e171977,caught
+1473469,2,36,1,SV Samson,a4cc73aa,retired hurt
+1473469,2,52,1,R Parag,04a418e8,bowled
+1473469,2,83,1,YBK Jaiswal,6c19c6e5,caught
+1473469,2,109,1,N Rana,fb2d1dda,lbw
+1473469,2,124,1,Dhruv Jurel,bcf325d2,run out
+1473469,3,5,1,R Parag,04a418e8,run out
+1473469,3,6,1,YBK Jaiswal,6c19c6e5,run out

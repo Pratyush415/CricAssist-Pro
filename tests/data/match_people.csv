@@ -1,0 +1,84 @@
+match_id,role,person_number,team,person,person_id
+1439892,match_referee,1,,JJ Crowe,2e760301
+1439892,player,1,Bangladesh,Zakir Hasan,e3e09091
+1439892,player,2,Bangladesh,Shadman Islam,246d11a2
+1439892,player,3,Bangladesh,Mominul Haque,de0a3209
+1439892,player,4,Bangladesh,Nazmul Hossain Shanto,1274d7ab
+1439892,player,5,Bangladesh,Mushfiqur Rahim,a94e08ea
+1439892,player,6,Bangladesh,Liton Das,0404d43c
+1439892,player,7,Bangladesh,Shakib Al Hasan,7dc35884
+1439892,player,8,Bangladesh,Mehedi Hasan Miraz,c58b0108
+1439892,player,9,Bangladesh,Taijul Islam,9d1d34bd
+1439892,player,10,Bangladesh,Hasan Mahmud,80ad39ac
+1439892,player,11,Bangladesh,Khaled Ahmed,5dbdecf1
+1439892,player,12,India,YBK Jaiswal,6c19c6e5
+1439892,player,13,India,RG Sharma,740742ef
+1439892,player,14,India,Shubman Gill,b4b99816
+1439892,player,15,India,RR Pant,919a3be2
+1439892,player,16,India,V Kohli,ba607b88
+1439892,player,17,India,KL Rahul,b17e2f24
+1439892,player,18,India,RA Jadeja,fe93fd9d
+1439892,player,19,India,R Ashwin,495d42a5
+1439892,player,20,India,Akash Deep,0a67aec0
+1439892,player,21,India,JJ Bumrah,462411b3
+1439892,player,22,India,Mohammed Siraj,2f49c897
+1439892,reserve_umpire,1,,VK Sharma,a7a49df4
+1439892,tv_umpire,1,,RJ Tucker,38810cfc
+1439892,umpire,1,,CM Brown,448f4f1c
+1439892,umpire,2,,RA Kettleborough,4017868f
+1448396,match_referee,1,,DA Cosker,aac9f784
+1448396,player,1,West Indies,RMAU Grimmond,5215d4c3
+1448396,player,2,West Indies,Q Joseph,d6164dc0
+1448396,player,3,West Indies,Z James,816af623
+1448396,player,4,West Indies,SR Taylor,92cf79a8
+1448396,player,5,West Indies,SA Campbelle,a7cd72b2
+1448396,player,6,West Indies,S Gajnabi,c35739a1
+1448396,player,7,West Indies,J Glasgow,a2632c7c
+1448396,player,8,West Indies,AA Alleyne,4b0e3049
+1448396,player,9,West Indies,JKC Claxton,e22f8ec1
+1448396,player,10,West Indies,K Ramharack,321c980e
+1448396,player,11,West Indies,A Munisar,a811cb83
+1448396,player,12,England,SIR Dunkley,3a9e9cb2
+1448396,player,13,England,NR Sciver-Brunt,f3a18a0c
+1448396,player,14,England,A Capsey,910dd54e
+1448396,player,15,England,AE Jones,b05e45e4
+1448396,player,16,England,EL Lamb,02181d9a
+1448396,player,17,England,AN Davidson-Richards,35828bdd
+1448396,player,18,England,CE Dean,c6625a26
+1448396,player,19,England,KL Cross,1ade138e
+1448396,player,20,England,EL Arlott,78fd864b
+1448396,player,21,England,S Glenn,b34e0c77
+1448396,player,22,England,L Filer,31adb911
+1448396,reserve_umpire,1,,JD Shantry,70fdd428
+1448396,tv_umpire,1,,AY Harris,90d95b82
+1448396,umpire,1,,CA Polosak,26a360d2
+1448396,umpire,2,,S Redfern,5b038989
+1473469,match_referee,1,,Shakti Singh,eb90d319
+1473469,player,1,Delhi Capitals,Mukesh Kumar,2cffab74
+1473469,player,2,Delhi Capitals,J Fraser-McGurk,9b6e1b3f
+1473469,player,3,Delhi Capitals,Abishek Porel,ad3b6e95
+1473469,player,4,Delhi Capitals,KK Nair,944533a5
+1473469,player,5,Delhi Capitals,KL Rahul,b17e2f24
+1473469,player,6,Delhi Capitals,T Stubbs,85b3fab2
+1473469,player,7,Delhi Capitals,AR Patel,2e171977
+1473469,player,8,Delhi Capitals,Ashutosh Sharma,84d9c311
+1473469,player,9,Delhi Capitals,V Nigam,5ffc0565
+1473469,player,10,Delhi Capitals,MA Starc,3fb19989
+1473469,player,11,Delhi Capitals,Kuldeep Yadav,8d2c70ad
+1473469,player,12,Delhi Capitals,MM Sharma,759ac88f
+1473469,player,13,Rajasthan Royals,YBK Jaiswal,6c19c6e5
+1473469,player,14,Rajasthan Royals,SV Samson,a4cc73aa
+1473469,player,15,Rajasthan Royals,R Parag,04a418e8
+1473469,player,16,Rajasthan Royals,N Rana,fb2d1dda
+1473469,player,17,Rajasthan Royals,Dhruv Jurel,bcf325d2
+1473469,player,18,Rajasthan Royals,SO Hetmyer,48a1d7b7
+1473469,player,19,Rajasthan Royals,PWH de Silva,a97c8ec2
+1473469,player,20,Rajasthan Royals,JC Archer,5574750c
+1473469,player,21,Rajasthan Royals,M Theekshana,f24c6701
+1473469,player,22,Rajasthan Royals,Sandeep Sharma,ce820073
+1473469,player,23,Rajasthan Royals,TU Deshpande,46a9bea1
+1473469,player,24,Rajasthan Royals,SB Dubey,6b2ff18f
+1473469,reserve_umpire,1,,Anish Sahasrabudhe,2892df67
+1473469,tv_umpire,1,,R Pandit,8a604384
+1473469,umpire,1,,A Totre,b1d7d7bc
+1473469,umpire,2,,K Kelkar,1d88908d

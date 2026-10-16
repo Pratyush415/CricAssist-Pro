@@ -1,0 +1,11 @@
+match_id,innings,batting_team,target_runs,target_overs,is_super_over,declared,penalty_runs_pre,penalty_runs_post
+1439892,1,Bangladesh,,,False,False,0,0
+1439892,2,India,,,False,True,0,0
+1439892,3,Bangladesh,,,False,False,0,0
+1439892,4,India,,,False,False,0,0
+1448396,1,West Indies,,,False,False,0,0
+1448396,2,England,106,21.0,False,False,0,0
+1473469,1,Delhi Capitals,,,False,False,0,0
+1473469,2,Rajasthan Royals,189,20.0,False,False,0,0
+1473469,3,Rajasthan Royals,,,True,False,0,0
+1473469,4,Delhi Capitals,,,True,False,0,0
