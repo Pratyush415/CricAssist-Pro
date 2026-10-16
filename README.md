@@ -12,6 +12,7 @@ CricAssist-Pro/
 │   │   ├── cricinfo_client.py
 │   │   └── parsers.py
 │   ├── stats/             # offline ball-by-ball database
+│   │   ├── dataset/       # schema.json + manifest.json for the CSV dataset
 │   │   ├── models.py
 │   │   ├── db.py
 │   │   ├── ingest.py

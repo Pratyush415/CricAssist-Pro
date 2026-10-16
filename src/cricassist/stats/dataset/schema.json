@@ -1,0 +1,3143 @@
+{
+ "dataset": "The Ultimate Ball-by-Ball Cricket Dataset",
+ "files": {
+  "ball_by_ball_data.csv": {
+   "description": "One row per ball: Cricsheet's ball-by-ball data with player columns.",
+   "rows": 5852078,
+   "primary_key": [
+    "match_id",
+    "innings",
+    "delivery_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Joins to matches.csv.",
+     "min": 63963,
+     "max": 1555386
+    },
+    {
+     "name": "season",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Season label as Cricsheet gives it, for example 2007/08."
+    },
+    {
+     "name": "start_date",
+     "type": "date",
+     "nullable": false,
+     "nulls": 0,
+     "description": "First day of the match.",
+     "min": "2001-12-19",
+     "max": "2026-10-07"
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The innings of the match, in the order they were batted. A Test has up to 4. A limited overs match has 1 and 2, and a Super Over adds 3 and 4, then 5 to 8 if it is tied again.",
+     "min": 1,
+     "max": 8,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+     ]
+    },
+    {
+     "name": "delivery_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Position of the delivery in its innings: 1 for the first, 2 for the next, and so on, with wides and no balls counted. With match_id and innings it identifies a delivery. It joins cricinfo_tracking.csv.",
+     "min": 1,
+     "max": 1513
+    },
+    {
+     "name": "over",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Over number, counted from 0, so 0 is the first over.",
+     "min": 0,
+     "max": 248
+    },
+    {
+     "name": "ball_in_over",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Position of the delivery in its over, counting every delivery, so it can pass 6 when the over has wides or no balls. With over it identifies a delivery within an innings.",
+     "min": 1,
+     "max": 21
+    },
+    {
+     "name": "scorecard_ball",
+     "type": "number",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The ball as a scorecard numbers it, as over.ball. The legal deliveries are numbered 1, 2, 3 and so on in order (6 in a normal over), and a wide or no ball has the number of the legal ball that replaces it, so it is not unique. Among legal deliveries it is. This is Cricsheet's actual_delivery.",
+     "min": 0.1,
+     "max": 248.5
+    },
+    {
+     "name": "is_legal_delivery",
+     "type": "boolean",
+     "nullable": false,
+     "nulls": 0,
+     "description": "True unless the delivery is a wide or a no ball. Byes and leg byes are legal. The wides and noballs columns are blank when there is none, so use this instead of comparing them with 0."
+    },
+    {
+     "name": "batting_team",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Team batting in this innings."
+    },
+    {
+     "name": "bowling_team",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Team in the field in this innings."
+    },
+    {
+     "name": "striker",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Batter facing the ball, named as Cricsheet writes it."
+    },
+    {
+     "name": "striker_id",
+     "type": "string",
+     "nullable": true,
+     "nulls": 249,
+     "description": "Cricsheet player id of the striker. Joins to players.csv player_id."
+    },
+    {
+     "name": "non_striker",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Batter at the other end."
+    },
+    {
+     "name": "bowler",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Bowler, named as Cricsheet writes it."
+    },
+    {
+     "name": "bowler_id",
+     "type": "string",
+     "nullable": true,
+     "nulls": 281,
+     "description": "Cricsheet player id of the bowler. Joins to players.csv player_id."
+    },
+    {
+     "name": "runs_off_bat",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Runs the batter scored off the bat on this ball. Extras are not included, so the runs the team gets on the ball are runs_off_bat plus extras. A no ball can still have runs off the bat.",
+     "min": 0,
+     "max": 8,
+     "allowed_values": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+     ]
+    },
+    {
+     "name": "extras",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Runs from extras on this ball: wides, noballs, byes, legbyes and penalty added together.",
+     "min": 0,
+     "max": 7,
+     "allowed_values": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ]
+    },
+    {
+     "name": "wides",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 5710476,
+     "description": "Runs from a wide on this ball, including the wide's own run and any runs taken or a boundary on top of it. Blank when the ball was not a wide.",
+     "min": 1,
+     "max": 5,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    {
+     "name": "noballs",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 5822462,
+     "description": "The run for the no ball itself, normally 1. Runs the batter scores off a no ball are in runs_off_bat. Blank when the ball was not a no ball.",
+     "min": 1,
+     "max": 5,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    {
+     "name": "byes",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 5834562,
+     "description": "Byes on this ball: runs taken when the ball passed the batter and the keeper. They are not credited to the batter. Blank when there is none.",
+     "min": 1,
+     "max": 5,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    {
+     "name": "legbyes",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 5792993,
+     "description": "Leg byes on this ball: runs taken after the ball hit the batter's body and not the bat. They are not credited to the batter. Blank when there is none.",
+     "min": 1,
+     "max": 5,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    {
+     "name": "penalty",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 5851984,
+     "description": "Penalty runs awarded to a side on this ball, usually 5. Blank when there is none.",
+     "min": 5,
+     "max": 5,
+     "allowed_values": [
+      5
+     ]
+    },
+    {
+     "name": "wicket_type",
+     "type": "string",
+     "nullable": true,
+     "nulls": 5646196,
+     "description": "How the batter left the innings, for example caught, bowled, lbw or run out. It also holds retirements (retired hurt, retired out, retired not out), which are not dismissals by the bowling side.",
+     "allowed_values": [
+      "bowled",
+      "caught",
+      "caught and bowled",
+      "handled the ball",
+      "hit the ball twice",
+      "hit wicket",
+      "lbw",
+      "obstructing the field",
+      "retired hurt",
+      "retired not out",
+      "retired out",
+      "run out",
+      "stumped"
+     ]
+    },
+    {
+     "name": "player_dismissed",
+     "type": "string",
+     "nullable": true,
+     "nulls": 5646196,
+     "description": "The batter whose innings ended on this ball. It can be the non striker, for example in a run out."
+    },
+    {
+     "name": "other_wicket_type",
+     "type": "string",
+     "nullable": true,
+     "nulls": 5852066,
+     "description": "How a second batter left the innings on the same ball, which is rare.",
+     "allowed_values": [
+      "retired hurt",
+      "retired out",
+      "run out",
+      "stumped",
+      "timed out"
+     ]
+    },
+    {
+     "name": "other_player_dismissed",
+     "type": "string",
+     "nullable": true,
+     "nulls": 5852066,
+     "description": "The second batter who left the innings on that ball.",
+     "allowed_values": [
+      "AA Senn",
+      "AD Mathews",
+      "EM Turay",
+      "JM Clarke",
+      "Junaid Aziz",
+      "NR Kirton",
+      "PK Matautaava",
+      "R Choden",
+      "Selim Salau",
+      "Sunzamul Islam",
+      "Theertha Satish",
+      "Zulfiqar Babar"
+     ]
+    },
+    {
+     "name": "wicket",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "1 if a batter's innings ended on this ball, for any reason in wicket_type. That includes retired hurt and retired out, so filter on wicket_type to count only dismissals.",
+     "min": 0,
+     "max": 1,
+     "allowed_values": [
+      0,
+      1
+     ]
+    },
+    {
+     "name": "striker balls faced",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The striker's balls faced so far in this innings. A wide does not count and a no ball does. It starts again at 0 in each innings.",
+     "min": 0,
+     "max": 582
+    },
+    {
+     "name": "total striker runs",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The striker's runs off the bat so far in this innings. It starts again at 0 in each innings.",
+     "min": 0,
+     "max": 400
+    },
+    {
+     "name": "player out runs",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 5646196,
+     "description": "Runs the batter had scored in this innings when their innings ended, on that ball. Blank on other balls.",
+     "min": 0,
+     "max": 380
+    },
+    {
+     "name": "player out balls faced",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 5646196,
+     "description": "Balls the batter had faced in this innings when their innings ended, on that ball. A wide does not count. Blank on other balls.",
+     "min": 0,
+     "max": 572
+    },
+    {
+     "name": "gender",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "male or female.",
+     "allowed_values": [
+      "female",
+      "male"
+     ]
+    },
+    {
+     "name": "event",
+     "type": "string",
+     "nullable": true,
+     "nulls": 39085,
+     "description": "Competition name, for example Indian Premier League."
+    },
+    {
+     "name": "format",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "TEST, ODI or T20. The Hundred is listed as T20.",
+     "allowed_values": [
+      "ODI",
+      "T20",
+      "TEST"
+     ]
+    },
+    {
+     "name": "type",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Intl for internationals, or Fran(league) for a franchise league, for example Fran(IPL).",
+     "allowed_values": [
+      "Fran(BBL)",
+      "Fran(BPL)",
+      "Fran(CPL)",
+      "Fran(Hundred)",
+      "Fran(ILT20)",
+      "Fran(IPL)",
+      "Fran(LPL)",
+      "Fran(MLC)",
+      "Fran(PSL)",
+      "Fran(SA20)",
+      "Fran(WBBL)",
+      "Fran(WPL)",
+      "Intl"
+     ]
+    },
+    {
+     "name": "country_striker",
+     "type": "string",
+     "nullable": true,
+     "nulls": 2478,
+     "description": "The striker's country, from the Cricinfo profile."
+    },
+    {
+     "name": "batting style_striker",
+     "type": "string",
+     "nullable": true,
+     "nulls": 18106,
+     "description": "The striker's batting style.",
+     "allowed_values": [
+      "left-hand bat",
+      "right-hand bat"
+     ]
+    },
+    {
+     "name": "bowling style_striker",
+     "type": "string",
+     "nullable": true,
+     "nulls": 899427,
+     "description": "The striker's bowling style."
+    },
+    {
+     "name": "playing role_striker",
+     "type": "string",
+     "nullable": true,
+     "nulls": 602827,
+     "description": "The striker's playing role.",
+     "allowed_values": [
+      "allrounder",
+      "batter",
+      "batting allrounder",
+      "bowler",
+      "bowling allrounder",
+      "middle-order batter",
+      "opening batter",
+      "top-order batter",
+      "wicketkeeper",
+      "wicketkeeper batter"
+     ]
+    },
+    {
+     "name": "striker_age",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 6738,
+     "description": "The striker's age in whole years on the first day of the match. Dates of birth are not published.",
+     "min": 11,
+     "max": 70
+    },
+    {
+     "name": "country_bowler",
+     "type": "string",
+     "nullable": true,
+     "nulls": 4628,
+     "description": "The bowler's country, from the Cricinfo profile."
+    },
+    {
+     "name": "batting style_bowler",
+     "type": "string",
+     "nullable": true,
+     "nulls": 20811,
+     "description": "The bowler's batting style.",
+     "allowed_values": [
+      "left-hand bat",
+      "right-hand bat"
+     ]
+    },
+    {
+     "name": "bowling style_bowler",
+     "type": "string",
+     "nullable": true,
+     "nulls": 52178,
+     "description": "The bowler's bowling style.",
+     "allowed_values": [
+      "left-arm bowler",
+      "left-arm fast",
+      "left-arm fast-medium",
+      "left-arm fast-medium, slow left-arm orthodox",
+      "left-arm medium",
+      "left-arm medium, slow left-arm orthodox",
+      "left-arm medium, slow left-arm orthodox, left-arm wrist-spin",
+      "left-arm medium-fast",
+      "left-arm slow",
+      "left-arm slow-medium",
+      "left-arm wrist-spin",
+      "legbreak",
+      "legbreak googly",
+      "legbreak, legbreak googly",
+      "right-arm bowler",
+      "right-arm fast",
+      "right-arm fast-medium",
+      "right-arm fast-medium, legbreak",
+      "right-arm fast-medium, right-arm offbreak",
+      "right-arm fast-medium, right-arm offbreak, legbreak googly",
+      "right-arm medium",
+      "right-arm medium, legbreak",
+      "right-arm medium, legbreak googly",
+      "right-arm medium, right-arm offbreak",
+      "right-arm medium, right-arm offbreak, legbreak",
+      "right-arm medium, right-arm offbreak, slow left-arm orthodox",
+      "right-arm medium, right-arm slow",
+      "right-arm medium-fast",
+      "right-arm medium-fast, legbreak",
+      "right-arm medium-fast, right-arm medium",
+      "right-arm medium-fast, right-arm offbreak",
+      "right-arm offbreak",
+      "right-arm offbreak, legbreak",
+      "right-arm offbreak, legbreak googly",
+      "right-arm offbreak, slow left-arm orthodox",
+      "right-arm slow",
+      "right-arm slow-medium",
+      "slow left-arm orthodox",
+      "slow left-arm orthodox, left-arm wrist-spin",
+      "slow left-arm orthodox, slow left-arm orthodox"
+     ]
+    },
+    {
+     "name": "playing role_bowler",
+     "type": "string",
+     "nullable": true,
+     "nulls": 623935,
+     "description": "The bowler's playing role.",
+     "allowed_values": [
+      "allrounder",
+      "batter",
+      "batting allrounder",
+      "bowler",
+      "bowling allrounder",
+      "middle-order batter",
+      "opening batter",
+      "top-order batter",
+      "wicketkeeper",
+      "wicketkeeper batter"
+     ]
+    },
+    {
+     "name": "bowler_age",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 11258,
+     "description": "The bowler's age in whole years on the first day of the match.",
+     "min": 11,
+     "max": 65
+    },
+    {
+     "name": "fielder_1",
+     "type": "string",
+     "nullable": true,
+     "nulls": 5717740,
+     "description": "The first listed fielder of the ball's first wicket: the catcher, the keeper on a stumping, or the first fielder named on a run out. Empty when no fielder is involved, or when Cricsheet records only that a substitute fielded. wicket_fielders.csv has every fielder."
+    },
+    {
+     "name": "fielder_1_id",
+     "type": "string",
+     "nullable": true,
+     "nulls": 5717740,
+     "description": "Cricsheet id of fielder_1. Joins to players.csv player_id when that player has batted or bowled."
+    },
+    {
+     "name": "fielder_1_substitute",
+     "type": "boolean",
+     "nullable": true,
+     "nulls": 5717704,
+     "description": "True if the first listed fielder was a substitute fielder."
+    },
+    {
+     "name": "non_boundary",
+     "type": "boolean",
+     "nullable": false,
+     "nulls": 0,
+     "description": "True for a four or six off the bat that was run and not hit to the boundary, which Cricsheet marks. A four or six with this False reached the boundary."
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id"
+     ],
+     "references": {
+      "file": "matches.csv",
+      "columns": [
+       "match_id"
+      ]
+     }
+    },
+    {
+     "columns": [
+      "striker_id"
+     ],
+     "references": {
+      "file": "players.csv",
+      "columns": [
+       "player_id"
+      ]
+     }
+    },
+    {
+     "columns": [
+      "bowler_id"
+     ],
+     "references": {
+      "file": "players.csv",
+      "columns": [
+       "player_id"
+      ]
+     }
+    }
+   ]
+  },
+  "cricinfo_tracking.csv": {
+   "description": "Cricinfo tracking for the balls that have it: line, length, shot, wagon wheel, win probability. Join on match_id, innings and delivery_number.",
+   "rows": 4468782,
+   "primary_key": [
+    "match_id",
+    "innings",
+    "delivery_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 63963,
+     "max": 1554980
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Innings of the match, numbered as in ball_by_ball_data.csv. Part of the key.",
+     "min": 1,
+     "max": 4,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4
+     ]
+    },
+    {
+     "name": "delivery_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Delivery within the innings. Part of the key, same meaning as in ball_by_ball_data.csv.",
+     "min": 1,
+     "max": 1513
+    },
+    {
+     "name": "ball_line",
+     "type": "string",
+     "nullable": true,
+     "nulls": 1688450,
+     "description": "Cricinfo's line: outside offstump, wide outside offstump, on the stumps, down leg or wide down leg.",
+     "allowed_values": [
+      "down leg",
+      "on the stumps",
+      "outside offstump",
+      "wide down leg",
+      "wide outside offstump"
+     ]
+    },
+    {
+     "name": "ball_length",
+     "type": "string",
+     "nullable": true,
+     "nulls": 1687871,
+     "description": "Cricinfo's length: full toss, yorker, full, good length, short of a good length or short.",
+     "allowed_values": [
+      "full",
+      "full toss",
+      "good length",
+      "short",
+      "short of a good length",
+      "yorker"
+     ]
+    },
+    {
+     "name": "shot_played",
+     "type": "string",
+     "nullable": true,
+     "nulls": 85224,
+     "description": "Cricinfo's shot name, for example cover drive, flick, defended or left alone. Names before 2014 are coarser."
+    },
+    {
+     "name": "shot_control",
+     "type": "string",
+     "nullable": true,
+     "nulls": 152540,
+     "description": "in control or not in control.",
+     "allowed_values": [
+      "in control",
+      "not in control"
+     ]
+    },
+    {
+     "name": "wagon_x",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 1010766,
+     "description": "Cricinfo's wagon wheel x coordinate for where the ball went, about 0 to 363.",
+     "min": 0,
+     "max": 364
+    },
+    {
+     "name": "wagon_y",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 1010766,
+     "description": "Cricinfo's wagon wheel y coordinate.",
+     "min": 0,
+     "max": 381
+    },
+    {
+     "name": "wagon_zone",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 1010766,
+     "description": "Cricinfo's wagon wheel zone, 1 to 8.",
+     "min": 1,
+     "max": 8,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+     ]
+    },
+    {
+     "name": "wagon_angle",
+     "type": "number",
+     "nullable": true,
+     "nulls": 1010766,
+     "description": "Angle of the shot in degrees, 0 to 360, with 0 straight behind the batter. Left-handers are mirrored.",
+     "min": 0.0,
+     "max": 359.7
+    },
+    {
+     "name": "wagon_distance",
+     "type": "number",
+     "nullable": true,
+     "nulls": 1010766,
+     "description": "Fraction of the way to the boundary from the centre of the field. Can be above 1.",
+     "min": 0.001,
+     "max": 1.394
+    },
+    {
+     "name": "wagon_in_ring",
+     "type": "boolean",
+     "nullable": true,
+     "nulls": 1010766,
+     "description": "True if the shot ended inside the 30 yard circle."
+    },
+    {
+     "name": "shot_direction",
+     "type": "string",
+     "nullable": true,
+     "nulls": 1010766,
+     "description": "The zone as a name: fine leg, square leg, mid wicket, mid on, mid off, cover, point or third man. Left-handers are mirrored, so cover is always the off side.",
+     "allowed_values": [
+      "cover",
+      "fine leg",
+      "mid off",
+      "mid on",
+      "mid wicket",
+      "point",
+      "square leg",
+      "third man"
+     ]
+    },
+    {
+     "name": "ball_timestamp",
+     "type": "datetime",
+     "nullable": true,
+     "nulls": 2657531,
+     "description": "Cricinfo's record time for the delivery, in UTC.",
+     "min": "2019-10-30T08:11:42.000Z",
+     "max": "2026-10-07T13:05:59.000Z"
+    },
+    {
+     "name": "win_probability",
+     "type": "number",
+     "nullable": true,
+     "nulls": 3433580,
+     "description": "The batting side's chance of winning at that ball, 0 to 100, in both innings.",
+     "min": 0.0,
+     "max": 100.0
+    },
+    {
+     "name": "predicted_score",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 3433580,
+     "description": "Cricinfo's projected innings score at that ball.",
+     "min": 13,
+     "max": 507
+    },
+    {
+     "name": "ball_events",
+     "type": "string",
+     "nullable": true,
+     "nulls": 4423838,
+     "description": "Reviews, dropped catches and other events Cricinfo logged on the ball."
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id",
+      "innings",
+      "delivery_number"
+     ],
+     "references": {
+      "file": "ball_by_ball_data.csv",
+      "columns": [
+       "match_id",
+       "innings",
+       "delivery_number"
+      ]
+     }
+    }
+   ]
+  },
+  "players.csv": {
+   "description": "One row per player, keyed by player_id (the same value as striker_id and bowler_id).",
+   "rows": 9374,
+   "primary_key": [
+    "player_id"
+   ],
+   "columns": [
+    {
+     "name": "player_id",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet player id. Same value as striker_id and bowler_id in the ball file."
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Name as Cricsheet writes it."
+    },
+    {
+     "name": "cricinfo_id",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 1,
+     "description": "The player's Cricinfo profile id.",
+     "min": 4068,
+     "max": 1556864
+    },
+    {
+     "name": "full name",
+     "type": "string",
+     "nullable": true,
+     "nulls": 15,
+     "description": "Full name from the Cricinfo profile."
+    },
+    {
+     "name": "gender",
+     "type": "string",
+     "nullable": true,
+     "nulls": 15,
+     "description": "male or female.",
+     "allowed_values": [
+      "female",
+      "male"
+     ]
+    },
+    {
+     "name": "country",
+     "type": "string",
+     "nullable": true,
+     "nulls": 22,
+     "description": "Country the player represents."
+    },
+    {
+     "name": "batting style",
+     "type": "string",
+     "nullable": true,
+     "nulls": 232,
+     "description": "Batting style, for example Right hand Bat.",
+     "allowed_values": [
+      "left-hand bat",
+      "right-hand bat"
+     ]
+    },
+    {
+     "name": "bowling style",
+     "type": "string",
+     "nullable": true,
+     "nulls": 1723,
+     "description": "Bowling style, for example Right arm Medium fast."
+    },
+    {
+     "name": "playing role",
+     "type": "string",
+     "nullable": true,
+     "nulls": 5019,
+     "description": "Playing role, for example Top order Batter or Allrounder.",
+     "allowed_values": [
+      "allrounder",
+      "batter",
+      "batting allrounder",
+      "bowler",
+      "bowling allrounder",
+      "middle-order batter",
+      "opening batter",
+      "top-order batter",
+      "wicketkeeper",
+      "wicketkeeper batter"
+     ]
+    },
+    {
+     "name": "fielding style",
+     "type": "string",
+     "nullable": true,
+     "nulls": 8460,
+     "description": "In practice only wicketkeeper.",
+     "allowed_values": [
+      "mid on",
+      "occasional wicketkeeper",
+      "short cover",
+      "third slip",
+      "wicketkeeper"
+     ]
+    },
+    {
+     "name": "first international year",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 1212,
+     "description": "Year of the player's first international match, from Cricinfo's career span.",
+     "min": 1984,
+     "max": 2026
+    },
+    {
+     "name": "last international year",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 1212,
+     "description": "Year of the player's last international match.",
+     "min": 1999,
+     "max": 2026
+    },
+    {
+     "name": "major teams",
+     "type": "string",
+     "nullable": true,
+     "nulls": 26,
+     "description": "Teams the player is known for, separated by commas."
+    },
+    {
+     "name": "image url",
+     "type": "string",
+     "nullable": true,
+     "nulls": 4970,
+     "description": "Cricinfo's profile picture address."
+    }
+   ]
+  },
+  "matches.csv": {
+   "description": "One row per match, keyed by match_id.",
+   "rows": 14585,
+   "primary_key": [
+    "match_id"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Joins to the other files.",
+     "min": 63963,
+     "max": 1555386
+    },
+    {
+     "name": "season",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Season label as Cricsheet gives it."
+    },
+    {
+     "name": "start_date",
+     "type": "date",
+     "nullable": false,
+     "nulls": 0,
+     "description": "First day of the match.",
+     "min": "2001-12-19",
+     "max": "2026-10-07"
+    },
+    {
+     "name": "gender",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "male or female.",
+     "allowed_values": [
+      "female",
+      "male"
+     ]
+    },
+    {
+     "name": "event",
+     "type": "string",
+     "nullable": true,
+     "nulls": 89,
+     "description": "Competition name."
+    },
+    {
+     "name": "format",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "TEST, ODI or T20. The Hundred is listed as T20.",
+     "allowed_values": [
+      "ODI",
+      "T20",
+      "TEST"
+     ]
+    },
+    {
+     "name": "type",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Intl or Fran(league).",
+     "allowed_values": [
+      "Fran(BBL)",
+      "Fran(BPL)",
+      "Fran(CPL)",
+      "Fran(Hundred)",
+      "Fran(ILT20)",
+      "Fran(IPL)",
+      "Fran(LPL)",
+      "Fran(MLC)",
+      "Fran(PSL)",
+      "Fran(SA20)",
+      "Fran(WBBL)",
+      "Fran(WPL)",
+      "Intl"
+     ]
+    },
+    {
+     "name": "venue",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Ground and city."
+    },
+    {
+     "name": "match_number",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 1385,
+     "description": "Match number within the competition, where Cricsheet has one.",
+     "min": 1,
+     "max": 140
+    },
+    {
+     "name": "toss_winner",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Team that won the toss."
+    },
+    {
+     "name": "toss_decision",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "bat or field.",
+     "allowed_values": [
+      "bat",
+      "field"
+     ]
+    },
+    {
+     "name": "player_of_match",
+     "type": "string",
+     "nullable": true,
+     "nulls": 842,
+     "description": "Player of the match."
+    },
+    {
+     "name": "player_of_match_2",
+     "type": "string",
+     "nullable": true,
+     "nulls": 14563,
+     "description": "A second player of the match, where two were named.",
+     "allowed_values": [
+      "AB de Villiers",
+      "Afif Hossain",
+      "BB McCullum",
+      "DW Steyn",
+      "Danish Kaneria",
+      "JN Malan",
+      "KE Pike",
+      "KKN Egodage",
+      "KMDN Kulasekara",
+      "L Ronchi",
+      "L Winfield",
+      "L Yamamoto-Lake",
+      "LMP Simmons",
+      "RT Ponting",
+      "SK Raina",
+      "SL Malinga",
+      "SR Watson",
+      "Salman Butt",
+      "TWM Latham",
+      "Tamim Iqbal",
+      "Taufeeq Umar",
+      "Umar Gul"
+     ]
+    },
+    {
+     "name": "winner",
+     "type": "string",
+     "nullable": true,
+     "nulls": 618,
+     "description": "Winning team."
+    },
+    {
+     "name": "winner_runs",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 7611,
+     "description": "Margin in runs, if the winner won by runs.",
+     "min": 1,
+     "max": 492
+    },
+    {
+     "name": "winner_wickets",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 7597,
+     "description": "Margin in wickets, if the winner won by wickets.",
+     "min": 1,
+     "max": 10,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+     ]
+    },
+    {
+     "name": "outcome",
+     "type": "string",
+     "nullable": true,
+     "nulls": 13967,
+     "description": "Result when there is no winner: draw, tie or no result.",
+     "allowed_values": [
+      "draw",
+      "no result",
+      "tie"
+     ]
+    },
+    {
+     "name": "team_1",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The first of the two teams, in the order Cricsheet lists them. It does not mean the home team."
+    },
+    {
+     "name": "team_2",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The second of the two teams, in Cricsheet's order."
+    },
+    {
+     "name": "city",
+     "type": "string",
+     "nullable": true,
+     "nulls": 792,
+     "description": "City of the ground, where Cricsheet records it."
+    },
+    {
+     "name": "end_date",
+     "type": "date",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Last day of the match. The same as start_date for a one day match.",
+     "min": "2001-12-23",
+     "max": "2026-10-07"
+    },
+    {
+     "name": "scheduled_overs",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 919,
+     "description": "Overs each innings was scheduled for, such as 20 or 50. Empty for Tests.",
+     "min": 20,
+     "max": 50,
+     "allowed_values": [
+      20,
+      50
+     ]
+    },
+    {
+     "name": "balls_per_over",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Balls in an over, normally 6, and 5 in some matches such as The Hundred.",
+     "min": 5,
+     "max": 6,
+     "allowed_values": [
+      5,
+      6
+     ]
+    },
+    {
+     "name": "match_type_number",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 4688,
+     "description": "The number of the match among all Tests, ODIs or T20Is, for internationals.",
+     "min": 1,
+     "max": 5026
+    },
+    {
+     "name": "collection",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The Cricsheet collection the match comes from: tests, odis, t20s, ipl, wpl, bbl, wbb, cpl, psl, sat, ilt, hnd, mlc, lpl or bpl.",
+     "allowed_values": [
+      "bbl",
+      "bpl",
+      "cpl",
+      "hnd",
+      "ilt",
+      "ipl",
+      "lpl",
+      "mlc",
+      "odis",
+      "psl",
+      "sat",
+      "t20s",
+      "tests",
+      "wbb",
+      "wpl"
+     ]
+    },
+    {
+     "name": "result_method",
+     "type": "string",
+     "nullable": true,
+     "nulls": 13985,
+     "description": "The method that decided the result when one was used: D/L, or Awarded.",
+     "allowed_values": [
+      "Awarded",
+      "D/L"
+     ]
+    },
+    {
+     "name": "eliminator",
+     "type": "string",
+     "nullable": true,
+     "nulls": 14482,
+     "description": "The team that won the super over or the bowl out that settled a tie."
+    },
+    {
+     "name": "umpire_1",
+     "type": "string",
+     "nullable": true,
+     "nulls": 438,
+     "description": "The first on-field umpire. match_people.csv has every official."
+    },
+    {
+     "name": "umpire_2",
+     "type": "string",
+     "nullable": true,
+     "nulls": 444,
+     "description": "The second on-field umpire."
+    },
+    {
+     "name": "tv_umpire",
+     "type": "string",
+     "nullable": true,
+     "nulls": 4557,
+     "description": "The first TV umpire."
+    },
+    {
+     "name": "match_referee",
+     "type": "string",
+     "nullable": true,
+     "nulls": 1345,
+     "description": "The match referee."
+    },
+    {
+     "name": "won_by_innings",
+     "type": "boolean",
+     "nullable": false,
+     "nulls": 0,
+     "description": "True if the match was won by an innings. winner_runs then holds the runs of the margin."
+    },
+    {
+     "name": "cricsheet_created",
+     "type": "date",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The date Cricsheet created this match's record. It is not the date of the match.",
+     "min": "2009-08-15",
+     "max": "2026-10-07"
+    },
+    {
+     "name": "cricsheet_revision",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet's revision number of the match record. It rises when the record is corrected.",
+     "min": 1,
+     "max": 6,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ]
+    },
+    {
+     "name": "cricsheet_data_version",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The version of Cricsheet's data format the match record is written in.",
+     "allowed_values": [
+      "1.2.0",
+      "1.3.0"
+     ]
+    },
+    {
+     "name": "event_group",
+     "type": "string",
+     "nullable": true,
+     "nulls": 13145,
+     "description": "The group of the event the match belongs to, such as A or B, where Cricsheet has one.",
+     "allowed_values": [
+      "1",
+      "2",
+      "3",
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+     ]
+    },
+    {
+     "name": "event_sub_name",
+     "type": "string",
+     "nullable": true,
+     "nulls": 14495,
+     "description": "The sub-division of the event, where Cricsheet has one.",
+     "allowed_values": [
+      "Australia in England",
+      "Australia in New Zealand",
+      "Bangladesh in England",
+      "India in England",
+      "New Zealand in Australia",
+      "New Zealand in England",
+      "Pakistan in England",
+      "South Africa in England",
+      "Sri Lanka in England",
+      "West Indies in England"
+     ]
+    },
+    {
+     "name": "event_stage",
+     "type": "string",
+     "nullable": true,
+     "nulls": 13525,
+     "description": "The stage of the event, such as Final or Semi Final, where Cricsheet has one.",
+     "allowed_values": [
+      "11th Place Play-Off",
+      "3rd Place Play-Off",
+      "3rd Place Play-off",
+      "4th Place Play-Off",
+      "5th Place Play-Off",
+      "5th place playoff",
+      "7th Place Play-Off",
+      "7th place playoff",
+      "9th Place Play-Off",
+      "Challenger",
+      "Elimination Final",
+      "Eliminator",
+      "Final",
+      "First Round",
+      "Knockout",
+      "ODI",
+      "Play-Off",
+      "Play-off",
+      "Play-off Semi-Final",
+      "Preliminary Final",
+      "Qualifier",
+      "Qualifier 1",
+      "Qualifier 2",
+      "Qualifier 3",
+      "Qualifier 4",
+      "Qualifying Group",
+      "Qualifying Play-off",
+      "Quarter Final",
+      "Race to the Final",
+      "Semi Final",
+      "Semi-Final",
+      "Semi-final",
+      "Super 10",
+      "Super Four",
+      "Super League Final",
+      "Super Sixes",
+      "Super Three",
+      "T20",
+      "Trophy Final"
+     ]
+    }
+   ]
+  },
+  "coverage_report.csv": {
+   "description": "For every match, how many balls have each Cricinfo column filled.",
+   "rows": 14585,
+   "primary_key": [
+    "match_id"
+   ],
+   "columns": [
+    {
+     "name": "archive",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet collection the match comes from, for example ipl or t20s.",
+     "allowed_values": [
+      "bbl",
+      "bpl",
+      "cpl",
+      "hnd",
+      "ilt",
+      "ipl",
+      "lpl",
+      "mlc",
+      "odis",
+      "psl",
+      "sat",
+      "t20s",
+      "tests",
+      "wbb",
+      "wpl"
+     ]
+    },
+    {
+     "name": "year",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Year the match started.",
+     "min": 2001,
+     "max": 2026
+    },
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id.",
+     "min": 63963,
+     "max": 1555386
+    },
+    {
+     "name": "rows",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match in the ball file.",
+     "min": 2,
+     "max": 2731
+    },
+    {
+     "name": "captured",
+     "type": "boolean",
+     "nullable": false,
+     "nulls": 0,
+     "description": "True if the match's Cricinfo page was captured."
+    },
+    {
+     "name": "no_commentary",
+     "type": "boolean",
+     "nullable": false,
+     "nulls": 0,
+     "description": "True if Cricinfo had nothing usable for the match."
+    },
+    {
+     "name": "ball_line",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with ball_line filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2697
+    },
+    {
+     "name": "ball_length",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with ball_length filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2699
+    },
+    {
+     "name": "shot_played",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with shot_played filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2731
+    },
+    {
+     "name": "shot_control",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with shot_control filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2731
+    },
+    {
+     "name": "wagon_x",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with wagon_x filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2389
+    },
+    {
+     "name": "wagon_y",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with wagon_y filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2389
+    },
+    {
+     "name": "wagon_zone",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with wagon_zone filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2389
+    },
+    {
+     "name": "wagon_angle",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with wagon_angle filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2389
+    },
+    {
+     "name": "wagon_distance",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with wagon_distance filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2389
+    },
+    {
+     "name": "wagon_in_ring",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with wagon_in_ring filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2389
+    },
+    {
+     "name": "shot_direction",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with shot_direction filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2389
+    },
+    {
+     "name": "ball_timestamp",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with ball_timestamp filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 2677
+    },
+    {
+     "name": "win_probability",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with win_probability filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 632
+    },
+    {
+     "name": "predicted_score",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with predicted_score filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 632
+    },
+    {
+     "name": "ball_events",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Number of balls in the match with ball_events filled in cricinfo_tracking.csv.",
+     "min": 0,
+     "max": 51
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id"
+     ],
+     "references": {
+      "file": "matches.csv",
+      "columns": [
+       "match_id"
+      ]
+     }
+    }
+   ]
+  },
+  "cricinfo_text_predictions.csv": {
+   "description": "Predicted line, length, shot and direction, each with a confidence, for balls that have commentary text but no Cricinfo value. Join on match_id, innings and delivery_number.",
+   "rows": 1654041,
+   "primary_key": [
+    "match_id",
+    "innings",
+    "delivery_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 64027,
+     "max": 1552859
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Innings of the match, numbered as in ball_by_ball_data.csv. Part of the key.",
+     "min": 1,
+     "max": 6,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ]
+    },
+    {
+     "name": "delivery_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Delivery within the innings. Part of the key.",
+     "min": 1,
+     "max": 1513
+    },
+    {
+     "name": "line",
+     "type": "string",
+     "nullable": true,
+     "nulls": 19751,
+     "description": "Predicted line, always one of Cricinfo's own labels. Empty where Cricinfo has a value or the commentary gives no reading.",
+     "allowed_values": [
+      "down leg",
+      "on the stumps",
+      "outside offstump",
+      "wide down leg",
+      "wide outside offstump"
+     ]
+    },
+    {
+     "name": "line_confidence",
+     "type": "number",
+     "nullable": true,
+     "nulls": 19751,
+     "description": "Probability from 0 to 1 that the predicted line matches what Cricinfo would have recorded. Checked on matches the model never saw.",
+     "min": 0.0,
+     "max": 0.876
+    },
+    {
+     "name": "line_explicit",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 19751,
+     "description": "1 if the commentary text contains words that point to this line, 0 if the model inferred it from the wider text and context.",
+     "min": 0,
+     "max": 1,
+     "allowed_values": [
+      0,
+      1
+     ]
+    },
+    {
+     "name": "length",
+     "type": "string",
+     "nullable": true,
+     "nulls": 20300,
+     "description": "Predicted length, always one of Cricinfo's own labels. Empty where Cricinfo has a value or the commentary gives no reading.",
+     "allowed_values": [
+      "full",
+      "full toss",
+      "good length",
+      "short",
+      "short of a good length",
+      "yorker"
+     ]
+    },
+    {
+     "name": "length_confidence",
+     "type": "number",
+     "nullable": true,
+     "nulls": 20300,
+     "description": "Probability from 0 to 1 that the predicted length matches what Cricinfo would have recorded. Checked on matches the model never saw.",
+     "min": 0.0,
+     "max": 0.903
+    },
+    {
+     "name": "length_explicit",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 20300,
+     "description": "1 if the commentary text contains words that point to this length, 0 if the model inferred it from the wider text and context.",
+     "min": 0,
+     "max": 1,
+     "allowed_values": [
+      0,
+      1
+     ]
+    },
+    {
+     "name": "shot",
+     "type": "string",
+     "nullable": true,
+     "nulls": 1347586,
+     "description": "Predicted shot, always one of Cricinfo's own labels. Empty where Cricinfo has a value or the commentary gives no reading.",
+     "allowed_values": [
+      "back defence",
+      "cover drive",
+      "cut shot",
+      "cut shot on back foot",
+      "cut shot on front foot",
+      "dab",
+      "defended",
+      "flick",
+      "forward defence",
+      "hook",
+      "late cut",
+      "left alone",
+      "leg glance",
+      "no shot",
+      "off side drive on back foot",
+      "off side drive on front foot",
+      "on drive",
+      "on side drive on back foot",
+      "on side drive on front foot",
+      "padded away",
+      "paddle away",
+      "paddle sweep",
+      "pull",
+      "pull hook on back foot",
+      "pull hook on front foot",
+      "push",
+      "push shot",
+      "ramp",
+      "reverse pull",
+      "reverse scoop",
+      "reverse sweep",
+      "slog shot",
+      "slog sweep",
+      "square drive",
+      "steered",
+      "straight drive",
+      "sweep",
+      "sweep shot",
+      "upper cut",
+      "vertical forward attack"
+     ]
+    },
+    {
+     "name": "shot_confidence",
+     "type": "number",
+     "nullable": true,
+     "nulls": 1347586,
+     "description": "Probability from 0 to 1 that the predicted shot matches what Cricinfo would have recorded. Checked on matches the model never saw.",
+     "min": 0.0,
+     "max": 0.922
+    },
+    {
+     "name": "shot_explicit",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 1347586,
+     "description": "1 if the commentary text contains words that point to this shot, 0 if the model inferred it from the wider text and context.",
+     "min": 0,
+     "max": 1,
+     "allowed_values": [
+      0,
+      1
+     ]
+    },
+    {
+     "name": "direction",
+     "type": "string",
+     "nullable": true,
+     "nulls": 1373899,
+     "description": "Predicted shot direction, always one of Cricinfo's own labels. Empty where Cricinfo has a value or the commentary gives no reading.",
+     "allowed_values": [
+      "cover",
+      "fine leg",
+      "mid off",
+      "mid on",
+      "mid wicket",
+      "point",
+      "square leg",
+      "third man"
+     ]
+    },
+    {
+     "name": "direction_confidence",
+     "type": "number",
+     "nullable": true,
+     "nulls": 1373899,
+     "description": "Probability from 0 to 1 that the predicted shot direction matches what Cricinfo would have recorded. Checked on matches the model never saw.",
+     "min": 0.0,
+     "max": 0.997
+    },
+    {
+     "name": "direction_explicit",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 1373899,
+     "description": "1 if the commentary text contains words that point to this shot direction, 0 if the model inferred it from the wider text and context.",
+     "min": 0,
+     "max": 1,
+     "allowed_values": [
+      0,
+      1
+     ]
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id",
+      "innings",
+      "delivery_number"
+     ],
+     "references": {
+      "file": "ball_by_ball_data.csv",
+      "columns": [
+       "match_id",
+       "innings",
+       "delivery_number"
+      ]
+     }
+    }
+   ]
+  },
+  "wickets.csv": {
+   "description": "Every wicket of every delivery, including the second and later wickets the ball file cannot hold. Join on match_id, innings and delivery_number.",
+   "rows": 205902,
+   "primary_key": [
+    "match_id",
+    "innings",
+    "delivery_number",
+    "wicket_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 63963,
+     "max": 1555386
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Innings of the match, numbered as in ball_by_ball_data.csv. Part of the key.",
+     "min": 1,
+     "max": 7,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7
+     ]
+    },
+    {
+     "name": "delivery_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Delivery within the innings, numbered as in ball_by_ball_data.csv. Part of the key.",
+     "min": 1,
+     "max": 1438
+    },
+    {
+     "name": "wicket_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Position of the wicket in Cricsheet's list for the delivery, from 1. Almost every delivery has one. Wicket 1 is player_dismissed and wicket 2 is other_player_dismissed in the ball file. Part of the key.",
+     "min": 1,
+     "max": 10,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+     ]
+    },
+    {
+     "name": "player_dismissed",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The batter whose innings ended, spelled as in the ball file."
+    },
+    {
+     "name": "player_dismissed_id",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet id of that batter."
+    },
+    {
+     "name": "wicket_type",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "How the innings ended: caught, bowled, lbw, run out, stumped and a few rare kinds. It also holds retirements, which are not dismissals by the bowling side.",
+     "allowed_values": [
+      "bowled",
+      "caught",
+      "caught and bowled",
+      "handled the ball",
+      "hit the ball twice",
+      "hit wicket",
+      "lbw",
+      "obstructing the field",
+      "retired hurt",
+      "retired not out",
+      "retired out",
+      "run out",
+      "stumped",
+      "timed out"
+     ]
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id",
+      "innings",
+      "delivery_number"
+     ],
+     "references": {
+      "file": "ball_by_ball_data.csv",
+      "columns": [
+       "match_id",
+       "innings",
+       "delivery_number"
+      ]
+     }
+    }
+   ]
+  },
+  "wicket_fielders.csv": {
+   "description": "The fielders of each wicket: the catcher, the keeper on a stumping, the fielders in a run out. Join on the wicket key in wickets.csv.",
+   "rows": 141706,
+   "primary_key": [
+    "match_id",
+    "innings",
+    "delivery_number",
+    "wicket_number",
+    "fielder_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 63963,
+     "max": 1555386
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Innings of the match. Part of the key.",
+     "min": 1,
+     "max": 7,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7
+     ]
+    },
+    {
+     "name": "delivery_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Delivery within the innings. Part of the key.",
+     "min": 1,
+     "max": 1438
+    },
+    {
+     "name": "wicket_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The wicket of the delivery, as in wickets.csv. Part of the key.",
+     "min": 1,
+     "max": 2,
+     "allowed_values": [
+      1,
+      2
+     ]
+    },
+    {
+     "name": "fielder_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Position of the fielder in Cricsheet's list for the wicket, from 1. Part of the key.",
+     "min": 1,
+     "max": 4,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4
+     ]
+    },
+    {
+     "name": "fielder",
+     "type": "string",
+     "nullable": true,
+     "nulls": 36,
+     "description": "The fielder, spelled as in the ball file. Empty when Cricsheet records only that a substitute fielded."
+    },
+    {
+     "name": "fielder_id",
+     "type": "string",
+     "nullable": true,
+     "nulls": 36,
+     "description": "Cricsheet id of the fielder."
+    },
+    {
+     "name": "substitute",
+     "type": "boolean",
+     "nullable": false,
+     "nulls": 0,
+     "description": "True if the fielder was a substitute."
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id",
+      "innings",
+      "delivery_number",
+      "wicket_number"
+     ],
+     "references": {
+      "file": "wickets.csv",
+      "columns": [
+       "match_id",
+       "innings",
+       "delivery_number",
+       "wicket_number"
+      ]
+     }
+    }
+   ]
+  },
+  "match_people.csv": {
+   "description": "The players of each side and the match officials, with a role and their order in Cricsheet's lists. Join on match_id.",
+   "rows": 385974,
+   "primary_key": [
+    "match_id",
+    "role",
+    "person_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 63963,
+     "max": 1555386
+    },
+    {
+     "name": "role",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "player, umpire, tv_umpire, match_referee or reserve_umpire. Part of the key.",
+     "allowed_values": [
+      "match_referee",
+      "player",
+      "reserve_umpire",
+      "tv_umpire",
+      "umpire"
+     ]
+    },
+    {
+     "name": "person_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Position in Cricsheet's list for that role, from 1. The players of both sides run in one sequence. Part of the key.",
+     "min": 1,
+     "max": 25
+    },
+    {
+     "name": "team",
+     "type": "string",
+     "nullable": true,
+     "nulls": 64075,
+     "description": "The team, for a player. Empty for officials."
+    },
+    {
+     "name": "person",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The person, spelled as in the ball file."
+    },
+    {
+     "name": "person_id",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet id of the person. It joins to players.csv player_id only for players who have batted or bowled."
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id"
+     ],
+     "references": {
+      "file": "matches.csv",
+      "columns": [
+       "match_id"
+      ]
+     }
+    }
+   ]
+  },
+  "innings.csv": {
+   "description": "One row per innings: the batting team, the target in a chase, super over and declaration flags, and penalty runs that sit on no delivery.",
+   "rows": 30745,
+   "primary_key": [
+    "match_id",
+    "innings"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 63963,
+     "max": 1555386
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Innings of the match, numbered as in ball_by_ball_data.csv. Part of the key.",
+     "min": 1,
+     "max": 8,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+     ]
+    },
+    {
+     "name": "batting_team",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The team batting in the innings."
+    },
+    {
+     "name": "target_runs",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 17327,
+     "description": "Runs the side had to score, in a chase. Empty in a first innings.",
+     "min": 7,
+     "max": 499
+    },
+    {
+     "name": "target_overs",
+     "type": "number",
+     "nullable": true,
+     "nulls": 17327,
+     "description": "Overs the target was set over. It can be below the scheduled overs after an interruption.",
+     "min": 5.0,
+     "max": 50.0
+    },
+    {
+     "name": "is_super_over",
+     "type": "boolean",
+     "nullable": false,
+     "nulls": 0,
+     "description": "True for a super over innings."
+    },
+    {
+     "name": "declared",
+     "type": "boolean",
+     "nullable": false,
+     "nulls": 0,
+     "description": "True if the innings was declared."
+    },
+    {
+     "name": "penalty_runs_pre",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Penalty runs Cricsheet records before the innings began. They sit on no delivery, so add them to the innings total from the ball file.",
+     "min": 0,
+     "max": 10,
+     "allowed_values": [
+      0,
+      5,
+      10
+     ]
+    },
+    {
+     "name": "penalty_runs_post",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Penalty runs Cricsheet records after the innings ended. They also sit on no delivery.",
+     "min": 0,
+     "max": 5,
+     "allowed_values": [
+      0,
+      5
+     ]
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id"
+     ],
+     "references": {
+      "file": "matches.csv",
+      "columns": [
+       "match_id"
+      ]
+     }
+    }
+   ]
+  },
+  "powerplays.csv": {
+   "description": "The powerplays of each innings, with their start and end in the same numbering as scorecard_ball.",
+   "rows": 35422,
+   "primary_key": [
+    "match_id",
+    "innings",
+    "powerplay_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 211028,
+     "max": 1555386
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Innings of the match. Part of the key.",
+     "min": 1,
+     "max": 2,
+     "allowed_values": [
+      1,
+      2
+     ]
+    },
+    {
+     "name": "powerplay_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Order of the powerplay in the innings, from 1. Part of the key.",
+     "min": 1,
+     "max": 3,
+     "allowed_values": [
+      1,
+      2,
+      3
+     ]
+    },
+    {
+     "name": "type",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "mandatory, batting or fielding.",
+     "allowed_values": [
+      "batting",
+      "fielding",
+      "mandatory"
+     ]
+    },
+    {
+     "name": "start_over",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Over of the first delivery of the powerplay, counted from 0 as in the ball file.",
+     "min": 0,
+     "max": 46
+    },
+    {
+     "name": "start_ball_in_over",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Position of that delivery in its over, counting every delivery, as in the ball file. Empty when Cricsheet's listed boundary matches no single delivery.",
+     "min": 0,
+     "max": 6,
+     "allowed_values": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ]
+    },
+    {
+     "name": "start_delivery_number",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 2,
+     "description": "delivery_number of that delivery in the ball file, to join on with match_id and innings. Empty when the boundary matches no single delivery.",
+     "min": 1,
+     "max": 286
+    },
+    {
+     "name": "end_over",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Over of the last delivery of the powerplay.",
+     "min": 0,
+     "max": 165
+    },
+    {
+     "name": "end_ball_in_over",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Position of that delivery in its over. Empty when the listed boundary matches no single delivery.",
+     "min": 1,
+     "max": 19
+    },
+    {
+     "name": "end_delivery_number",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 4,
+     "description": "delivery_number of that delivery in the ball file. A delivery is in the powerplay when its delivery_number lies from start_delivery_number to end_delivery_number. Empty when the boundary matches no single delivery.",
+     "min": 2,
+     "max": 325
+    },
+    {
+     "name": "start_listed",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The first boundary exactly as Cricsheet lists it, written over.position, so 5.11 is the 11th delivery of over 5. A tenth delivery reads as .1, so 5.1 can mean the 1st or the 10th."
+    },
+    {
+     "name": "end_listed",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The last boundary exactly as Cricsheet lists it, in the same form."
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id",
+      "innings"
+     ],
+     "references": {
+      "file": "innings.csv",
+      "columns": [
+       "match_id",
+       "innings"
+      ]
+     }
+    }
+   ]
+  },
+  "reviews.csv": {
+   "description": "DRS reviews: who asked, the umpire, the batter and the outcome. Join on match_id, innings and delivery_number.",
+   "rows": 16923,
+   "primary_key": [
+    "match_id",
+    "innings",
+    "delivery_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 343729,
+     "max": 1544002
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Innings of the match. Part of the key.",
+     "min": 1,
+     "max": 5,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    {
+     "name": "delivery_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Delivery within the innings, numbered as in the ball file. Part of the key.",
+     "min": 1,
+     "max": 1248
+    },
+    {
+     "name": "review_by",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The team that asked for the review."
+    },
+    {
+     "name": "umpire",
+     "type": "string",
+     "nullable": true,
+     "nulls": 282,
+     "description": "The on-field umpire whose decision was reviewed."
+    },
+    {
+     "name": "umpire_id",
+     "type": "string",
+     "nullable": true,
+     "nulls": 282,
+     "description": "Cricsheet id of that umpire."
+    },
+    {
+     "name": "batter",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The batter involved."
+    },
+    {
+     "name": "batter_id",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet id of the batter."
+    },
+    {
+     "name": "decision",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The outcome of the review as Cricsheet records it: upheld, struck down or technical failure.",
+     "allowed_values": [
+      "struck down",
+      "technical failure",
+      "upheld"
+     ]
+    },
+    {
+     "name": "review_type",
+     "type": "string",
+     "nullable": true,
+     "nulls": 10407,
+     "description": "Cricsheet's type of the review. Where it is given it is wicket.",
+     "allowed_values": [
+      "wicket"
+     ]
+    },
+    {
+     "name": "umpires_call",
+     "type": "boolean",
+     "nullable": false,
+     "nulls": 0,
+     "description": "True if the review ended as umpire's call."
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id",
+      "innings",
+      "delivery_number"
+     ],
+     "references": {
+      "file": "ball_by_ball_data.csv",
+      "columns": [
+       "match_id",
+       "innings",
+       "delivery_number"
+      ]
+     }
+    }
+   ]
+  },
+  "match_replacements.csv": {
+   "description": "Substitutions and role changes in a match, such as concussion replacements and impact players.",
+   "rows": 1902,
+   "primary_key": [
+    "match_id",
+    "innings",
+    "delivery_number",
+    "replacement_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 64013,
+     "max": 1554975
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Innings in which the replacement was made. Part of the key.",
+     "min": 1,
+     "max": 4,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4
+     ]
+    },
+    {
+     "name": "delivery_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Delivery within the innings at which it was recorded. Part of the key.",
+     "min": 1,
+     "max": 897
+    },
+    {
+     "name": "replacement_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Order within that delivery, from 1. Part of the key.",
+     "min": 1,
+     "max": 2,
+     "allowed_values": [
+      1,
+      2
+     ]
+    },
+    {
+     "name": "kind",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet's kind of replacement: match for a player replaced in the match, role for a change of role.",
+     "allowed_values": [
+      "match",
+      "role"
+     ]
+    },
+    {
+     "name": "team",
+     "type": "string",
+     "nullable": true,
+     "nulls": 868,
+     "description": "The team, for a replacement in the match."
+    },
+    {
+     "name": "role",
+     "type": "string",
+     "nullable": true,
+     "nulls": 1034,
+     "description": "The role taken, for a change of role.",
+     "allowed_values": [
+      "batter",
+      "bowler"
+     ]
+    },
+    {
+     "name": "player_in",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The player who came in."
+    },
+    {
+     "name": "player_in_id",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet id of that player."
+    },
+    {
+     "name": "player_out",
+     "type": "string",
+     "nullable": true,
+     "nulls": 182,
+     "description": "The player who went out."
+    },
+    {
+     "name": "player_out_id",
+     "type": "string",
+     "nullable": true,
+     "nulls": 182,
+     "description": "Cricsheet id of that player."
+    },
+    {
+     "name": "reason",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Why: injury, impact_player, concussion_substitute, supersub and a few others.",
+     "allowed_values": [
+      "concussion_substitute",
+      "covid_replacement",
+      "excluded - high full pitched balls",
+      "excluded - running on the pitch",
+      "impact_player",
+      "injury",
+      "supersub",
+      "too many overs",
+      "unknown"
+     ]
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id",
+      "innings",
+      "delivery_number"
+     ],
+     "references": {
+      "file": "ball_by_ball_data.csv",
+      "columns": [
+       "match_id",
+       "innings",
+       "delivery_number"
+      ]
+     }
+    }
+   ]
+  },
+  "match_missing.csv": {
+   "description": "What Cricsheet says it does not have for a match: powerplays by innings and type, reviews, player of the match or umpires. An absence here means the data is missing, not that nothing happened.",
+   "rows": 1577,
+   "primary_key": [
+    "match_id",
+    "missing_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 216271,
+     "max": 1555386
+    },
+    {
+     "name": "missing_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Place of the item in Cricsheet's list for the match, from 1. The same powerplay type can be listed twice for an innings when two of them are missing. Part of the key.",
+     "min": 1,
+     "max": 5,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    {
+     "name": "missing_type",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "What Cricsheet says it does not have for the match: powerplays, reviews, player_of_match or umpires.",
+     "allowed_values": [
+      "player_of_match",
+      "powerplays",
+      "reviews",
+      "umpires"
+     ]
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": true,
+     "nulls": 954,
+     "description": "The innings, for missing powerplays. Empty for the other kinds.",
+     "min": 1,
+     "max": 2,
+     "allowed_values": [
+      1,
+      2
+     ]
+    },
+    {
+     "name": "powerplay_type",
+     "type": "string",
+     "nullable": true,
+     "nulls": 954,
+     "description": "The kind of powerplay that is missing, for missing powerplays.",
+     "allowed_values": [
+      "batting",
+      "fielding",
+      "mandatory"
+     ]
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id"
+     ],
+     "references": {
+      "file": "matches.csv",
+      "columns": [
+       "match_id"
+      ]
+     }
+    }
+   ]
+  },
+  "miscounted_overs.csv": {
+   "description": "Overs the umpires miscounted, with the number of balls the over really held and the umpire when known. They explain overs with five or seven legal balls.",
+   "rows": 395,
+   "primary_key": [
+    "match_id",
+    "innings",
+    "over"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 64012,
+     "max": 1543891
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Innings of the match. Part of the key.",
+     "min": 1,
+     "max": 4,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4
+     ]
+    },
+    {
+     "name": "over",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Over number, counted from 0 as in the ball file. Part of the key.",
+     "min": 0,
+     "max": 160
+    },
+    {
+     "name": "balls",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The number of legal balls the over really contained, such as 5 or 7. Cricsheet records these overs because the umpires miscounted them.",
+     "min": 5,
+     "max": 8,
+     "allowed_values": [
+      5,
+      6,
+      7,
+      8
+     ]
+    },
+    {
+     "name": "umpire",
+     "type": "string",
+     "nullable": true,
+     "nulls": 200,
+     "description": "The umpire Cricsheet names for the miscount, when it is known."
+    },
+    {
+     "name": "umpire_id",
+     "type": "string",
+     "nullable": true,
+     "nulls": 202,
+     "description": "Cricsheet id of that umpire."
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id",
+      "innings"
+     ],
+     "references": {
+      "file": "innings.csv",
+      "columns": [
+       "match_id",
+       "innings"
+      ]
+     }
+    }
+   ]
+  },
+  "innings_absent_hurt.csv": {
+   "description": "Batters Cricsheet records as absent hurt in an innings, who are not the same as players who did not bat.",
+   "rows": 185,
+   "primary_key": [
+    "match_id",
+    "innings",
+    "player"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 64053,
+     "max": 1545667
+    },
+    {
+     "name": "innings",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Innings of the match. Part of the key.",
+     "min": 1,
+     "max": 4,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4
+     ]
+    },
+    {
+     "name": "player",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "A batter Cricsheet records as absent hurt in the innings, spelled as in the ball file."
+    },
+    {
+     "name": "player_id",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet id of that player."
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id",
+      "innings"
+     ],
+     "references": {
+      "file": "innings.csv",
+      "columns": [
+       "match_id",
+       "innings"
+      ]
+     }
+    }
+   ]
+  },
+  "match_dates.csv": {
+   "description": "Every date of a match as Cricsheet lists them, for multi-day matches.",
+   "rows": 17683,
+   "primary_key": [
+    "match_id",
+    "date_number"
+   ],
+   "columns": [
+    {
+     "name": "match_id",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet match id. Part of the key.",
+     "min": 63963,
+     "max": 1555386
+    },
+    {
+     "name": "date_number",
+     "type": "integer",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Order of the date in Cricsheet's list, from 1. Part of the key.",
+     "min": 1,
+     "max": 6,
+     "allowed_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ]
+    },
+    {
+     "name": "date",
+     "type": "date",
+     "nullable": false,
+     "nulls": 0,
+     "description": "A date of the match as Cricsheet lists it. A multi-day match has one row for each date listed.",
+     "min": "2001-12-19",
+     "max": "2026-10-07"
+    }
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "match_id"
+     ],
+     "references": {
+      "file": "matches.csv",
+      "columns": [
+       "match_id"
+      ]
+     }
+    }
+   ]
+  },
+  "player_external_ids.csv": {
+   "description": "A person's ids in other systems (Cricbuzz, BCCI, Opta, Pulse, CricketArchive and others), from Cricsheet's register, for joining other data.",
+   "rows": 5653,
+   "primary_key": [
+    "player_id",
+    "source",
+    "external_id"
+   ],
+   "columns": [
+    {
+     "name": "player_id",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "Cricsheet id of the person. Part of the key."
+    },
+    {
+     "name": "source",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The other system: bcci, bigbash, cricbuzz, cricheroes, crichq, cricingif, cricketarchive, cricketworld, nvplay, opta or pulse. Part of the key.",
+     "allowed_values": [
+      "bcci",
+      "bigbash",
+      "cricbuzz",
+      "cricheroes",
+      "crichq",
+      "cricingif",
+      "cricketarchive",
+      "cricketworld",
+      "nvplay",
+      "opta",
+      "pulse"
+     ]
+    },
+    {
+     "name": "external_id",
+     "type": "string",
+     "nullable": false,
+     "nulls": 0,
+     "description": "The person's id in that system. A person can hold more than one id in a system. Part of the key."
+    }
+   ]
+  }
+ }
+}
