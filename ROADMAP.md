@@ -1,6 +1,6 @@
 # CricAssist-Pro Roadmap
 
-Deadline: **Wed Oct 21, 2026**
+Deadline: **Wed Oct 21, 2026** (submission and demo)
 
 ## Goal for Oct 21
 
@@ -44,9 +44,17 @@ from ESPNcricinfo.
 - [ ] Test set of 15 journalist questions with verified answers
 - [ ] **Done when:** at least 13 of 15 answered correctly
 
-### Wed Oct 21: Spare day and polish
-- [ ] Fix remaining issues
-- [ ] README and demo script
+### Wed Oct 21: Submission and demo
+Submission:
+- [ ] Fix remaining issues; all tests pass
+- [ ] README: what it does, setup, how to build the database, how to run, architecture, data sources and licences
+- [ ] Merge the work branch into `main` so the submitted repo is complete
+- [ ] Fresh-clone check: setup steps work from scratch
+
+Demo:
+- [ ] Demo script: 5–6 rehearsed questions showing stats depth, sourcing and a live lookup
+- [ ] Database pre-built and tested on the demo machine
+- [ ] Fallback: screen recording of a full run, in case the network or API fails live
 - [ ] Simple Streamlit web page (only if time allows)
 
 ## Deferred until after Oct 21
