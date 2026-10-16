@@ -58,5 +58,19 @@ Each CSV becomes a table of the same name. Column names are lowercased with
 spaces replaced by underscores, so `striker balls faced` becomes
 `striker_balls_faced`.
 
+The build also creates derived tables for stats (`stats/views.py`):
+`batting_innings` and `bowling_innings` (one row per player per innings),
+`player_matches`, `deliveries` and `dismissals` (views without super overs),
+and `bowling_styles`. They follow ESPNcricinfo's scoring conventions: super
+overs are excluded, wides are not balls faced, byes and leg byes are not
+charged to the bowler, and run outs are not credited to the bowler.
+
+`stats/queries.py` has the stats functions: batting and bowling summaries,
+recent innings, batter vs bowler, and batter vs bowling style, each with
+filters for format, competition, event, opposition, venue and dates.
+
+Cricsheet does not have every match, so totals can be lower than official
+career figures. Every result says how many matches it is based on.
+
 Tests run on a three-match subset in `tests/data/`, made with
 `scripts/make_test_dataset.py`.

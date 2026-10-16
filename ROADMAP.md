@@ -44,11 +44,11 @@ Answer: numbers only from stats tools, context quoted with Cricinfo links
 - [x] `cricassist build-db` command
 - [x] **Done when:** full database builds locally and row counts match the manifest
 
-### Sat Oct 17: Stats engine, part 1 (R1)
-- [ ] Batting innings and bowling figures views
-- [ ] Player career and recent form
-- [ ] Batter vs bowler, batter vs bowling style
-- [ ] **Done when:** these queries return correct numbers
+### Sat Oct 17: Stats engine, part 1 (R1) (done early, Oct 16)
+- [x] Batting innings and bowling figures views
+- [x] Player career and recent form
+- [x] Batter vs bowler, batter vs bowling style
+- [x] **Done when:** these queries return correct numbers
 
 ### Sun Oct 18: Stats engine, part 2 (R1)
 - [ ] Team head-to-heads, venue records
@@ -104,6 +104,11 @@ Demo:
 | By Oct 20 | Confirmation that scraping fits ESPNcricinfo's terms of use for this submission |
 
 ## Risks
+- **Missing matches:** Cricsheet does not have every match (about 160 men's
+  Tests since Dec 2001 are missing, mostly before 2009, plus some ODIs and
+  T20Is, e.g. Kohli's 122* in the 2022 Asia Cup). Totals can be lower than
+  official records. Every stats result reports how many matches it is based
+  on and says so; the assistant must pass that on.
 - **Wrong stats:** legal deliveries, retirements and super overs make stats easy
   to get subtly wrong. Mitigated by checking results against ESPNcricinfo.
 - **Numbers leaking from scraped text:** the model could quote a figure from a

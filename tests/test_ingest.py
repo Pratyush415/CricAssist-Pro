@@ -1,34 +1,14 @@
 import json
 import shutil
-from pathlib import Path
 
 import pytest
 
+from conftest import DATA_DIR, DC_V_RR, KANPUR_TEST, TEST_MANIFEST, build
 from cricassist.main import main
-from cricassist.stats.db import column_name, connect, load_manifest, load_schema
-from cricassist.stats.ingest import IngestError, build_database, verify_files, verify_headers
+from cricassist.stats.db import column_name, load_manifest, load_schema
+from cricassist.stats.ingest import IngestError, verify_files, verify_headers
 
-DATA_DIR = Path(__file__).parent / "data"
-TEST_MANIFEST = json.loads((DATA_DIR / "manifest.json").read_text("utf-8"))
 CSV_NAMES = [f["name"] for f in TEST_MANIFEST["files"]]
-
-KANPUR_TEST = 1439892  # India v Bangladesh, 2024
-DC_V_RR = 1473469  # IPL 2025, tied and decided by a super over
-WI_V_ENG_WOMEN = 1448396  # ODI 2025, D/L result
-
-
-def build(raw_dir: Path, db_path: Path, manifest: dict = TEST_MANIFEST):
-    return build_database(raw_dir, db_path, manifest=manifest, log=lambda msg: None)
-
-
-@pytest.fixture(scope="module")
-def db(tmp_path_factory):
-    db_path = tmp_path_factory.mktemp("db") / "test.db"
-    report = build(DATA_DIR, db_path)
-    assert report.warnings == []
-    con = connect(db_path)
-    yield con
-    con.close()
 
 
 @pytest.fixture

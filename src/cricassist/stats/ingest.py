@@ -17,6 +17,7 @@ from cricassist.stats.db import (
     load_schema,
     table_name,
 )
+from cricassist.stats.views import create_derived
 
 
 class IngestError(Exception):
@@ -176,6 +177,9 @@ def build_database(
             report.row_counts[table_name(entry["name"])] = rows
             errors += errs
             report.warnings += warns
+
+        log("Building derived tables...")
+        create_derived(con)
 
         con.execute("CREATE TABLE dataset_info (key VARCHAR PRIMARY KEY, value VARCHAR)")
         con.executemany(
