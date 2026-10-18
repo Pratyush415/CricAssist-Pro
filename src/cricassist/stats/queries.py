@@ -580,7 +580,7 @@ def team_head_to_head(con, team: str, opposition: str, filters: Filters | None =
     scores = _match_scores(con, [m["match_id"] for m in meetings])
     for m in meetings:
         m["date"] = str(m["date"])
-        m["scores"] = scores.get(m.pop("match_id"), "")
+        m["scores"] = scores.get(m["match_id"], "")
         winner = a if m["result"] == "won" else b if m["result"] == "lost" else None
         m["result"] = f"{winner} won by {m['margin']}" if winner and m["margin"] else (
             f"{winner} won" if winner else m["result"]
@@ -708,7 +708,7 @@ def best_innings(con, kind: str, filters: Filters | None = None, limit: int = 10
         where, params = filters.where()
         rows = _rows(
             con,
-            f"""SELECT player, team, opposition, runs, balls, fours, sixes, is_out, start_date AS date, format, event, venue
+            f"""SELECT match_id, player, team, opposition, runs, balls, fours, sixes, is_out, start_date AS date, format, event, venue
                 FROM batting_innings WHERE true{where} ORDER BY runs DESC, balls ASC, start_date LIMIT ?""",
             [*params, limit],
         )
@@ -718,7 +718,7 @@ def best_innings(con, kind: str, filters: Filters | None = None, limit: int = 10
         where, params = filters.where()
         rows = _rows(
             con,
-            f"""SELECT player, team, opposition, balls, balls_per_over, maidens, runs, wickets,
+            f"""SELECT match_id, player, team, opposition, balls, balls_per_over, maidens, runs, wickets,
                        start_date AS date, format, event, venue
                 FROM bowling_innings WHERE true{where} ORDER BY wickets DESC, runs ASC, start_date LIMIT ?""",
             [*params, limit],
@@ -731,7 +731,7 @@ def best_innings(con, kind: str, filters: Filters | None = None, limit: int = 10
         order = "runs ASC" if kind == "team_lowest" else "runs DESC"
         rows = _rows(
             con,
-            f"""SELECT team, opposition, runs, wickets, declared, balls, balls_per_over, format,
+            f"""SELECT match_id, team, opposition, runs, wickets, declared, balls, balls_per_over, format,
                        innings, result, start_date AS date, event, venue
                 FROM team_innings WHERE {cond}{where} ORDER BY {order}, start_date LIMIT ?""",
             [*params, limit],
@@ -1135,3 +1135,101 @@ def player_by_year(con, player: str, role: str = "batting", filters: Filters | N
         result["totals_by_format"] = totals_by_format
         result["consistency_note"] = "With by_format, consistency compares year-format rows; filter to one format to compare years within it."
     return result
+
+
+# --- Scorecards --------------------------------------------------------------
+
+
+def match_scorecard(con, match_id: int) -> dict:
+    """The full scorecard of one match: result, and every batter's and bowler's
+    figures in each innings (super overs left out). Get match ids from
+    team_head_to_head or best_innings."""
+    info = _rows(
+        con,
+        """SELECT match_id, start_date AS date, format, gender, event, event_stage, venue, city,
+                  team_1, team_2, toss_winner, toss_decision, player_of_match, winner, outcome, eliminator
+           FROM matches WHERE match_id = ?""",
+        [match_id],
+    )
+    if not info:
+        raise LookupError(f"No match with id {match_id} in the data")
+    match = info[0]
+    match["date"] = str(match["date"])
+    result = _rows(con, "SELECT team, result, margin, won_tiebreak FROM match_results WHERE match_id = ?", [match_id])
+    winner = next((r for r in result if r["result"] == "won"), None)
+    tiebreak = next((r for r in result if r["won_tiebreak"]), None)
+    match["result"] = (
+        f"{winner['team']} won by {winner['margin']}" if winner and winner["margin"] else
+        f"{winner['team']} won" if winner else
+        f"tied ({tiebreak['team']} won the super over)" if tiebreak else
+        result[0]["result"] if result else None
+    )
+    # How each batter was out, scorecard style, with the fielders from the data.
+    dismissal_rows = con.execute(
+        """SELECT w.innings, w.player_dismissed_id, w.wicket_type, d.bowler,
+                  list(CASE WHEN f.substitute THEN 'sub (' || f.fielder || ')' ELSE f.fielder END
+                       ORDER BY f.fielder_number) FILTER (WHERE f.fielder IS NOT NULL) AS fielders
+           FROM wickets w
+           JOIN ball_by_ball_data d USING (match_id, innings, delivery_number)
+           LEFT JOIN wicket_fielders f USING (match_id, innings, delivery_number, wicket_number)
+           WHERE w.match_id = ?
+           GROUP BY w.innings, w.delivery_number, w.wicket_number, w.player_dismissed_id, w.wicket_type, d.bowler
+           ORDER BY w.innings, w.delivery_number, w.wicket_number""",
+        [match_id],
+    ).fetchall()
+    dismissal_text = {}
+    for inns, player_id, kind, bowler, fielders in dismissal_rows:
+        fielders = fielders or []
+        catcher = fielders[0] if fielders else None
+        text = {
+            "bowled": f"b {bowler}",
+            "lbw": f"lbw b {bowler}",
+            "caught and bowled": f"c & b {bowler}",
+            "caught": (f"c & b {bowler}" if catcher == bowler else f"c {catcher} b {bowler}") if catcher else f"c ? b {bowler}",
+            "stumped": f"st {catcher} b {bowler}" if catcher else f"st b {bowler}",
+            "hit wicket": f"hit wicket b {bowler}",
+            "run out": f"run out ({'/'.join(fielders)})" if fielders else "run out",
+        }.get(kind, kind)
+        dismissal_text[(inns, player_id)] = text  # the last one wins (retired hurt, then out)
+
+    innings = []
+    for t in _rows(
+        con,
+        """SELECT innings, team, opposition, runs, wickets, declared, balls, balls_per_over, format, extras, target_runs
+           FROM team_innings WHERE match_id = ? ORDER BY innings""",
+        [match_id],
+    ):
+        batting = _rows(
+            con,
+            """SELECT position, player, player_id, runs, balls, fours, sixes, is_out
+               FROM batting_innings WHERE match_id = ? AND innings = ? ORDER BY position""",
+            [match_id, t["innings"]],
+        )
+        for b in batting:
+            out = b.pop("is_out")
+            b["score"] = f"{b['runs']}{'' if out else '*'} ({b['balls']})"
+            b["dismissal"] = dismissal_text.get((t["innings"], b.pop("player_id"))) if out else "not out"
+        # Bowlers in the order they came on, as a scorecard lists them.
+        bowling = _rows(
+            con,
+            """SELECT b.player, b.balls, b.balls_per_over, b.maidens, b.runs, b.wickets, b.wides, b.noballs
+               FROM bowling_innings b
+               JOIN (SELECT bowler_id, min(delivery_number) AS first_ball FROM deliveries
+                     WHERE match_id = ? AND innings = ? GROUP BY bowler_id) f
+                 ON f.bowler_id IS NOT DISTINCT FROM b.player_id
+               WHERE b.match_id = ? AND b.innings = ? ORDER BY f.first_ball""",
+            [match_id, t["innings"], match_id, t["innings"]],
+        )
+        for b in bowling:
+            b["figures"] = f"{_overs(b['balls'], b.pop('balls_per_over'))}-{b['maidens']}-{b['runs']}-{b['wickets']}"
+            b["economy"] = _ratio(6 * b["runs"], b["balls"])
+        innings.append({
+            "innings": t["innings"],
+            "team": t["team"],
+            "total": _score(t["runs"], t["wickets"], t["declared"], t["balls"], t["balls_per_over"], t["format"]),
+            "extras": t["extras"],
+            "target": t["target_runs"],
+            "batting": batting,
+            "bowling": bowling,
+        })
+    return {"match": match, "innings": innings, "note": COVERAGE_NOTE}

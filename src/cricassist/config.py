@@ -13,6 +13,8 @@ DEFAULT_MODELS = {
 @dataclass(frozen=True)
 class Settings:
     db_path: Path
+    context_path: Path  # ChromaDB vector database of context passages
+    cache_dir: Path  # fetched ESPNcricinfo pages
     llm_provider: str  # "gemini" or "claude"
     llm_model: str
     gemini_api_key: str
@@ -42,6 +44,8 @@ def load_settings() -> Settings:
     provider = os.getenv("CRICASSIST_LLM_PROVIDER", "gemini").strip().lower()
     return Settings(
         db_path=Path(os.getenv("CRICASSIST_DB_PATH", "data/processed/cricassist.db")),
+        context_path=Path(os.getenv("CRICASSIST_CONTEXT_PATH", "data/processed/context")),
+        cache_dir=Path(os.getenv("CRICASSIST_CACHE_DIR", "data/raw/cricinfo_cache")),
         llm_provider=provider,
         llm_model=os.getenv("CRICASSIST_LLM_MODEL", "") or DEFAULT_MODELS.get(provider, ""),
         gemini_api_key=os.getenv("GEMINI_API_KEY", ""),

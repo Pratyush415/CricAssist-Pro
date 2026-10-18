@@ -3,6 +3,7 @@ import pytest
 from conftest import DC_V_RR, KANPUR_TEST
 from cricassist.stats.queries import (
     Filters,
+    match_scorecard,
     TeamNotFound,
     batting_summary,
     best_innings,
@@ -182,3 +183,31 @@ def test_kanpur_is_one_match_everywhere(db):
     assert team_results(db, "Bangladesh", Filters(format="TEST"))["overall"]["played"] == 1
     assert venue_summary(db, "Kanpur")["coverage"]["matches_in_data"] == 1
     assert db.execute("SELECT DISTINCT match_id FROM team_innings WHERE venue LIKE '%Kanpur%'").fetchall() == [(KANPUR_TEST,)]
+
+
+# --- Scorecards --------------------------------------------------------------
+
+
+def test_match_scorecard(db):
+    card = match_scorecard(db, KANPUR_TEST)
+    assert card["match"]["result"] == "India won by 7 wickets"
+    assert [i["total"] for i in card["innings"]] == ["233", "285/9d", "146", "98/3"]
+    first = card["innings"][0]
+    assert first["batting"][2]["score"] == "107* (194)"  # Mominul at No. 3
+    assert first["bowling"][0]["player"] == "JJ Bumrah"  # opened the bowling
+    assert [b["figures"] for b in first["bowling"] if b["player"] == "JJ Bumrah"] == ["18-7-50-3"]
+    second = {b["player"]: b["dismissal"] for b in card["innings"][1]["batting"]}
+    assert second["YBK Jaiswal"] == "b Hasan Mahmud"
+    assert second["KL Rahul"].startswith("st ") and second["KL Rahul"].endswith(" b Mehedi Hasan Miraz")
+    assert second["JJ Bumrah"] == "not out"
+    assert all(d and "?" not in d for d in second.values())
+
+
+def test_match_scorecard_super_over_and_ids(db):
+    card = match_scorecard(db, DC_V_RR)
+    assert card["match"]["result"] == "tied (Delhi Capitals won the super over)"
+    assert len(card["innings"]) == 2  # super overs left out
+    h2h = team_head_to_head(db, "DC", "RR")
+    assert h2h["recent_meetings"][0]["match_id"] == DC_V_RR
+    with pytest.raises(LookupError):
+        match_scorecard(db, 1)

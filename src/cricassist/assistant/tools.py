@@ -85,6 +85,49 @@ def _dataset_info(con, args: dict) -> dict:
     }
 
 
+_context_store = None
+
+
+def set_context_store(store) -> None:
+    """Use this ContextStore for search_cricinfo_context (tests, or a custom path)."""
+    global _context_store
+    _context_store = store
+
+
+def _get_context_store():
+    global _context_store
+    if _context_store is None:
+        from cricassist.config import load_settings
+        from cricassist.context.store import ContextStore
+
+        path = load_settings().context_path
+        if not path.exists():
+            return None
+        _context_store = ContextStore(path)
+    return _context_store
+
+
+EMPTY_CONTEXT = (
+    "No written context is available: the context database is empty because no ESPNcricinfo pages "
+    "have been collected (the site refuses automated requests and its terms forbid scraping for AI "
+    "tools without permission). Answer from the stats tools only, and tell the journalist that no "
+    "match report or profile text is available."
+)
+
+
+def _search_context(con, args: dict) -> dict:
+    store = _get_context_store()
+    if store is None or store.count() == 0:
+        return {"passages": [], "note": EMPTY_CONTEXT}
+    kind = args.get("kind") or None
+    passages = store.search(args["query"], n=int(args.get("n", 5)), kind=kind)
+    return {
+        "passages": passages,
+        "note": "Background text only. Quote words with the URL; never take numbers from passages, "
+        "use the stats tools for every figure.",
+    }
+
+
 def _recent(con, args: dict) -> dict:
     fn = q.batting_innings_list if args.get("role", "batting") == "batting" else q.bowling_innings_list
     return fn(con, args["player"], _filters(args), last=int(args.get("last", 10)))
@@ -212,6 +255,30 @@ TOOLS = [
             ["kind"],
         ),
         lambda con, a: q.best_innings(con, a["kind"], _filters(a), int(a.get("limit", 10))),
+    ),
+    Tool(
+        "match_scorecard",
+        "The full scorecard of one match: result, toss, player of the match, and every batter's and bowler's "
+        "figures in each innings. Use it for any question about a single match, instead of looking up players "
+        "one by one. Get the match_id from team_head_to_head (recent_meetings) or best_innings.",
+        _schema({"match_id": {"type": "integer"}}, ["match_id"], filters=False),
+        lambda con, a: q.match_scorecard(con, int(a["match_id"])),
+    ),
+    Tool(
+        "search_cricinfo_context",
+        "Search written context (match reports and player profiles) by meaning, for background the stats "
+        "cannot give: what happened in a match, how a player plays, notable moments. Returns passages with "
+        "their source URL. Never take numbers from them.",
+        _schema(
+            {
+                "query": {"type": "string", "description": "What to look for, in plain words, e.g. 'Head century 2023 World Cup final'."},
+                "kind": {"type": "string", "enum": ["match_report", "player_profile"]},
+                "n": {"type": "integer", "description": "How many passages, default 5."},
+            },
+            ["query"],
+            filters=False,
+        ),
+        _search_context,
     ),
 ]
 

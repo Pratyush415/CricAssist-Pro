@@ -30,6 +30,8 @@ SAMPLE_ARGS = {
     "venue_summary": {"venue": "Kanpur", "format": "TEST"},
     "leaders": {"stat": "runs", "limit": 3},
     "best_innings": {"kind": "team_highest", "limit": 3},
+    "search_cricinfo_context": {"query": "2023 World Cup final"},
+    "match_scorecard": {"match_id": 1439892},
 }
 
 
@@ -38,7 +40,10 @@ def test_every_tool_has_a_sample():
 
 
 @pytest.mark.parametrize("name", sorted(SAMPLE_ARGS))
-def test_every_tool_runs(db, name):
+def test_every_tool_runs(db, name, monkeypatch):
+    from cricassist.assistant import tools
+
+    monkeypatch.setattr(tools, "_get_context_store", lambda: None)  # no vector database in these tests
     result, is_error = run_tool(db, name, SAMPLE_ARGS[name])
     assert not is_error, result
     assert isinstance(json.loads(result), dict)
@@ -196,7 +201,8 @@ def test_claude_refusal_and_cut_off(db):
 
 
 def settings(**overrides):
-    base = dict(db_path=None, llm_provider="gemini", llm_model="", gemini_api_key="", anthropic_api_key="")
+    base = dict(db_path=None, context_path=None, cache_dir=None, llm_provider="gemini", llm_model="",
+                gemini_api_key="", anthropic_api_key="")
     return Settings(**{**base, **overrides})
 
 

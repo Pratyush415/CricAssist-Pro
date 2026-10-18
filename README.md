@@ -58,6 +58,38 @@ prints each call, so you can see where every number came from. Its rules
 the model's memory or its own arithmetic across rows; when the data cannot
 answer (for example ICC rankings), it says so and offers what the data can show.
 
+## Written context (R4)
+
+`cricassist build-context` builds a ChromaDB vector database of match reports
+and player profiles for the assistant's `search_cricinfo_context` tool:
+
+1. Fetch the pages on `sources/scrape_list.json` (34 matches, 100 players)
+   with a polite client (`sources/cricinfo_client.py`): it reads robots.txt,
+   waits at least 3 seconds between requests, identifies itself honestly,
+   caches every page in `data/raw/cricinfo_cache/`, and stops when refused.
+2. Extract the article text (`sources/parsers.py`), split it into overlapping
+   passages that keep their URL, title and date (`context/passages.py`).
+3. Embed them locally with all-MiniLM-L6-v2 (no API key; about 80 MB,
+   downloaded once) into `data/processed/context/` (`context/store.py`).
+
+```bash
+cricassist build-context                 # fetch what the site allows, then build
+cricassist build-context --no-fetch      # rebuild from cached pages only
+cricassist build-context --local-only --source-dir path/to/docs   # documents you may use
+```
+
+**ESPNcricinfo and this project.** ESPNcricinfo's terms of use (Disney terms,
+section 2.B(x)) forbid collecting its content by automated means for AI tools,
+data mining or databases without written permission, and the site refuses
+automated requests, including robots.txt (HTTP 403). The fetcher respects
+that: it makes one request for robots.txt, is refused, and stops. It does not
+disguise itself as a browser or work around the block, which is also why
+`python-espncricinfo` (which bypasses the bot protection with a headless
+browser) is not used. So the live context database is empty, and the assistant
+says that no written context is available and answers from the stats. The
+whole pipeline is tested on sample pages, and any source you have the right to
+use can be loaded with `--source-dir`.
+
 ## Building the stats database
 
 1. Unzip the dataset CSVs into `data/raw/` (see `src/cricassist/stats/dataset/README.md`).

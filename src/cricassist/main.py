@@ -30,6 +30,41 @@ def build_db(args: argparse.Namespace) -> int:
     return 0
 
 
+def build_context(args: argparse.Namespace) -> int:
+    from cricassist.context.build import build_context as run_build
+    from cricassist.context.build import load_scrape_list
+    from cricassist.context.store import ContextStore
+    from cricassist.sources.cricinfo_client import CricinfoClient
+
+    settings = load_settings()
+    store = ContextStore(settings.context_path)
+    if args.reset:
+        store.clear()
+    client = None if args.local_only else CricinfoClient(settings.cache_dir, delay=args.delay)
+    report = run_build(
+        store,
+        client=client,
+        scrape_list=None if args.local_only else load_scrape_list(),
+        source_dir=Path(args.source_dir) if args.source_dir else None,
+        fetch=not args.no_fetch,
+        limit=args.limit,
+    )
+    if client is not None:
+        print(f"  pages on the list:   {report.pages_listed}")
+        print(f"  fetched now:         {report.fetched}")
+        print(f"  from the cache:      {report.from_cache}")
+        print(f"  not found:           {report.not_found}")
+        print(f"  no article text:     {report.no_article_text}")
+        if report.refused_reason:
+            print(f"  not collected:       {report.pages_listed - report.fetched - report.from_cache - report.not_found}")
+            print(f"  reason: {report.refused_reason}")
+    if args.source_dir:
+        print(f"  local documents:     {report.local_documents}")
+    print(f"Added {report.passages} passages from {report.documents} documents; "
+          f"{report.total_passages} passages in {settings.context_path}")
+    return 0
+
+
 def _format_call(call) -> str:
     args = ", ".join(f"{k}={v!r}" for k, v in call.args.items())
     return f"  · {call.name}({args})" + ("  [error]" if call.is_error else "")
@@ -94,6 +129,15 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--skip-checksums", action="store_true", help="check file sizes only, not SHA-256")
     p.set_defaults(func=build_db)
 
+    p = sub.add_parser("build-context", help="build the vector database of match reports and player profiles")
+    p.add_argument("--no-fetch", action="store_true", help="use cached pages only; make no web requests")
+    p.add_argument("--source-dir", help="also add documents you may use from this folder (.html, .txt, .md, .jsonl)")
+    p.add_argument("--local-only", action="store_true", help="skip the ESPNcricinfo scrape list; use --source-dir only")
+    p.add_argument("--limit", type=int, help="only the first N pages of the scrape list")
+    p.add_argument("--delay", type=float, default=5.0, help="seconds between requests (default 5, minimum 3)")
+    p.add_argument("--reset", action="store_true", help="empty the vector database first")
+    p.set_defaults(func=build_context)
+
     p = sub.add_parser("chat", help="ask the assistant questions about the stats")
     p.add_argument("question", nargs="*", help="ask one question and exit; leave out for a conversation")
     p.add_argument("--provider", choices=["gemini", "claude"], help="AI provider (default: CRICASSIST_LLM_PROVIDER)")
@@ -102,6 +146,8 @@ def main(argv: list[str] | None = None) -> int:
     p.set_defaults(func=chat)
 
     args = parser.parse_args(argv)
+    if getattr(args, "delay", None) is not None and args.delay < 3:
+        parser.error("--delay must be at least 3 seconds")
     if not args.command:
         parser.print_help()
         return 0

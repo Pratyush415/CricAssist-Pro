@@ -64,13 +64,13 @@ Answer: numbers only from stats tools, context quoted with Cricinfo links
 - [x] **Done when:** end-to-end chat answers stats questions correctly (the three demo questions so far)
 
 ### Tue Oct 20: Cricinfo scraper, vector database and evaluation (R4)
-- [ ] Check ESPNcricinfo terms of use and `robots.txt`
-- [ ] Check whether `espncricinfo-python` still works; otherwise a small BeautifulSoup scraper
-- [ ] Scraper (`sources/`) for match reports and player profiles: a few seconds between requests, every page cached locally, honest user agent
-- [ ] Clean text, split into passages, keep source URL, title and date with each passage
-- [ ] Embed into ChromaDB with a local embedding model (works offline, no extra API key)
-- [ ] `search_cricinfo_context` tool for the assistant, returning passages with URLs
-- [ ] `cricassist build-context` command to rebuild the vector database from the cache
+- [x] Check ESPNcricinfo terms of use and `robots.txt`: the terms (Disney terms 2.B(x)) forbid automated collection for AI tools and databases without written permission, and the site refuses automated requests, even robots.txt (HTTP 403)
+- [x] Check whether `espncricinfo-python` still works: v1.0.0 works by running a headless browser to bypass the site's bot protection, so it is not used; the project has its own polite fetcher instead
+- [x] Scraper (`sources/`) for match reports and player profiles: a few seconds between requests, every page cached locally, honest user agent, reads robots.txt, stops when refused
+- [x] Clean text, split into passages, keep source URL, title and date with each passage
+- [x] Embed into ChromaDB with a local embedding model (works offline, no extra API key)
+- [x] `search_cricinfo_context` tool for the assistant, returning passages with URLs
+- [x] `cricassist build-context` command to rebuild the vector database from the cache (or from a folder of documents you may use: `--source-dir`)
 - [ ] Test set of 15 journalist questions with verified answers, mixing stats-only, context-only and combined questions
 - [ ] **Done when:** at least 13 of 15 correct, no unsourced numbers, context answers cite Cricinfo URLs
 
@@ -119,7 +119,7 @@ Questions 1-5 answer correctly on Gemini today; 6 needs the context tool.
 | ~~Oct 16–17~~ | ~~Run `cricassist build-db` locally on the full dataset~~ (done Oct 16: about a minute, all row counts match) |
 | ~~By Oct 19~~ | ~~AI API key in local `.env`~~ (done: Gemini free-tier key) |
 | ~~By Oct 19~~ | ~~Demo questions~~ (done: 3 from Pratyush, 3 chosen to cover the remaining features) |
-| By Oct 20 | Confirmation that scraping fits ESPNcricinfo's terms of use for this submission |
+| By Oct 20 | Interviewer's answer on R4, given ESPNcricinfo's terms (Pratyush is emailing them) |
 
 ## Risks
 - **Missing matches:** Cricsheet does not have every match (about 160 men's
@@ -137,6 +137,11 @@ Questions 1-5 answer correctly on Gemini today; 6 needs the context tool.
 - **Numbers leaking from scraped text:** the model could quote a figure from a
   retrieved passage. Mitigated by the "numbers only from stats tools" rule and
   checked in the test set.
+- **No ESPNcricinfo text:** the pipeline is built and tested, but the live
+  context database is empty: the site refuses automated requests and its terms
+  forbid scraping for AI tools. The assistant says no written context is
+  available and answers from the stats. A source the interviewer approves can
+  be loaded with `cricassist build-context --source-dir` without code changes.
 - **Scraper breakage or blocking:** Cricinfo may change its pages or block
   requests. Mitigated by caching every page, so the vector database can be
   rebuilt without re-scraping and the demo runs offline.
