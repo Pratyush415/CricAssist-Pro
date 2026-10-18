@@ -60,7 +60,7 @@ Answer: numbers only from stats tools, context quoted with Cricinfo links
 - [x] AI model with tool use wrapping the stats queries (Gemini free tier by default; Claude via `CRICASSIST_LLM_PROVIDER=claude`)
 - [x] System prompt: no number unless it came from a stats tool; always name the source and filters
 - [x] `cricassist chat` command
-- [ ] Choose the curated scrape list: 30–50 notable matches and ~100 key players, matched to the demo questions
+- [x] Choose the curated scrape list: 30–50 notable matches and ~100 key players, matched to the demo questions (`src/cricassist/sources/scrape_list.json`: 34 matches, 100 players, made by `scripts/make_scrape_list.py`)
 - [x] **Done when:** end-to-end chat answers stats questions correctly (the three demo questions so far)
 
 ### Tue Oct 20: Cricinfo scraper, vector database and evaluation (R4)
@@ -87,13 +87,23 @@ Demo:
 - [ ] Fallback: screen recording of a full run, in case the network or API fails live
 - [ ] Simple Streamlit web page (only if time allows)
 
-## Demo questions (so far)
+## Demo questions
 1. How has Shami been over the years in terms of consistency? (year-by-year tool)
 2. How long was Dale Steyn number one in the Test rankings? Kept as the honest
    "the data cannot answer that" moment: rankings are not in the data, so the
    assistant says so and shows his Test record year by year instead. The strict
    rule stays: no number from scraped text or the model's memory.
 3. How many sixes did Virat Kohli hit at the 2022 T20 World Cup? (8)
+4. How does Kohli fare against left-arm spin in T20s since 2022? (batter vs
+   bowling style; the roadmap's headline example)
+5. Who were the best death-over bowlers in IPL 2025, and how does Bumrah
+   compare? (phase stats and leaderboards)
+6. Tell me about the 2023 World Cup final. (combined: scorecard from the stats
+   tools plus Cricinfo match-report context; complete once R4 is built)
+
+Backup: What's a par first-innings score at the Wankhede in the IPL? (venue)
+
+Questions 1-5 answer correctly on Gemini today; 6 needs the context tool.
 
 ## Deferred until after Oct 21
 - Scraping beyond the curated set (all match reports, news articles)
@@ -108,7 +118,7 @@ Demo:
 | ~~Oct 16~~ | ~~Small CSVs + 20,000-row samples of the two large CSVs~~ (full dataset provided) |
 | ~~Oct 16–17~~ | ~~Run `cricassist build-db` locally on the full dataset~~ (done Oct 16: about a minute, all row counts match) |
 | ~~By Oct 19~~ | ~~AI API key in local `.env`~~ (done: Gemini free-tier key) |
-| By Oct 19 | Demo questions you want to show, to drive the curated scrape list |
+| ~~By Oct 19~~ | ~~Demo questions~~ (done: 3 from Pratyush, 3 chosen to cover the remaining features) |
 | By Oct 20 | Confirmation that scraping fits ESPNcricinfo's terms of use for this submission |
 
 ## Risks

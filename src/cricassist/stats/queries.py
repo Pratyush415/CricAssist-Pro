@@ -858,13 +858,17 @@ def leaders(
     )
     for r in rows:
         r[stat] = r.pop("value")
+        # Give every common ratio, so the model never has to work one out itself.
         if batting:
             r["average"] = _ratio(r["runs"], r["outs"])
             r["strike_rate"] = _ratio(100 * r["runs"], r["balls"])
+            r["boundary_pct"] = _ratio(100 * (r["fours"] + r["sixes"]), r["balls"], 1)
         else:
             r["overs"] = _overs(r["balls"])
             r["economy"] = _ratio(6 * r["runs"], r["balls"])
             r["bowling_average"] = _ratio(r["runs"], r["wickets"])
+            r["bowling_strike_rate"] = _ratio(r["balls"], r["wickets"], 1)
+            r["dot_ball_pct"] = _ratio(100 * r["dots"], r["balls"], 1)
     return {
         "stat": stat,
         "phase": phase,
