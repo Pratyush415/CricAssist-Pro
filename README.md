@@ -65,12 +65,30 @@ and `bowling_styles`. They follow ESPNcricinfo's scoring conventions: super
 overs are excluded, wides are not balls faced, byes and leg byes are not
 charged to the bowler, and run outs are not credited to the bowler.
 
-`stats/queries.py` has the stats functions: batting and bowling summaries,
-recent innings, batter vs bowler, and batter vs bowling style, each with
-filters for format, competition, event, opposition, venue and dates.
+`stats/queries.py` has the stats functions, each with filters for format,
+gender, competition, event, season, opposition, venue and dates:
+
+- Players: batting and bowling summaries, recent innings, batter vs bowler,
+  batter vs bowling style, phase stats (powerplay, middle, death), and line,
+  length and shot breakdowns from ESPNcricinfo's ball tracking.
+- Teams: head-to-heads with recent meetings and scores, results by
+  opposition, and phase stats.
+- Venues: average scores by innings, batting first vs chasing, toss, highest
+  and lowest totals, and leading players.
+- Records and leaderboards: highest scores, best figures, highest and lowest
+  totals, and top players by any stat, overall or in one phase.
+
+Renamed franchises count as one team under their current name (for example
+Delhi Daredevils is Delhi Capitals), and short names like CSK work; see
+`stats/teams.py`. Team and record queries default to men's cricket unless
+the filters ask for women's.
+
+`scripts/check_known_stats.py` checks 10 stats from the full database against
+ESPNcricinfo's figures.
 
 Cricsheet does not have every match, so totals can be lower than official
-career figures. Every result says how many matches it is based on.
+career figures. In particular the dataset has no Afghanistan internationals.
+Every result says how many matches it is based on.
 
 Tests run on a three-match subset in `tests/data/`, made with
 `scripts/make_test_dataset.py`.

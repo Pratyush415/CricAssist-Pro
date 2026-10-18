@@ -11,6 +11,8 @@ The scoring rules follow ESPNcricinfo's conventions:
   Byes, leg byes and penalty runs are not charged to the bowler.
 """
 
+from cricassist.stats.teams import alias_rows
+
 BOWLER_WICKETS = ("bowled", "caught", "caught and bowled", "lbw", "stumped", "hit wicket")
 NOT_OUT_RETIREMENTS = ("retired hurt", "retired not out")
 
@@ -19,6 +21,44 @@ def _sql_list(values: tuple[str, ...]) -> str:
     return "(" + ", ".join(f"'{v}'" for v in values) + ")"
 
 
+def _sql_str(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
+_ALIASES = ", ".join(f"({_sql_str(name)}, {_sql_str(team)})" for name, team in alias_rows())
+
+# Phases of a limited overs innings, by over (counted from 0). T20: powerplay
+# overs 1-6, middle 7-15, death 16-20. ODI: 1-10, 11-40, 41-50. The Hundred
+# (sets of 5 balls): powerplay the first 25 balls, death the last 25.
+_PHASE = """
+    CASE
+        WHEN b.format = 'T20' AND m.collection = 'hnd' THEN
+            CASE WHEN b.over < 5 THEN 'powerplay' WHEN b.over < 15 THEN 'middle' ELSE 'death' END
+        WHEN b.format = 'T20' THEN
+            CASE WHEN b.over < 6 THEN 'powerplay' WHEN b.over < 15 THEN 'middle' ELSE 'death' END
+        WHEN b.format = 'ODI' THEN
+            CASE WHEN b.over < 10 THEN 'powerplay' WHEN b.over < 40 THEN 'middle' ELSE 'death' END
+    END"""
+
+# The 41 shot names in the tracking data, grouped into families.
+_SHOT_GROUP = """
+    CASE
+        WHEN t.shot_played IS NULL THEN NULL
+        WHEN t.shot_played IN ('defended', 'forward defence', 'back defence', 'padded away') THEN 'defence'
+        WHEN t.shot_played IN ('left alone', 'no shot') THEN 'leave / no shot'
+        WHEN t.shot_played LIKE '%drive%' OR t.shot_played = 'vertical forward attack' THEN 'drive'
+        WHEN t.shot_played LIKE '%cut%' THEN 'cut'
+        WHEN t.shot_played LIKE 'pull%' OR t.shot_played = 'hook' THEN 'pull / hook'
+        WHEN t.shot_played = 'slog sweep' THEN 'slog sweep'
+        WHEN t.shot_played IN ('reverse sweep', 'reverse scoop') THEN 'reverse sweep / scoop'
+        WHEN t.shot_played LIKE '%sweep%' OR t.shot_played = 'paddle away' THEN 'sweep'
+        WHEN t.shot_played = 'ramp' THEN 'ramp'
+        WHEN t.shot_played = 'slog shot' THEN 'slog'
+        WHEN t.shot_played IN ('flick', 'leg glance') THEN 'flick / glance'
+        WHEN t.shot_played IN ('push', 'push shot', 'dab', 'steered') THEN 'push / dab / steer'
+        ELSE 'other'
+    END"""
+
 # Bowling styles grouped the way journalists ask about them. A player with
 # several styles listed is grouped by the first, which is their main one.
 _MAIN_STYLE = "trim(split_part(style, ',', 1))"
@@ -26,6 +66,17 @@ _MAIN_STYLE = "trim(split_part(style, ',', 1))"
 DERIVED = {
     # name: (kind, sql). Views are cheap to define and stay in sync with the
     # raw tables; tables are for the aggregates that are expensive to compute.
+
+    # Every team name, earlier franchise name and short name, with the
+    # team's current name (see teams.py).
+    "team_names": ("TABLE", f"""
+        WITH aliases(name, team) AS (VALUES {_ALIASES}),
+        names AS (SELECT team_1 AS name FROM matches UNION SELECT team_2 FROM matches)
+        SELECT n.name, coalesce(a.team, n.name) AS team
+        FROM names n LEFT JOIN aliases a USING (name)
+        UNION
+        SELECT name, team FROM aliases
+    """),
     "bowling_styles": ("TABLE", f"""
         SELECT style,
                CASE WHEN main LIKE 'left-arm%' OR main = 'slow left-arm orthodox'
@@ -47,14 +98,15 @@ DERIVED = {
     """),
     # Every ball outside super overs, with the match details and the runs
     # charged to the bowler.
-    "deliveries": ("VIEW", """
+    "deliveries": ("VIEW", f"""
         SELECT b.*,
                m.venue, m.city, m.collection, m.balls_per_over,
                b.wides IS NULL AS faced,
                b.runs_off_bat + coalesce(b.wides, 0) + coalesce(b.noballs, 0) AS bowler_runs,
                b.runs_off_bat = 4 AND NOT b.non_boundary AS is_four,
                b.runs_off_bat = 6 AND NOT b.non_boundary AS is_six,
-               st.arm AS bowler_arm, st.kind AS bowler_kind
+               st.arm AS bowler_arm, st.kind AS bowler_kind,
+               {_PHASE} AS phase
         FROM ball_by_ball_data b
         JOIN innings i USING (match_id, innings)
         JOIN matches m USING (match_id)
@@ -71,6 +123,80 @@ DERIVED = {
                w.wicket_type NOT IN {_sql_list(NOT_OUT_RETIREMENTS)} AS is_out
         FROM wickets w
         JOIN deliveries d USING (match_id, innings, delivery_number)
+    """),
+    # Deliveries with Cricinfo's line, length and shot data (about half of
+    # matches since 2014 have line and length; most have the shot).
+    "tracked_deliveries": ("VIEW", f"""
+        SELECT d.*, t.ball_line, t.ball_length, t.shot_played, t.shot_control,
+               t.wagon_zone, t.shot_direction, {_SHOT_GROUP} AS shot_group
+        FROM deliveries d
+        JOIN cricinfo_tracking t USING (match_id, innings, delivery_number)
+    """),
+    # One row per team per match, under the team's current name, with the result.
+    "match_results": ("VIEW", """
+        WITH sides AS (
+            SELECT m.*, m.team_1 AS side, m.team_2 AS other FROM matches m
+            UNION ALL
+            SELECT m.*, m.team_2, m.team_1 FROM matches m
+        )
+        SELECT s.match_id, s.start_date, s.season, s.gender, s.format, s.type, s.event,
+               s.venue, s.city, s.collection,
+               t.team, o.team AS opposition, s.side AS team_as_named,
+               CASE
+                   WHEN s.winner IS NOT NULL AND s.winner = s.side THEN 'won'
+                   WHEN s.winner IS NOT NULL THEN 'lost'
+                   WHEN s.outcome = 'tie' THEN 'tied'
+                   WHEN s.outcome = 'draw' THEN 'drawn'
+                   ELSE 'no result'
+               END AS result,
+               coalesce(s.outcome = 'tie' AND s.eliminator = s.side, false) AS won_tiebreak,
+               CASE
+                   WHEN s.won_by_innings THEN 'an innings and ' || s.winner_runs || ' runs'
+                   WHEN s.winner_runs IS NOT NULL THEN s.winner_runs || ' runs'
+                   WHEN s.winner_wickets IS NOT NULL THEN s.winner_wickets || ' wickets'
+               END
+               || CASE WHEN s.result_method = 'D/L' THEN ' (D/L)' ELSE '' END AS margin,
+               s.toss_winner = s.side AS won_toss, s.toss_decision,
+               s.player_of_match
+        FROM sides s
+        JOIN team_names t ON t.name = s.side
+        JOIN team_names o ON o.name = s.other
+    """),
+    # One row per team innings outside super overs: the total, wickets and
+    # overs, under the team's current name.
+    "team_innings": ("TABLE", """
+        WITH balls AS (
+            SELECT match_id, innings,
+                   sum(runs_off_bat + extras) AS runs,
+                   count(*) FILTER (WHERE is_legal_delivery) AS balls,
+                   count(*) FILTER (WHERE is_four) AS fours,
+                   count(*) FILTER (WHERE is_six) AS sixes,
+                   sum(extras) AS extras
+            FROM deliveries GROUP BY match_id, innings
+        ),
+        outs AS (
+            SELECT match_id, innings, count(*) FILTER (WHERE is_out) AS wickets
+            FROM dismissals GROUP BY match_id, innings
+        )
+        SELECT i.match_id, i.innings,
+               t.team, o.team AS opposition, i.batting_team AS team_as_named,
+               coalesce(b.runs, 0) + i.penalty_runs_pre + i.penalty_runs_post AS runs,
+               coalesce(w.wickets, 0) AS wickets,
+               coalesce(b.balls, 0) AS balls, m.balls_per_over,
+               coalesce(b.fours, 0) AS fours, coalesce(b.sixes, 0) AS sixes,
+               coalesce(b.extras, 0) AS extras,
+               i.declared, i.target_runs, i.target_overs, m.scheduled_overs,
+               i.innings = max(i.innings) OVER (PARTITION BY i.match_id) AS is_last_innings,
+               r.result, r.won_tiebreak, r.margin,
+               m.start_date, m.season, m.gender, m.format, m.type, m.event, m.venue, m.city, m.collection
+        FROM innings i
+        JOIN matches m USING (match_id)
+        JOIN team_names t ON t.name = i.batting_team
+        JOIN team_names o ON o.name = CASE WHEN i.batting_team = m.team_1 THEN m.team_2 ELSE m.team_1 END
+        JOIN match_results r ON r.match_id = i.match_id AND r.team_as_named = i.batting_team
+        LEFT JOIN balls b ON b.match_id = i.match_id AND b.innings = i.innings
+        LEFT JOIN outs w ON w.match_id = i.match_id AND w.innings = i.innings
+        WHERE NOT i.is_super_over
     """),
     # One row per player per match they were in the XI for (or a substitute
     # who came in), whether or not they batted or bowled.
@@ -185,7 +311,12 @@ DERIVED = {
 
 def create_derived(con) -> None:
     """(Re)create the derived views and tables, in dependency order."""
+    existing = dict(
+        con.execute(
+            "SELECT table_name, table_type FROM information_schema.tables WHERE table_schema = 'main'"
+        ).fetchall()
+    )
     for name, (kind, sql) in DERIVED.items():
-        con.execute(f'DROP VIEW IF EXISTS "{name}"')
-        con.execute(f'DROP TABLE IF EXISTS "{name}"')
+        if name in existing:
+            con.execute(f'DROP {"VIEW" if existing[name] == "VIEW" else "TABLE"} "{name}"')
         con.execute(f'CREATE {kind} "{name}" AS {sql}')

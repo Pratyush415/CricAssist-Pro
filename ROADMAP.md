@@ -51,10 +51,10 @@ Answer: numbers only from stats tools, context quoted with Cricinfo links
 - [x] **Done when:** these queries return correct numbers
 
 ### Sun Oct 18: Stats engine, part 2 (R1)
-- [ ] Team head-to-heads, venue records
-- [ ] Phase stats (powerplay, middle overs, death overs)
-- [ ] Line, length and shot breakdowns from tracking data
-- [ ] **Done when:** 10 stats checked against ESPNcricinfo all match
+- [x] Team head-to-heads, venue records
+- [x] Phase stats (powerplay, middle overs, death overs)
+- [x] Line, length and shot breakdowns from tracking data
+- [x] **Done when:** 10 stats checked against ESPNcricinfo all match (`scripts/check_known_stats.py`: 10 of 10; spot-check on Cricinfo pending)
 
 ### Mon Oct 19: AI assistant (R1)
 - [ ] Claude API with tool use wrapping the stats queries
@@ -109,6 +109,11 @@ Demo:
   T20Is, e.g. Kohli's 122* in the 2022 Asia Cup). Totals can be lower than
   official records. Every stats result reports how many matches it is based
   on and says so; the assistant must pass that on.
+- **No Afghanistan internationals:** the Kaggle dataset has none at all, so
+  every international against Afghanistan is missing too (e.g. Bumrah has 12
+  of his 15 wickets at the 2024 T20 World Cup). Asking about Afghanistan gives
+  a clear "not in the dataset" message. Fixable after Oct 21 by loading the
+  raw Cricsheet files (already deferred below).
 - **Wrong stats:** legal deliveries, retirements and super overs make stats easy
   to get subtly wrong. Mitigated by checking results against ESPNcricinfo.
 - **Numbers leaking from scraped text:** the model could quote a figure from a
