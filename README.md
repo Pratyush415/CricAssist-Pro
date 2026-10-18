@@ -39,6 +39,25 @@ cp .env.example .env
 pytest
 ```
 
+## Asking questions
+
+1. Put an API key in `.env` (copy `.env.example`). The default provider is
+   Gemini, which has a free tier: get a key at aistudio.google.com. To use
+   Claude instead, set `CRICASSIST_LLM_PROVIDER=claude` and `ANTHROPIC_API_KEY`.
+2. Build the stats database (below), then run:
+
+   ```bash
+   cricassist chat                                   # a conversation
+   cricassist chat "How many sixes did Kohli hit at the 2022 T20 World Cup?"
+   cricassist chat --model gemini-3.5-flash "..."    # another model
+   ```
+
+The assistant answers by calling the stats tools in `assistant/tools.py` and
+prints each call, so you can see where every number came from. Its rules
+(`assistant/prompts.py`): every number must come from a tool result, never from
+the model's memory or its own arithmetic across rows; when the data cannot
+answer (for example ICC rankings), it says so and offers what the data can show.
+
 ## Building the stats database
 
 1. Unzip the dataset CSVs into `data/raw/` (see `src/cricassist/stats/dataset/README.md`).

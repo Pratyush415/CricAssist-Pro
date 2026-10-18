@@ -57,11 +57,11 @@ Answer: numbers only from stats tools, context quoted with Cricinfo links
 - [x] **Done when:** 10 stats checked against ESPNcricinfo all match (`scripts/check_known_stats.py`: 10 of 10; spot-check on Cricinfo pending)
 
 ### Mon Oct 19: AI assistant (R1)
-- [ ] Claude API with tool use wrapping the stats queries
-- [ ] System prompt: no number unless it came from a stats tool; always name the source and filters
-- [ ] `cricassist chat` command
+- [x] AI model with tool use wrapping the stats queries (Gemini free tier by default; Claude via `CRICASSIST_LLM_PROVIDER=claude`)
+- [x] System prompt: no number unless it came from a stats tool; always name the source and filters
+- [x] `cricassist chat` command
 - [ ] Choose the curated scrape list: 30–50 notable matches and ~100 key players, matched to the demo questions
-- [ ] **Done when:** end-to-end chat answers stats questions correctly
+- [x] **Done when:** end-to-end chat answers stats questions correctly (the three demo questions so far)
 
 ### Tue Oct 20: Cricinfo scraper, vector database and evaluation (R4)
 - [ ] Check ESPNcricinfo terms of use and `robots.txt`
@@ -87,6 +87,14 @@ Demo:
 - [ ] Fallback: screen recording of a full run, in case the network or API fails live
 - [ ] Simple Streamlit web page (only if time allows)
 
+## Demo questions (so far)
+1. How has Shami been over the years in terms of consistency? (year-by-year tool)
+2. How long was Dale Steyn number one in the Test rankings? Kept as the honest
+   "the data cannot answer that" moment: rankings are not in the data, so the
+   assistant says so and shows his Test record year by year instead. The strict
+   rule stays: no number from scraped text or the model's memory.
+3. How many sixes did Virat Kohli hit at the 2022 T20 World Cup? (8)
+
 ## Deferred until after Oct 21
 - Scraping beyond the curated set (all match reports, news articles)
 - Loading raw Cricsheet files for competitions not in the Kaggle dataset
@@ -99,7 +107,7 @@ Demo:
 |---|---|
 | ~~Oct 16~~ | ~~Small CSVs + 20,000-row samples of the two large CSVs~~ (full dataset provided) |
 | ~~Oct 16–17~~ | ~~Run `cricassist build-db` locally on the full dataset~~ (done Oct 16: about a minute, all row counts match) |
-| By Oct 19 | Anthropic API key in local `.env` (never committed) |
+| ~~By Oct 19~~ | ~~AI API key in local `.env`~~ (done: Gemini free-tier key) |
 | By Oct 19 | Demo questions you want to show, to drive the curated scrape list |
 | By Oct 20 | Confirmation that scraping fits ESPNcricinfo's terms of use for this submission |
 
@@ -122,5 +130,13 @@ Demo:
 - **Scraper breakage or blocking:** Cricinfo may change its pages or block
   requests. Mitigated by caching every page, so the vector database can be
   rebuilt without re-scraping and the demo runs offline.
+- **Model arithmetic:** in testing, the model added up rows of a table itself
+  and got two counts wrong. The system prompt now forbids totals the tools did
+  not compute; the model must re-query with a date range instead.
+- **Gemini free-tier quota:** the free tier allows only a few requests per
+  minute and a small daily quota per model (used up after ~20 requests on
+  Oct 19). The assistant waits out per-minute limits, but on demo day avoid
+  heavy testing beforehand, keep `--model` alternatives ready (each model has
+  its own quota), or switch to Claude with a paid key.
 - **Tight Tuesday:** scraper, vector database and evaluation share one day.
   The curated list is chosen on Monday so Tuesday starts with known targets.

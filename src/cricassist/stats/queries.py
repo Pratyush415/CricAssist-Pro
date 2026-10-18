@@ -106,6 +106,9 @@ class Filters:
         if self.event:
             sql.append("event ILIKE ?")
             params.append(f"%{self.event}%")
+            # "T20 World Cup" means the tournament, not its qualifiers, unless asked.
+            if "qualif" not in self.event.lower():
+                sql.append("event NOT ILIKE '%qualif%'")
         if self.season:
             if "/" in str(self.season):
                 sql.append("season = ?")
@@ -235,11 +238,19 @@ def resolve_player(con: duckdb.DuckDBPyConnection, player: str) -> dict:
     candidates = exact or find_players(con, player)
     if len(candidates) == 1:
         return candidates[0]
-    # A clear favourite (e.g. "Kohli" -> Virat Kohli) wins over obscure namesakes.
-    if not exact and len(candidates) > 1 and candidates[0]["matches_in_data"] >= 10 * max(
-        1, candidates[1]["matches_in_data"]
-    ):
-        return candidates[0]
+    if not exact and len(candidates) > 1:
+        # Whole-word matches beat partial ones: "Shami" is Mohammed Shami, not Shamim Hossain.
+        words = [re.escape(w) for w in player.lower().split()]
+        whole = [
+            c for c in candidates
+            if all(re.search(rf"\b{w}\b", f"{c['name']} {c['full_name'] or ''}".lower()) for w in words)
+        ]
+        if len(whole) == 1:
+            return whole[0]
+        pool = whole or candidates
+        # A clear favourite (e.g. "Kohli" -> Virat Kohli) wins over obscure namesakes.
+        if len(pool) > 1 and pool[0]["matches_in_data"] >= 10 * max(1, pool[1]["matches_in_data"]):
+            return pool[0]
     raise PlayerNotFound(player, candidates)
 
 
@@ -1023,3 +1034,100 @@ def delivery_breakdown(con, player: str, by: str = "length", role: str = "battin
         "(line and length mostly from 2014 on)."
     )
     return {"player": p, "role": role, "by": by, "filters": filters.describe(), "breakdown": rows, "coverage": coverage}
+
+
+# --- Over time ---------------------------------------------------------------
+
+
+def player_by_year(con, player: str, role: str = "batting", filters: Filters | None = None,
+                   by_format: bool = False, min_matches: int = 3) -> dict:
+    """A player's record year by year, for questions about form and consistency.
+
+    The `consistency` block compares the years with at least `min_matches`
+    matches: the best and worst year by average, and how far the yearly
+    averages spread (the lower the spread, the more consistent).
+    """
+    filters = _filters(con, filters)
+    if role not in ("batting", "bowling"):
+        raise ValueError("role must be batting or bowling")
+    p = resolve_player(con, player)
+    where, params = filters.where()
+    group = "year(start_date), format" if by_format else "year(start_date)"
+    fmt = "format" if by_format else "NULL"
+    if role == "batting":
+        rows = _rows(
+            con,
+            f"""SELECT year(start_date) AS year, {fmt} AS format, count(DISTINCT match_id) AS matches,
+                       count(*) AS innings, sum(runs) AS runs, sum(balls) AS balls,
+                       count(*) FILTER (WHERE is_out) AS outs,
+                       count(*) FILTER (WHERE runs >= 100) AS hundreds,
+                       count(*) FILTER (WHERE runs BETWEEN 50 AND 99) AS fifties
+                FROM batting_innings WHERE player_id = ?{where}
+                GROUP BY {group} ORDER BY {group}""",
+            [p["player_id"], *params],
+        )
+        for r in rows:
+            r["average"] = _ratio(r["runs"], r["outs"])
+            r["strike_rate"] = _ratio(100 * r["runs"], r["balls"])
+    else:
+        rows = _rows(
+            con,
+            f"""SELECT year(start_date) AS year, {fmt} AS format, count(DISTINCT match_id) AS matches,
+                       sum(balls) AS balls, sum(runs) AS runs, sum(wickets) AS wickets,
+                       count(*) FILTER (WHERE wickets >= 5) AS five_wickets
+                FROM bowling_innings WHERE player_id = ?{where}
+                GROUP BY {group} ORDER BY {group}""",
+            [p["player_id"], *params],
+        )
+        for r in rows:
+            r["average"] = _ratio(r["runs"], r["wickets"])
+            r["economy"] = _ratio(6 * r["runs"], r["balls"])
+            r["strike_rate"] = _ratio(r["balls"], r["wickets"], 1)
+    totals_by_format = None
+    if by_format:
+        totals_by_format = {}
+        for r in rows:
+            t = totals_by_format.setdefault(r["format"], {"years": 0, "matches": 0, "balls": 0, "runs": 0, "outs": 0, "wickets": 0})
+            t["years"] += 1
+            for k in ("matches", "balls", "runs", "outs", "wickets"):
+                t[k] += r.get(k) or 0
+        for t in totals_by_format.values():
+            if role == "batting":
+                del t["wickets"]
+                t["average"], t["strike_rate"] = _ratio(t["runs"], t["outs"]), _ratio(100 * t["runs"], t["balls"])
+            else:
+                del t["outs"]
+                t["average"], t["economy"] = _ratio(t["runs"], t["wickets"]), _ratio(6 * t["runs"], t["balls"])
+    else:
+        for r in rows:
+            r.pop("format")
+
+    counted = [r for r in rows if r["matches"] >= min_matches and r["average"] is not None]
+    consistency = None
+    if len(counted) >= 2:
+        avgs = sorted(r["average"] for r in counted)
+        mean = sum(avgs) / len(avgs)
+        spread = (sum((a - mean) ** 2 for a in avgs) / len(avgs)) ** 0.5
+        # For batting a higher average is better; for bowling a lower one.
+        best = max(counted, key=lambda r: r["average"]) if role == "batting" else min(counted, key=lambda r: r["average"])
+        worst = min(counted, key=lambda r: r["average"]) if role == "batting" else max(counted, key=lambda r: r["average"])
+        consistency = {
+            "years_counted": len(counted),
+            "min_matches_per_year": min_matches,
+            "best_year": {"year": best["year"], "average": best["average"]},
+            "worst_year": {"year": worst["year"], "average": worst["average"]},
+            "median_yearly_average": avgs[len(avgs) // 2] if len(avgs) % 2 else round((avgs[len(avgs) // 2 - 1] + avgs[len(avgs) // 2]) / 2, 2),
+            "spread_of_yearly_averages": round(spread, 2),
+            "spread_pct_of_mean": round(100 * spread / mean, 1) if mean else None,
+            "how_to_read": "spread is the standard deviation of the yearly averages; a smaller spread means steadier year-to-year output",
+        }
+    span = con.execute(
+        f"SELECT count(*), min(start_date), max(start_date) FROM player_matches WHERE player_id = ?{where}",
+        [p["player_id"], *params],
+    ).fetchone()
+    result = {"player": p, "role": role, "filters": filters.describe(), "by_year": rows,
+              "consistency": consistency, "coverage": _coverage(*span)}
+    if totals_by_format is not None:
+        result["totals_by_format"] = totals_by_format
+        result["consistency_note"] = "With by_format, consistency compares year-format rows; filter to one format to compare years within it."
+    return result
