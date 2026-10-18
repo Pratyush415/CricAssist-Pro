@@ -65,6 +65,53 @@ def build_context(args: argparse.Namespace) -> int:
     return 0
 
 
+def evaluate(args: argparse.Namespace) -> int:
+    import json
+
+    from cricassist.assistant.agent import Assistant, AssistantError, make_backend
+    from cricassist.evaluation import load_questions, run_evaluation, summarise
+    from cricassist.stats.db import connect
+
+    settings = load_settings()
+    questions = load_questions()
+    if args.only:
+        wanted = {w.strip() for w in args.only.split(",")}
+        questions = [q for q in questions if q["id"] in wanted]
+    try:
+        con = connect(settings.db_path)
+        model = make_backend(settings, args.provider, args.model).model  # checks the key early
+    except (FileNotFoundError, AssistantError) as e:
+        print(e, file=sys.stderr)
+        return 1
+
+    results_path = Path(args.results) if args.results else Path("data/processed/eval") / f"results-{model}.json"
+    results: dict[str, dict] = {}
+    if results_path.is_file() and not args.fresh:
+        results = json.loads(results_path.read_text("utf-8"))
+    if args.summary:
+        print(summarise(results, questions))
+        return 0
+    results_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def save(grade):
+        results[grade.id] = {**grade.to_dict(), "model": model}
+        results_path.write_text(json.dumps(results, indent=1, ensure_ascii=False), "utf-8")
+        status = grade.error or f"correct={'yes' if grade.correct else 'NO'} sourced={'yes' if grade.sourced else 'NO'}"
+        print(f"    {status}", flush=True)
+
+    def make_assistant():
+        backend = make_backend(settings, args.provider, args.model)
+        if hasattr(backend, "on_wait"):
+            backend.on_wait = lambda message: print(f"    ({message})", flush=True)
+        return Assistant(con, backend)
+
+    run_evaluation(make_assistant, questions, previous=results, pause=args.pause, on_result=save)
+    print()
+    print(summarise(results, questions))
+    print(f"\nFull answers: {results_path}")
+    return 0
+
+
 def _format_call(call) -> str:
     args = ", ".join(f"{k}={v!r}" for k, v in call.args.items())
     return f"  · {call.name}({args})" + ("  [error]" if call.is_error else "")
@@ -137,6 +184,16 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--delay", type=float, default=5.0, help="seconds between requests (default 5, minimum 3)")
     p.add_argument("--reset", action="store_true", help="empty the vector database first")
     p.set_defaults(func=build_context)
+
+    p = sub.add_parser("eval", help="run the 15-question test set and grade the answers")
+    p.add_argument("--provider", choices=["gemini", "claude"], help="AI provider (default: CRICASSIST_LLM_PROVIDER)")
+    p.add_argument("--model", help="model name (default: CRICASSIST_LLM_MODEL or the provider's default)")
+    p.add_argument("--only", help="comma-separated question ids to run")
+    p.add_argument("--results", help="results file (default: data/processed/eval/results-<model>.json)")
+    p.add_argument("--fresh", action="store_true", help="ignore earlier results instead of resuming")
+    p.add_argument("--pause", type=float, default=10.0, help="seconds between questions (default 10, for free-tier limits)")
+    p.add_argument("--summary", action="store_true", help="print the results table without running anything")
+    p.set_defaults(func=evaluate)
 
     p = sub.add_parser("chat", help="ask the assistant questions about the stats")
     p.add_argument("question", nargs="*", help="ask one question and exit; leave out for a conversation")

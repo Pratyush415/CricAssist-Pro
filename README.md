@@ -58,6 +58,32 @@ prints each call, so you can see where every number came from. Its rules
 the model's memory or its own arithmetic across rows; when the data cannot
 answer (for example ICC rankings), it says so and offers what the data can show.
 
+## Evaluation
+
+`cricassist eval` asks the assistant 15 journalist questions
+(`evaluation/questions.json`): 10 stats questions, 2 the data cannot answer
+(ICC rankings, Afghanistan internationals), 2 that need written context, and 1
+combined. Expected answers were checked against the database. Each answer is
+graded on two things:
+
+- **Correct**: it contains the expected facts, and for questions the data
+  cannot answer it says so without inventing anything (no ranking durations,
+  no made-up quotes).
+- **Sourced**: every number in it appears in the question or in a tool call or
+  result. Any other number could only have come from the model's memory or its
+  own arithmetic, and is reported.
+
+```bash
+cricassist eval                          # run all 15 (resumes an earlier run)
+cricassist eval --model gemini-3.5-flash # another model, with its own free quota
+cricassist eval --only steyn_ranking     # one question
+cricassist eval --summary                # print the last results
+```
+
+Results, with every answer and tool call, go to `data/processed/eval/`. A run
+takes about 45 model requests, more than one Gemini model's free daily quota,
+so it saves after each question and picks up where it stopped.
+
 ## Written context (R4)
 
 `cricassist build-context` builds a ChromaDB vector database of match reports

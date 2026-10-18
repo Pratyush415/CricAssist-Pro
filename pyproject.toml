@@ -24,4 +24,4 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 
 [tool.setuptools.package-data]
-cricassist = ["stats/dataset/*.json", "sources/*.json"]
+cricassist = ["stats/dataset/*.json", "sources/*.json", "evaluation/*.json"]

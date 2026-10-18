@@ -31,6 +31,7 @@ class ToolCall:
     name: str
     args: dict
     is_error: bool
+    result: str = ""  # the JSON the model was given
 
 
 @dataclass
@@ -209,7 +210,7 @@ class Assistant:
 
         def execute(name: str, args: dict) -> tuple[str, bool]:
             result, is_error = run_tool(self.con, name, args)
-            call = ToolCall(name, args, is_error)
+            call = ToolCall(name, args, is_error, result)
             calls.append(call)
             if self.on_tool_call:
                 self.on_tool_call(call)

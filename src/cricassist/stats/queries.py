@@ -235,6 +235,19 @@ def resolve_player(con: duckdb.DuckDBPyConnection, player: str) -> dict:
     )
     if len(exact) == 1:
         return exact[0]
+    if len(exact) > 1:
+        # Namesakes: rank by matches, and let a clear favourite win (Rashid Khan of Afghanistan).
+        ids = [e["player_id"] for e in exact]
+        exact = _rows(
+            con,
+            f"""SELECT p.player_id, p.name, p.full_name, p.country,
+                       (SELECT count(*) FROM player_matches pm WHERE pm.player_id = p.player_id) AS matches_in_data
+                FROM players p WHERE p.player_id IN ({", ".join("?" * len(ids))})
+                ORDER BY matches_in_data DESC""",
+            ids,
+        )
+        if exact[0]["matches_in_data"] >= 10 * max(1, exact[1]["matches_in_data"]):
+            return exact[0]
     candidates = exact or find_players(con, player)
     if len(candidates) == 1:
         return candidates[0]
@@ -714,6 +727,7 @@ def best_innings(con, kind: str, filters: Filters | None = None, limit: int = 10
         )
         for r in rows:
             r["score"] = f"{r['runs']}{'' if r.pop('is_out') else '*'} ({r['balls']})"
+            r["strike_rate"] = _ratio(100 * r["runs"], r["balls"])
     elif kind == "bowling":
         where, params = filters.where()
         rows = _rows(
@@ -1102,6 +1116,7 @@ def player_by_year(con, player: str, role: str = "batting", filters: Filters | N
             else:
                 del t["outs"]
                 t["average"], t["economy"] = _ratio(t["runs"], t["wickets"]), _ratio(6 * t["runs"], t["balls"])
+                t["strike_rate"] = _ratio(t["balls"], t["wickets"], 1)
     else:
         for r in rows:
             r.pop("format")
