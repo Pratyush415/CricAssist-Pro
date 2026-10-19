@@ -82,28 +82,33 @@ Submission:
 - [ ] Fresh-clone check: setup steps work from scratch
 
 Demo:
-- [ ] Demo script: 5–6 rehearsed questions showing stats depth, Cricinfo context with sources, and a combined answer
+- [ ] Demo script: 3 rehearsed questions (see Demo questions) showing stats depth, honesty about gaps, and a combined answer, plus backups
 - [ ] Both databases pre-built and tested on the demo machine
 - [ ] Fallback: screen recording of a full run, in case the network or API fails live
 - [ ] Simple Streamlit web page (only if time allows)
 
 ## Demo questions
-1. How has Shami been over the years in terms of consistency? (year-by-year tool)
-2. How long was Dale Steyn number one in the Test rankings? Kept as the honest
-   "the data cannot answer that" moment: rankings are not in the data, so the
-   assistant says so and shows his Test record year by year instead. The strict
-   rule stays: no number from scraped text or the model's memory.
-3. How many sixes did Virat Kohli hit at the 2022 T20 World Cup? (8)
-4. How does Kohli fare against left-arm spin in T20s since 2022? (batter vs
-   bowling style; the roadmap's headline example)
-5. Who were the best death-over bowlers in IPL 2025, and how does Bumrah
-   compare? (phase stats and leaderboards)
-6. Tell me about the 2023 World Cup final. (combined: scorecard from the stats
-   tools plus Cricinfo match-report context; complete once R4 is built)
+Three questions, one for each thing the project must show. Three keep the demo
+within one Gemini model's free daily quota, with room for a rehearsal.
 
-Backup: What's a par first-innings score at the Wankhede in the IPL? (venue)
+1. How does Kohli fare against left-arm spin in T20s since 2022?
+   Stats depth (R1-R3): a matchup by bowling style, filtered by format and date.
+2. How long was Dale Steyn ranked number one in Test cricket?
+   Honesty: rankings are not in the data, so the assistant says so, gives no
+   duration, and shows his Test record by year instead.
+3. Tell me about the 2023 World Cup final.
+   Combined answer and R4: the full scorecard from the data (dismissals
+   included, e.g. "c Head b Maxwell", which the model had wrong from memory),
+   and an honest note that no written context is available.
 
-Questions 1-5 answer correctly on Gemini today; 6 needs the context tool.
+Backups, if asked for more or if one fails:
+- How many sixes did Virat Kohli hit at the 2022 T20 World Cup? (8)
+- How has Shami been over the years in terms of consistency?
+- Who were the best death-over bowlers in IPL 2025, and how does Bumrah compare?
+- What's a par first-innings score at the Wankhede in the IPL?
+
+Use the default model (gemini-3.8-flash) for the demo and do not spend its
+quota on the day before presenting; run the evaluation on another model.
 
 ## Deferred until after Oct 21
 - Scraping beyond the curated set (all match reports, news articles)
