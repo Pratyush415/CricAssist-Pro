@@ -80,6 +80,7 @@ cricassist eval --only steyn_ranking     # one question
 cricassist eval --summary                # print the last results
 ```
 
+Latest results: **14 of 15 correct, 15 of 15 fully sourced** (`docs/evaluation.md`).
 Results, with every answer and tool call, go to `data/processed/eval/`. A run
 takes about 45 model requests, more than one Gemini model's free daily quota,
 so it saves after each question and picks up where it stopped.

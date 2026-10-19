@@ -91,6 +91,10 @@ def evaluate(args: argparse.Namespace) -> int:
     if args.summary:
         print(summarise(results, questions))
         return 0
+    if args.redo:
+        for qid in (w.strip() for w in args.redo.split(",")):
+            results.pop(qid, None)  # forget the old answer so it runs again
+        questions = [q for q in questions if q["id"] in {w.strip() for w in args.redo.split(",")}]
     results_path.parent.mkdir(parents=True, exist_ok=True)
 
     def save(grade):
@@ -191,6 +195,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--only", help="comma-separated question ids to run")
     p.add_argument("--results", help="results file (default: data/processed/eval/results-<model>.json)")
     p.add_argument("--fresh", action="store_true", help="ignore earlier results instead of resuming")
+    p.add_argument("--redo", help="comma-separated question ids to run again, replacing their earlier results")
     p.add_argument("--pause", type=float, default=10.0, help="seconds between questions (default 10, for free-tier limits)")
     p.add_argument("--summary", action="store_true", help="print the results table without running anything")
     p.set_defaults(func=evaluate)

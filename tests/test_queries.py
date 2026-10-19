@@ -189,3 +189,21 @@ def test_batter_vs_one_style_group(db):
     with pytest.raises(ValueError, match="Unknown bowling style"):
         batter_vs_bowling_style(db, "YBK Jaiswal", style="chinaman")
     assert "left-arm spin" in STYLE_GROUPS
+
+
+def test_player_by_year_consistency_per_format(db):
+    from cricassist.stats.queries import player_by_year
+
+    split = player_by_year(db, "YBK Jaiswal", "batting", by_format=True, min_matches=1)
+    assert "consistency" not in split  # years are only compared within a format
+    assert set(split["totals_by_format"]) == {"TEST", "T20"}
+    assert all("consistency" in t for t in split["totals_by_format"].values())
+    whole = player_by_year(db, "YBK Jaiswal", "batting", min_matches=1)
+    assert "consistency" in whole and "totals_by_format" not in whole
+
+
+def test_record_lists_report_coverage(db):
+    from cricassist.stats.queries import Filters, best_innings, leaders
+
+    assert best_innings(db, "team_lowest", Filters(format="TEST"))["coverage"]["matches_in_data"] == 1
+    assert leaders(db, "runs")["coverage"]["matches_in_data"] == 2  # men's matches in the test data

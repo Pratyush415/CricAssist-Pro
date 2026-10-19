@@ -185,7 +185,9 @@ TOOLS = [
     Tool(
         "batter_vs_bowling_style",
         "A batter's record against types of bowling. Without style: pace, spin and each kind. With style, one group: "
-        + ", ".join(q.STYLE_GROUPS) + ".",
+        + ", ".join(q.STYLE_GROUPS) + ". Groups combine kinds: 'left-arm spin' is left-arm orthodox plus "
+        "left-arm wrist-spin together, 'spin' is all four spin kinds; ask for the group the question names "
+        "rather than adding kinds up yourself.",
         _schema({"batter": PLAYER, "style": {"type": "string", "enum": list(q.STYLE_GROUPS)}}, ["batter"]),
         lambda con, a: q.batter_vs_bowling_style(con, a["batter"], _filters(a), a.get("style")),
     ),

@@ -756,7 +756,15 @@ def best_innings(con, kind: str, filters: Filters | None = None, limit: int = 10
         raise ValueError("kind must be batting, bowling, team_highest or team_lowest")
     for r in rows:
         r["date"] = str(r["date"])
-    return {"kind": kind, "filters": filters.describe(), "records": rows, "note": COVERAGE_NOTE}
+    return {"kind": kind, "filters": filters.describe(), "records": rows, "coverage": _match_coverage(con, filters)}
+
+
+def _match_coverage(con, filters: Filters) -> dict:
+    """How many matches the filters cover, and their date range."""
+    where, params = filters.where()
+    return _coverage(*con.execute(
+        f"SELECT count(DISTINCT match_id), min(start_date), max(start_date) FROM team_innings WHERE true{where}", params
+    ).fetchone())
 
 
 # --- Leaderboards ------------------------------------------------------------
@@ -889,7 +897,7 @@ def leaders(
         "filters": filters.describe(),
         "minimum_balls": min_balls,
         "leaders": rows,
-        "note": COVERAGE_NOTE,
+        "coverage": _match_coverage(con, filters),
     }
 
 
@@ -1121,35 +1129,44 @@ def player_by_year(con, player: str, role: str = "batting", filters: Filters | N
         for r in rows:
             r.pop("format")
 
-    counted = [r for r in rows if r["matches"] >= min_matches and r["average"] is not None]
-    consistency = None
-    if len(counted) >= 2:
-        avgs = sorted(r["average"] for r in counted)
-        mean = sum(avgs) / len(avgs)
-        spread = (sum((a - mean) ** 2 for a in avgs) / len(avgs)) ** 0.5
-        # For batting a higher average is better; for bowling a lower one.
-        best = max(counted, key=lambda r: r["average"]) if role == "batting" else min(counted, key=lambda r: r["average"])
-        worst = min(counted, key=lambda r: r["average"]) if role == "batting" else max(counted, key=lambda r: r["average"])
-        consistency = {
-            "years_counted": len(counted),
-            "min_matches_per_year": min_matches,
-            "best_year": {"year": best["year"], "average": best["average"]},
-            "worst_year": {"year": worst["year"], "average": worst["average"]},
-            "median_yearly_average": avgs[len(avgs) // 2] if len(avgs) % 2 else round((avgs[len(avgs) // 2 - 1] + avgs[len(avgs) // 2]) / 2, 2),
-            "spread_of_yearly_averages": round(spread, 2),
-            "spread_pct_of_mean": round(100 * spread / mean, 1) if mean else None,
-            "how_to_read": "spread is the standard deviation of the yearly averages; a smaller spread means steadier year-to-year output",
-        }
     span = con.execute(
         f"SELECT count(*), min(start_date), max(start_date) FROM player_matches WHERE player_id = ?{where}",
         [p["player_id"], *params],
     ).fetchone()
-    result = {"player": p, "role": role, "filters": filters.describe(), "by_year": rows,
-              "consistency": consistency, "coverage": _coverage(*span)}
-    if totals_by_format is not None:
+    result = {"player": p, "role": role, "filters": filters.describe(), "by_year": rows, "coverage": _coverage(*span)}
+    if totals_by_format is None:
+        result["consistency"] = _consistency(rows, role, min_matches)
+    else:
+        # Years are only comparable within a format, so each format gets its own summary.
+        for fmt, totals in totals_by_format.items():
+            totals["consistency"] = _consistency([r for r in rows if r["format"] == fmt], role, min_matches)
         result["totals_by_format"] = totals_by_format
-        result["consistency_note"] = "With by_format, consistency compares year-format rows; filter to one format to compare years within it."
     return result
+
+
+def _consistency(rows: list[dict], role: str, min_matches: int) -> dict | None:
+    """Best and worst year, median and spread of the yearly averages, over years
+    with at least `min_matches` matches. None if fewer than two such years."""
+    counted = [r for r in rows if r["matches"] >= min_matches and r["average"] is not None]
+    if len(counted) < 2:
+        return None
+    avgs = sorted(r["average"] for r in counted)
+    mean = sum(avgs) / len(avgs)
+    spread = (sum((a - mean) ** 2 for a in avgs) / len(avgs)) ** 0.5
+    # For batting a higher average is better; for bowling a lower one.
+    best = max(counted, key=lambda r: r["average"]) if role == "batting" else min(counted, key=lambda r: r["average"])
+    worst = min(counted, key=lambda r: r["average"]) if role == "batting" else max(counted, key=lambda r: r["average"])
+    mid = len(avgs) // 2
+    return {
+        "years_counted": len(counted),
+        "min_matches_per_year": min_matches,
+        "best_year": {"year": best["year"], "average": best["average"]},
+        "worst_year": {"year": worst["year"], "average": worst["average"]},
+        "median_yearly_average": avgs[mid] if len(avgs) % 2 else round((avgs[mid - 1] + avgs[mid]) / 2, 2),
+        "spread_of_yearly_averages": round(spread, 2),
+        "spread_pct_of_mean": round(100 * spread / mean, 1) if mean else None,
+        "how_to_read": "spread is the standard deviation of the yearly averages; a smaller spread means steadier year-to-year output",
+    }
 
 
 # --- Scorecards --------------------------------------------------------------

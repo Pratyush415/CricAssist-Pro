@@ -71,8 +71,8 @@ Answer: numbers only from stats tools, context quoted with Cricinfo links
 - [x] Embed into ChromaDB with a local embedding model (works offline, no extra API key)
 - [x] `search_cricinfo_context` tool for the assistant, returning passages with URLs
 - [x] `cricassist build-context` command to rebuild the vector database from the cache (or from a folder of documents you may use: `--source-dir`)
-- [ ] Test set of 15 journalist questions with verified answers, mixing stats-only, context-only and combined questions
-- [ ] **Done when:** at least 13 of 15 correct, no unsourced numbers, context answers cite Cricinfo URLs
+- [x] Test set of 15 journalist questions with verified answers, mixing stats-only, context-only and combined questions (`cricassist eval`)
+- [x] **Done when:** at least 13 of 15 correct, no unsourced numbers, context answers cite Cricinfo URLs (14 of 15 correct, 15 of 15 sourced, see `docs/evaluation.md`; context answers say none is available, as the database is empty)
 
 ### Wed Oct 21: Submission and demo
 Submission:
