@@ -32,12 +32,35 @@ CricAssist-Pro/
 
 ## Setup
 
+Python 3.11 or newer. Installing takes a few minutes (ChromaDB has many
+dependencies).
+
+Windows (PowerShell):
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -e ".[dev]"
+Copy-Item .env.example .env      # then put your API key in .env
+pytest
+```
+
+macOS / Linux:
+
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-cp .env.example .env
+cp .env.example .env             # then put your API key in .env
 pytest
 ```
+
+On Windows, clone into a short folder path (for example `C:\code\CricAssist-Pro`):
+some dependencies have deeply nested files, and a long path can exceed
+Windows' 260-character limit unless long paths are enabled. If PowerShell
+refuses to run `Activate.ps1`, run
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, or call
+`.venv\Scripts\python.exe -m pip ...` directly. The tests use a small sample
+dataset in `tests/data/` and need no downloads or API key.
 
 ## Asking questions
 

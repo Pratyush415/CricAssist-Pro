@@ -77,20 +77,23 @@ def evaluate(args: argparse.Namespace) -> int:
     if args.only:
         wanted = {w.strip() for w in args.only.split(",")}
         questions = [q for q in questions if q["id"] in wanted]
-    try:
-        con = connect(settings.db_path)
-        model = make_backend(settings, args.provider, args.model).model  # checks the key early
-    except (FileNotFoundError, AssistantError) as e:
-        print(e, file=sys.stderr)
-        return 1
+    from cricassist.config import DEFAULT_MODELS
 
+    provider = (args.provider or settings.llm_provider).lower()
+    model = args.model or (settings.llm_model if provider == settings.llm_provider else "") or DEFAULT_MODELS.get(provider, "")
     results_path = Path(args.results) if args.results else Path("data/processed/eval") / f"results-{model}.json"
     results: dict[str, dict] = {}
     if results_path.is_file() and not args.fresh:
         results = json.loads(results_path.read_text("utf-8"))
-    if args.summary:
+    if args.summary:  # only reads saved results: no database or API key needed
         print(summarise(results, questions))
         return 0
+    try:
+        con = connect(settings.db_path)
+        make_backend(settings, args.provider, args.model)  # checks the key before any question runs
+    except (FileNotFoundError, AssistantError) as e:
+        print(e, file=sys.stderr)
+        return 1
     if args.redo:
         for qid in (w.strip() for w in args.redo.split(",")):
             results.pop(qid, None)  # forget the old answer so it runs again

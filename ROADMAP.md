@@ -79,7 +79,7 @@ Submission:
 - [ ] Fix remaining issues; all tests pass
 - [ ] README: what it does, setup, how to build both databases, how to run, architecture, data sources and licences
 - [ ] Merge the work branch into `main` so the submitted repo is complete
-- [ ] Fresh-clone check: setup steps work from scratch
+- [x] Fresh-clone check: setup steps work from scratch (Oct 19: clean venv install, 159 tests, full build, 10 of 10 stats, web app; fixed Windows setup steps and `eval --summary`)
 
 Demo:
 - [ ] Demo script: 3 rehearsed questions (see Demo questions) showing stats depth, honesty about gaps, and a combined answer, plus backups
