@@ -8,10 +8,13 @@ version = "0.1.0"
 description = "AI co-pilot for cricket journalists: ESPNcricinfo context plus an offline ball-by-ball stats database."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["duckdb>=1.1"]
+dependencies = [
+    "duckdb>=1.1", "google-genai>=1.30", "anthropic>=1.0", "chromadb>=1.0", "beautifulsoup4>=4.12",
+    "fastapi>=0.110", "uvicorn[standard]>=0.29", "markdown>=3.5",
+]
 
 [project.optional-dependencies]
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "httpx>=0.27"]
 
 [project.scripts]
 cricassist = "cricassist.main:main"
@@ -24,4 +27,4 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 
 [tool.setuptools.package-data]
-cricassist = ["stats/dataset/*.json"]
+cricassist = ["stats/dataset/*.json", "sources/*.json", "evaluation/*.json", "web/static/*"]

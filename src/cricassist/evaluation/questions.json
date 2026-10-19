@@ -1,0 +1,113 @@
+{
+ "note": "Expected answers verified against the stats database on 2026-10-19 (dataset snapshot 2026-10-10). Patterns are case-insensitive regular expressions; each inner list in must_include is a set of alternatives, of which one must appear.",
+ "questions": [
+  {
+   "id": "kohli_sixes_2022_t20wc",
+   "type": "stats",
+   "question": "How many sixes did Virat Kohli hit at the 2022 T20 World Cup?",
+   "expected": "8 sixes (296 runs in 6 innings)",
+   "must_include": [["\\b8\\b"]]
+  },
+  {
+   "id": "shami_consistency",
+   "type": "stats",
+   "question": "How has Shami been over the years in terms of consistency?",
+   "expected": "International bowling: best year 2023 (average 20.05), worst 2020 (40.53); an answer by format is also fine if it names 2023 and quotes a spread or median",
+   "must_include": [["2023"], ["20\\.05", "40\\.53", "spread", "standard deviation", "median"]]
+  },
+  {
+   "id": "kohli_vs_left_arm_spin",
+   "type": "stats",
+   "question": "How does Kohli fare against left-arm spin in T20s since 2022?",
+   "expected": "Average 60.7, strike rate 123.63, 10 dismissals",
+   "must_include": [["60\\.70?"], ["123\\.63"]]
+  },
+  {
+   "id": "ipl_2025_death_overs",
+   "type": "stats",
+   "question": "Who were the best death-over bowlers in IPL 2025, and how does Bumrah compare?",
+   "expected": "Most death-over wickets: Prasidh Krishna, 15; Bumrah's death-over economy 6.98",
+   "must_include": [["Prasidh"], ["6\\.98"]]
+  },
+  {
+   "id": "kohli_test_career",
+   "type": "stats",
+   "question": "What was Virat Kohli's Test batting record?",
+   "expected": "9230 runs at 46.85 in 123 Tests",
+   "must_include": [["9,?230"], ["46\\.85"]]
+  },
+  {
+   "id": "highest_ipl_score",
+   "type": "stats",
+   "question": "What is the highest individual score in IPL history?",
+   "expected": "Chris Gayle 175* (66) v Pune Warriors, 2013",
+   "must_include": [["Gayle"], ["175"]]
+  },
+  {
+   "id": "india_australia_tests",
+   "type": "stats",
+   "question": "What is India's head-to-head record against Australia in Tests?",
+   "expected": "In the data (men's, Dec 2003 on): 48 played, India won 19, lost 16, drew 13",
+   "must_include": [["\\b48\\b"], ["\\b19\\b"], ["\\b16\\b"], ["\\b13\\b"]]
+  },
+  {
+   "id": "wankhede_par_score",
+   "type": "stats",
+   "question": "What's a par first-innings score at the Wankhede in the IPL, and does batting first or chasing win more?",
+   "expected": "Average first-innings score 173.1; chasing sides won 72, batting first 59",
+   "must_include": [["173"], ["\\b72\\b"], ["\\b59\\b"]]
+  },
+  {
+   "id": "hazlewood_dismissed_kohli",
+   "type": "stats",
+   "question": "How many times has Josh Hazlewood dismissed Virat Kohli?",
+   "expected": "11 times (514 balls, 294 runs), all formats",
+   "must_include": [["\\b11\\b"]]
+  },
+  {
+   "id": "lowest_test_total",
+   "type": "stats",
+   "question": "What is the lowest Test team total since 2001?",
+   "expected": "West Indies 27 v Australia, Kingston, July 2025",
+   "must_include": [["West Indies"], ["\\b27\\b"]]
+  },
+  {
+   "id": "steyn_ranking",
+   "type": "cannot_answer",
+   "question": "How long was Dale Steyn ranked number one in Test cricket?",
+   "expected": "Rankings are not in the data: say so, give no duration, offer his record instead",
+   "must_include": [["ranking"], ["not (tracked|available|included|in )", "no (ranking|data)", "does(n't| not) (track|have|include|cover)", "cannot", "can't"]],
+   "must_not_include": ["\\b\\d+\\s*(days|weeks|months)\\b", "\\bfrom (19|20)\\d\\d to (19|20)\\d\\d\\b.*No\\.? ?1"]
+  },
+  {
+   "id": "rashid_t20i_record",
+   "type": "cannot_answer",
+   "question": "What is Rashid Khan's T20I bowling record for Afghanistan?",
+   "expected": "The data has no Afghanistan internationals: say so; may offer his franchise record",
+   "must_include": [["Afghanistan"], ["no Afghanistan", "not (in|included|available)", "missing", "does(n't| not) (have|include|contain)", "cannot", "can't"]]
+  },
+  {
+   "id": "kohli_quote_pakistan_2022",
+   "type": "context",
+   "question": "What did Virat Kohli say after his innings against Pakistan at the 2022 T20 World Cup?",
+   "expected": "No written context is available: say so, invent no quote; may give his score from the stats",
+   "must_include": [["no written", "not available", "no (match report|context|quotes?)", "does(n't| not) (have|include|contain)", "cannot", "can't", "unable"]],
+   "must_not_include": ["\"[^\"]{25,}\"", "“[^”]{25,}”"]
+  },
+  {
+   "id": "bumrah_bowling_action",
+   "type": "context",
+   "question": "Describe Jasprit Bumrah's bowling action and run-up.",
+   "expected": "No written context is available: say so rather than describing it from memory",
+   "must_include": [["no written", "not available", "no (player profile|profile|context)", "does(n't| not) (have|include|contain|cover)", "cannot", "can't", "unable"]],
+   "must_not_include": ["hyperextend", "short run-?up", "unorthodox action"]
+  },
+  {
+   "id": "world_cup_final_2023",
+   "type": "combined",
+   "question": "Tell me about the 2023 World Cup final.",
+   "expected": "Australia beat India by 6 wickets; Head 137; India 240, Australia 241/4; no written report available",
+   "must_include": [["Australia"], ["6 wickets", "six wickets"], ["137"], ["no written", "not available", "no (match report|written|context)"]]
+  }
+ ]
+}
