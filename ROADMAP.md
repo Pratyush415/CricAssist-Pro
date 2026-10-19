@@ -135,8 +135,9 @@ quota on the day before presenting; run the evaluation on another model.
 - **No Afghanistan internationals:** the Kaggle dataset has none at all, so
   every international against Afghanistan is missing too (e.g. Bumrah has 12
   of his 15 wickets at the 2024 T20 World Cup). Asking about Afghanistan gives
-  a clear "not in the dataset" message. Fixable after Oct 21 by loading the
-  raw Cricsheet files (already deferred below).
+  a clear "not in the dataset" message. Loading Cricsheet's own files would not
+  fix this: Cricsheet itself currently withholds 380 matches involving
+  Afghanistan or the Afghanistan Premier League (per its downloads page).
 - **Wrong stats:** legal deliveries, retirements and super overs make stats easy
   to get subtly wrong. Mitigated by checking results against ESPNcricinfo.
 - **Numbers leaking from scraped text:** the model could quote a figure from a
