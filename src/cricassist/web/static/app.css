@@ -211,6 +211,13 @@ button, select, textarea { font: inherit; color: inherit; }
 .sessions li:hover { background: var(--raised); color: var(--ink); }
 .sessions li.active { background: var(--raised); color: var(--ink); box-shadow: inset 3px 0 0 var(--accent); }
 .sessions .title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sessions .badge { flex: none; display: grid; place-items: center; width: 14px; height: 14px; }
+.sessions .badge.running svg { width: 14px; height: 14px; animation: spin 1s linear infinite; }  /* a spinning ball */
+.sessions .badge.unread::before {                              /* a finished answer you have not opened yet */
+  content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--leather);
+  box-shadow: 0 0 0 3px rgba(192, 38, 27, .2);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 .sessions .del {
   display: grid; place-items: center;
   width: 26px; height: 26px; padding: 0;

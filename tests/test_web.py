@@ -1,6 +1,7 @@
 """The web app's API, with a fake AI model (no network)."""
 
 import json
+import threading
 from pathlib import Path
 
 import pytest
@@ -14,9 +15,11 @@ from cricassist.web.app import create_app, render_markdown
 class FakeBackend:
     """Calls one stats tool, reports a rate-limit pause, then answers in Markdown."""
 
-    def __init__(self, model, fail=False):
+    def __init__(self, model, fail=False, gate=None):
         self.model = model
         self.fail = fail
+        self.gate = gate  # if set, the answer waits until the test opens it
+        self.started = threading.Event()
         self.on_wait = None
         self.on_draft = None
         self.questions = []
@@ -29,6 +32,9 @@ class FakeBackend:
         self.questions.append(question)
         if self.fail:
             raise AssistantError("Gemini's free daily quota for this model is used up.")
+        self.started.set()
+        if self.gate:
+            self.gate.wait(10)
         if self.on_draft:
             self.on_draft("")
         execute("batting_summary", {"player": "Jaiswal", "format": "TEST"})
@@ -54,11 +60,18 @@ def settings(db_path, tmp_path):
 
 
 @pytest.fixture
-def make_client(settings, backends):
+def gate():
+    """Holds answers from the gemini-3.7-flash fake until the test sets it."""
+    return threading.Event()
+
+
+@pytest.fixture
+def make_client(settings, backends, gate):
     """A new app (as after a server restart) over the same chats file."""
 
     def factory(settings, provider, model):
-        backend = FakeBackend(model, fail=model == "gemini-3.1-flash-lite")
+        backend = FakeBackend(model, fail=model == "gemini-3.1-flash-lite",
+                              gate=gate if model == "gemini-3.7-flash" else None)
         backends.append(backend)
         return backend
 
@@ -216,3 +229,36 @@ def test_a_damaged_chats_file_is_set_aside(make_client, settings):
     client = make_client()
     assert client.get("/api/sessions").json() == []
     assert settings.chats_path.with_name("chats.json.damaged").is_file()
+
+
+# --- Several chats at once ---------------------------------------------------
+
+
+def test_other_chats_work_while_one_is_answering(client, backends, gate, settings):
+    slow = client.post("/api/sessions", json={"model": "gemini-3.7-flash"}).json()["id"]
+    fast = client.post("/api/sessions", json={}).json()["id"]
+
+    result = {}
+    worker = threading.Thread(target=lambda: result.update(
+        response=client.post(f"/api/sessions/{slow}/messages", json={"text": "Slow question"})))
+    worker.start()
+    for _ in range(100):  # the request creates the model's backend on another thread
+        slow_backend = next((b for b in backends if b.model == "gemini-3.7-flash"), None)
+        if slow_backend:
+            break
+        threading.Event().wait(0.05)
+    assert slow_backend and slow_backend.started.wait(5)
+
+    running = {s["id"]: s["running"] for s in client.get("/api/sessions").json()}
+    assert running == {slow: True, fast: False}
+    assert client.get(f"/api/sessions/{slow}").json()["running"] is True
+    # The busy chat refuses a second question; another chat answers meanwhile.
+    assert client.post(f"/api/sessions/{slow}/messages", json={"text": "Again"}).status_code == 409
+    other = client.post(f"/api/sessions/{fast}/messages", json={"text": "Fast question"})
+    assert events(other)[-1][0] == "answer"
+    assert "running" not in settings.chats_path.read_text("utf-8")  # never saved
+
+    gate.set()
+    worker.join(10)
+    assert events(result["response"])[-1][0] == "answer"
+    assert client.get(f"/api/sessions/{slow}").json()["running"] is False

@@ -69,10 +69,13 @@ class Session:
     lock: threading.Lock = field(default_factory=threading.Lock)
 
     def summary(self) -> dict:
-        return {"id": self.id, "title": self.title, "model": self.model, "created": self.created}
+        return {"id": self.id, "title": self.title, "model": self.model, "created": self.created,
+                "running": self.lock.locked()}  # still answering a question
 
     def to_dict(self) -> dict:
-        return {**self.summary(), "messages": self.messages}
+        """What is saved to the chats file (never `running`: nothing runs after a restart)."""
+        return {"id": self.id, "title": self.title, "model": self.model, "created": self.created,
+                "messages": self.messages}
 
     @classmethod
     def from_dict(cls, d: dict) -> "Session":

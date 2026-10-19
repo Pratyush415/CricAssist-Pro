@@ -1,8 +1,14 @@
 // CricAssist web app: sessions in the side panel, a model picker, and a chat
 // thread that shows the assistant's tool calls live while it works.
+//
+// Each chat answers independently: while one is still answering you can open
+// another, start a new one, or ask somewhere else. A running answer keeps
+// collecting its tool calls and streamed text in `pending`, and is drawn into
+// the thread whenever its chat is the one on screen.
 "use strict";
 
 const SPLASH_MIN_MS = 2400;
+const POLL_MS = 2500;  // checking on an answer that was running before a page reload
 const SUGGESTIONS = [
   ["How does Kohli fare against left-arm spin in T20s since 2022?", "Batter vs bowling style"],
   ["How long was Dale Steyn ranked number one in Test cricket?", "What the data can and can't say"],
@@ -18,7 +24,10 @@ const picker = $("#model");
 const list = $("#sessionList");
 const statusEl = $("#status");
 
-const state = { sessions: [], current: null, models: [], defaultModel: null, busy: false };
+const state = { sessions: [], current: null, models: [], defaultModel: null };
+const pending = new Map();  // session id -> { lines, draftHtml, controller, view }
+const unread = new Set();   // chats that finished answering while not on screen
+let pollTimer = null;
 
 // ---------- Helpers ----------
 
@@ -42,6 +51,16 @@ function svgUse(id, cls) {
   const use = document.createElementNS(ns, "use");
   use.setAttribute("href", `#${id}`);
   svg.append(use);
+  return svg;
+}
+
+function svgTrash() {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  const path = document.createElementNS(ns, "path");
+  path.setAttribute("d", "M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3");
+  svg.append(path);
   return svg;
 }
 
@@ -73,6 +92,14 @@ function modelLabel(id) {
   return (state.models.find((m) => m.id === id) || { label: id }).label;
 }
 
+function isCurrent(id) {
+  return state.current?.id === id;
+}
+
+function isRunning(id) {
+  return pending.has(id) || Boolean(state.sessions.find((s) => s.id === id)?.running);
+}
+
 function scrollToEnd() {
   thread.scrollTop = thread.scrollHeight;
 }
@@ -88,21 +115,16 @@ function renderSessions() {
   for (const s of state.sessions) {
     const del = el("button", { class: "del", type: "button", "aria-label": `Delete chat: ${s.title}` }, svgTrash());
     del.addEventListener("click", (e) => { e.stopPropagation(); deleteSession(s.id); });
-    const item = el("li", { class: s.id === state.current?.id ? "active" : "", title: s.title },
-      el("span", { class: "title" }, s.title), del);
+    const badge = isRunning(s.id)
+      ? el("span", { class: "badge running", title: "Answering…" }, svgUse("ball"))
+      : unread.has(s.id) ? el("span", { class: "badge unread", title: "New answer" }) : null;
+    const item = el("li", { class: isCurrent(s.id) ? "active" : "", title: s.title },
+      el("span", { class: "title" }, s.title));
+    if (badge) item.append(badge);
+    item.append(del);
     item.addEventListener("click", () => openSession(s.id));
     list.append(item);
   }
-}
-
-function svgTrash() {
-  const ns = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  const path = document.createElementNS(ns, "path");
-  path.setAttribute("d", "M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3");
-  svg.append(path);
-  return svg;
 }
 
 function renderWelcome() {
@@ -154,14 +176,54 @@ function errorMessage(text) {
   return node;
 }
 
-function renderMessages(messages) {
-  if (!messages.length) return renderWelcome();
+// The bubble of an answer in progress, built from what has arrived so far.
+function pendingView(p) {
+  const { node, content } = botShell();
+  content.classList.add("working");
+  const dots = el("div", { class: "dots" }, el("span"), el("span"), el("span"));
+  const live = el("ul", { class: "live" });
+  const draft = el("div", { class: "draft" });
+  content.append(dots, live, draft);
+  const view = { node, content, dots, live, draft };
+  for (const line of p.lines) live.append(lineItem(line));
+  setDraft(view, p.draftHtml);
+  return view;
+}
+
+function lineItem(line) {
+  return el("li", { class: line.error ? "err" : "" }, line.text);
+}
+
+function setDraft(view, html) {
+  view.draft.innerHTML = html;
+  view.dots.hidden = Boolean(html);
+  view.content.classList.toggle("streaming", Boolean(html));
+}
+
+function stillAnsweringView() {
+  const { node, content } = botShell();
+  content.classList.add("working");
+  content.append(el("div", { class: "dots" }, el("span"), el("span"), el("span")),
+    el("ul", { class: "live" }, el("li", {}, "Still answering this question…")));
+  return node;
+}
+
+function renderMessages(session) {
+  if (!session.messages.length && !isRunning(session.id)) return renderWelcome();
   thread.replaceChildren();
-  for (const m of messages) {
+  for (const m of session.messages) {
     if (m.role === "user") thread.append(userMessage(m.text));
     else if (m.role === "assistant") thread.append(botMessage(m));
     else if (m.role === "error") thread.append(errorMessage(m.text));
     else if (m.role === "notice") thread.append(el("div", { class: "notice" }, m.text));
+  }
+  const p = pending.get(session.id);
+  if (p) {
+    p.view = pendingView(p);
+    thread.append(p.view.node);
+  } else if (session.running) {
+    thread.append(stillAnsweringView());  // started before a page reload: wait for it
+    schedulePoll(session.id);
   }
   scrollToEnd();
 }
@@ -180,13 +242,14 @@ function renderPicker() {
   picker.value = state.current?.model || state.defaultModel;
 }
 
-function setBusy(busy) {
-  state.busy = busy;
-  sendBtn.disabled = busy || !input.value.trim();
+// Only the chat on screen decides whether you can type: other chats may be busy.
+function updateComposer() {
+  const busy = Boolean(state.current && isRunning(state.current.id));
   input.disabled = busy;
   picker.disabled = busy;
-  statusEl.textContent = busy ? "Working…" : "";
-  if (!busy) input.focus();
+  sendBtn.disabled = busy || !input.value.trim();
+  const others = [...pending.keys()].filter((id) => !isCurrent(id)).length;
+  statusEl.textContent = busy ? "Answering…" : others ? `${others} other chat${others === 1 ? "" : "s"} answering` : "";
 }
 
 // ---------- Sessions ----------
@@ -196,47 +259,78 @@ async function refreshSessions() {
   renderSessions();
 }
 
-async function newChat() {
+function detachView() {
+  for (const p of pending.values()) p.view = null;  // the thread is about to be redrawn
+  clearTimeout(pollTimer);
+}
+
+function newChat() {
+  detachView();
   state.current = null;
   history.replaceState(null, "", location.pathname);
   picker.value = picker.value || state.defaultModel;
   renderSessions();
   renderWelcome();
+  updateComposer();
   closeNav();
   input.focus();
 }
 
 async function openSession(id) {
-  if (state.busy) return;
   const session = await api(`/api/sessions/${id}`);
+  detachView();
   state.current = session;
+  unread.delete(id);
   history.replaceState(null, "", `#${session.id}`);  // a refresh comes back to this chat
   picker.value = session.model;
+  const known = state.sessions.find((s) => s.id === id);
+  if (known) known.running = session.running;
   renderSessions();
-  renderMessages(session.messages);
+  renderMessages(session);
+  updateComposer();
   closeNav();
+  if (!isRunning(id)) input.focus();
 }
 
 async function deleteSession(id) {
-  if (state.busy) return;
+  pending.get(id)?.controller.abort();
+  pending.delete(id);
+  unread.delete(id);
   await api(`/api/sessions/${id}`, { method: "DELETE" });
-  if (state.current?.id === id) {
+  if (isCurrent(id)) {
+    detachView();
     state.current = null;
     history.replaceState(null, "", location.pathname);
+    renderWelcome();
   }
   await refreshSessions();
-  if (!state.current) renderWelcome();
+  updateComposer();
+}
+
+// After a page reload, an answer may still be running on the server with no
+// stream attached here: check back until it is done, then show it.
+function schedulePoll(id) {
+  clearTimeout(pollTimer);
+  pollTimer = setTimeout(async () => {
+    if (!isCurrent(id) || pending.has(id)) return;
+    try {
+      const session = await api(`/api/sessions/${id}`);
+      if (session.running) return schedulePoll(id);
+      await refreshSessions();
+      if (isCurrent(id)) await openSession(id);
+    } catch { /* deleted or server gone: stop checking */ }
+  }, POLL_MS);
 }
 
 // ---------- Asking ----------
 
 async function ask(text) {
   text = text.trim();
-  if (!text || state.busy) return;
+  if (!text || (state.current && isRunning(state.current.id))) return;
   input.value = "";
   autosize();
-  setBusy(true);
 
+  let id;
   try {
     if (!state.current) {
       state.current = await api("/api/sessions", { method: "POST", body: { model: picker.value } });
@@ -245,50 +339,67 @@ async function ask(text) {
       thread.replaceChildren();
       await refreshSessions();
     }
-    if (thread.querySelector(".welcome")) thread.replaceChildren();
-    thread.append(userMessage(text));
+    id = state.current.id;
+  } catch (err) {
+    thread.append(errorMessage(err.message));
+    return;
+  }
 
-    const { node, content } = botShell();
-    content.classList.add("working");
-    const live = el("ul", { class: "live" });
-    const dots = el("div", { class: "dots" }, el("span"), el("span"), el("span"));
-    const draft = el("div", { class: "draft" });
-    content.append(dots, live, draft);
-    thread.append(node);
-    scrollToEnd();
+  const p = { lines: [], draftHtml: "", controller: new AbortController(), view: null };
+  pending.set(id, p);
+  if (thread.querySelector(".welcome")) thread.replaceChildren();
+  thread.append(userMessage(text));
+  p.view = pendingView(p);
+  thread.append(p.view.node);
+  scrollToEnd();
+  renderSessions();
+  updateComposer();
 
-    const res = await fetch(`/api/sessions/${state.current.id}/messages`, {
+  // Every update goes to the pending record, and to the screen only while this chat is open.
+  const addLine = (line) => {
+    p.lines.push(line);
+    if (p.view && isCurrent(id)) { p.view.live.append(lineItem(line)); scrollToEnd(); }
+  };
+  const finish = (node) => {
+    pending.delete(id);
+    if (p.view && isCurrent(id)) { p.view.node.replaceWith(node); scrollToEnd(); }
+    else unread.add(id);
+    const known = state.sessions.find((s) => s.id === id);
+    if (known) known.running = false;
+    renderSessions();
+    updateComposer();
+  };
+
+  try {
+    const res = await fetch(`/api/sessions/${id}/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
+      signal: p.controller.signal,
     });
     if (!res.ok) {
       const detail = await res.json().catch(() => ({}));
       throw new Error(detail.detail || `Request failed (${res.status})`);
     }
-
     await readEvents(res, {
       session: (s) => {
         const known = state.sessions.find((x) => x.id === s.id);
         if (known && known.title !== s.title) { known.title = s.title; renderSessions(); }
       },
-      tool: (call) => { live.append(el("li", { class: call.is_error ? "err" : "" }, "· " + describeCall(call))); scrollToEnd(); },
-      wait: (w) => { live.append(el("li", {}, w.message)); scrollToEnd(); },
+      tool: (call) => addLine({ text: "· " + describeCall(call), error: call.is_error }),
+      wait: (w) => addLine({ text: w.message }),
       draft: (d) => {
         // The answer as it streams in; an empty draft means the model went back to its tools.
-        draft.innerHTML = d.html;
-        dots.hidden = Boolean(d.html);
-        content.classList.toggle("streaming", Boolean(d.html));
-        scrollToEnd();
+        p.draftHtml = d.html;
+        if (p.view && isCurrent(id)) { setDraft(p.view, d.html); scrollToEnd(); }
       },
-      answer: (m) => { node.replaceWith(botMessage(m)); scrollToEnd(); },
-      error: (m) => { node.replaceWith(errorMessage(m.text)); scrollToEnd(); },
+      answer: (m) => finish(botMessage(m)),
+      error: (m) => finish(errorMessage(m.text)),
     });
+    if (pending.has(id)) finish(errorMessage("The connection closed before the answer arrived."));
   } catch (err) {
-    thread.querySelector(".msg.bot .working")?.closest(".msg")?.remove();
-    thread.append(errorMessage(err.message));
-  } finally {
-    setBusy(false);
+    if (err.name === "AbortError") return;  // the chat was deleted
+    if (pending.has(id)) finish(errorMessage(err.message));
   }
 }
 
@@ -321,7 +432,7 @@ async function readEvents(res, handlers) {
 function autosize() {
   input.style.height = "auto";
   input.style.height = Math.min(input.scrollHeight, 200) + "px";
-  sendBtn.disabled = state.busy || !input.value.trim();
+  updateComposer();
 }
 
 function closeNav() { app.classList.remove("nav-open"); }
@@ -365,6 +476,7 @@ async function start() {
     await minimum;
     thread.replaceChildren(errorMessage(`Could not reach the CricAssist server: ${err.message}`));
   }
+  updateComposer();
   app.hidden = false;
   requestAnimationFrame(() => $("#splash").classList.add("done"));
   setTimeout(() => $("#splash").remove(), 900);
