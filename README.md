@@ -58,6 +58,22 @@ prints each call, so you can see where every number came from. Its rules
 the model's memory or its own arithmetic across rows; when the data cannot
 answer (for example ICC rankings), it says so and offers what the data can show.
 
+## Web app
+
+```bash
+cricassist web          # opens http://127.0.0.1:8000 in your browser
+cricassist web --port 8080 --no-browser
+```
+
+A local chat interface over the same assistant (`src/cricassist/web/`): a
+splash screen with the CricAssist logo (the i's dotted with red leather balls,
+the final t drawn as a bat), a ChatGPT-style thread, a side panel of chat
+sessions, and a model picker. While the assistant works, each stats tool it
+calls appears live; each answer can be expanded to show the tools behind it.
+Chats are kept in memory for as long as the server runs, and switching the
+model mid-chat starts a fresh conversation with the new model. It listens on
+this computer only.
+
 ## Evaluation
 
 `cricassist eval` asks the assistant 15 journalist questions

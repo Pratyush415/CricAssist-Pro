@@ -85,7 +85,7 @@ Demo:
 - [ ] Demo script: 3 rehearsed questions (see Demo questions) showing stats depth, honesty about gaps, and a combined answer, plus backups
 - [ ] Both databases pre-built and tested on the demo machine
 - [ ] Fallback: screen recording of a full run, in case the network or API fails live
-- [ ] Simple Streamlit web page (only if time allows)
+- [x] Web app (`cricassist web`): local chat UI with splash and logo, chat sessions, model picker, live tool calls
 
 ## Demo questions
 Three questions, one for each thing the project must show. Three keep the demo

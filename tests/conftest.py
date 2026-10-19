@@ -19,11 +19,17 @@ def build(raw_dir: Path, db_path: Path, manifest: dict = TEST_MANIFEST):
 
 
 @pytest.fixture(scope="session")
-def db(tmp_path_factory):
-    """A read-only connection to a database built from the three-match test subset."""
-    db_path = tmp_path_factory.mktemp("db") / "test.db"
-    report = build(DATA_DIR, db_path)
+def db_path(tmp_path_factory):
+    """A database built once from the three-match test subset."""
+    path = tmp_path_factory.mktemp("db") / "test.db"
+    report = build(DATA_DIR, path)
     assert report.warnings == []
+    return path
+
+
+@pytest.fixture(scope="session")
+def db(db_path):
+    """A read-only connection to the test database."""
     con = connect(db_path)
     yield con
     con.close()

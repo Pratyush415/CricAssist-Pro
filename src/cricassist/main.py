@@ -116,6 +116,27 @@ def evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def web(args: argparse.Namespace) -> int:
+    import threading
+    import webbrowser
+
+    import uvicorn
+
+    from cricassist.web.app import create_app
+
+    try:
+        app = create_app()
+    except FileNotFoundError as e:
+        print(e, file=sys.stderr)
+        return 1
+    url = f"http://{args.host}:{args.port}"
+    print(f"CricAssist is running at {url} (Ctrl+C to stop)")
+    if not args.no_browser:
+        threading.Timer(1.2, webbrowser.open, [url]).start()
+    uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
+    return 0
+
+
 def _format_call(call) -> str:
     args = ", ".join(f"{k}={v!r}" for k, v in call.args.items())
     return f"  · {call.name}({args})" + ("  [error]" if call.is_error else "")
@@ -188,6 +209,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--delay", type=float, default=5.0, help="seconds between requests (default 5, minimum 3)")
     p.add_argument("--reset", action="store_true", help="empty the vector database first")
     p.set_defaults(func=build_context)
+
+    p = sub.add_parser("web", help="open the CricAssist web app in your browser")
+    p.add_argument("--host", default="127.0.0.1", help="address to listen on (default: this computer only)")
+    p.add_argument("--port", type=int, default=8000, help="port (default 8000)")
+    p.add_argument("--no-browser", action="store_true", help="do not open a browser window")
+    p.set_defaults(func=web)
 
     p = sub.add_parser("eval", help="run the 15-question test set and grade the answers")
     p.add_argument("--provider", choices=["gemini", "claude"], help="AI provider (default: CRICASSIST_LLM_PROVIDER)")
