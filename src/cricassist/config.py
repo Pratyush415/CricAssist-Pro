@@ -19,6 +19,7 @@ class Settings:
     llm_model: str
     gemini_api_key: str
     anthropic_api_key: str
+    chats_path: Path = Path("data/processed/chats.json")  # web app chat sessions
 
 
 def load_dotenv(path: Path = Path(".env")) -> None:
@@ -50,4 +51,5 @@ def load_settings() -> Settings:
         llm_model=os.getenv("CRICASSIST_LLM_MODEL", "") or DEFAULT_MODELS.get(provider, ""),
         gemini_api_key=os.getenv("GEMINI_API_KEY", ""),
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
+        chats_path=Path(os.getenv("CRICASSIST_CHATS_PATH", "data/processed/chats.json")),
     )

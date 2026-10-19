@@ -1,12 +1,15 @@
 """FastAPI server for the web app.
 
-Chat sessions live in memory for as long as the server runs. Each session has
-its own conversation with the model (so follow-up questions work) and its own
-database cursor. Asking a question streams Server-Sent Events: one per tool
+Chat sessions are saved to a JSON file (settings.chats_path) after every
+change and loaded when the server starts. Each session has its own
+conversation with the model (so follow-up questions work) and its own
+database cursor; a chat restored from the file is given its earlier questions
+and answers as text the first time it is continued. Asking a question streams Server-Sent Events: one per tool
 call and rate-limit pause while the assistant works, then the answer.
 """
 
 import json
+import os
 import queue
 import re
 import threading
@@ -14,6 +17,7 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from importlib import resources
+from pathlib import Path
 
 import markdown
 from fastapi import FastAPI, HTTPException
@@ -66,6 +70,54 @@ class Session:
     def summary(self) -> dict:
         return {"id": self.id, "title": self.title, "model": self.model, "created": self.created}
 
+    def to_dict(self) -> dict:
+        return {**self.summary(), "messages": self.messages}
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Session":
+        return cls(id=d["id"], model=d["model"], title=d.get("title", "New chat"),
+                   created=d.get("created", time.time()), messages=d.get("messages", []))
+
+    def earlier_turns(self) -> list[tuple[str, str]]:
+        """Answered questions since the last model switch, as (role, text) pairs."""
+        messages = self.messages
+        for i in range(len(messages) - 1, -1, -1):
+            if messages[i]["role"] == "notice":
+                messages = messages[i + 1:]
+                break
+        turns = []
+        for question, answer in zip(messages, messages[1:]):
+            if question["role"] == "user" and answer["role"] == "assistant":
+                turns += [("user", question["text"]), ("assistant", answer["text"])]
+        return turns
+
+
+class ChatFile:
+    """All chat sessions in one JSON file, rewritten whole on every change."""
+
+    def __init__(self, path: Path):
+        self.path = Path(path)
+        self.lock = threading.Lock()
+
+    def load(self) -> dict[str, Session]:
+        if not self.path.is_file():
+            return {}
+        try:
+            data = json.loads(self.path.read_text("utf-8"))
+        except (OSError, ValueError):
+            # Keep a damaged file for inspection rather than overwrite it.
+            self.path.replace(self.path.with_name(self.path.name + ".damaged"))
+            return {}
+        return {d["id"]: Session.from_dict(d) for d in data.get("sessions", [])}
+
+    def save(self, sessions: dict[str, Session]) -> None:
+        with self.lock:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            tmp = self.path.with_name(self.path.name + ".tmp")
+            payload = {"version": 1, "sessions": [s.to_dict() for s in sessions.values()]}
+            tmp.write_text(json.dumps(payload, ensure_ascii=False, default=str), "utf-8")
+            os.replace(tmp, self.path)  # a crash mid-write leaves the old file intact
+
 
 class NewSession(BaseModel):
     model: str | None = None
@@ -87,8 +139,14 @@ def create_app(settings=None, backend_factory=make_backend) -> FastAPI:
     """The app. `backend_factory(settings, provider, model)` makes a model backend; tests pass a fake one."""
     settings = settings or load_settings()
     con = connect(settings.db_path)  # fails early, with a clear message, if the database is missing
-    sessions: dict[str, Session] = {}
+    chat_file = ChatFile(settings.chats_path)
+    sessions: dict[str, Session] = chat_file.load()
     sessions_lock = threading.Lock()
+
+    def save() -> None:
+        with sessions_lock:
+            snapshot = dict(sessions)
+        chat_file.save(snapshot)
 
     def models() -> list[dict]:
         gemini_ready = bool(settings.gemini_api_key)
@@ -118,6 +176,9 @@ def create_app(settings=None, backend_factory=make_backend) -> FastAPI:
     def assistant_for(session: Session) -> Assistant:
         if session.assistant is None:
             backend = backend_factory(settings, provider_of(session.model), session.model)
+            turns = session.earlier_turns()
+            if turns and hasattr(backend, "seed"):
+                backend.seed(turns)  # a chat restored from the file picks up where it left off
             session.assistant = Assistant(con.cursor(), backend)
         return session.assistant
 
@@ -144,6 +205,7 @@ def create_app(settings=None, backend_factory=make_backend) -> FastAPI:
         session = Session(id=uuid.uuid4().hex[:12], model=model)
         with sessions_lock:
             sessions[session.id] = session
+        save()
         return session.summary()
 
     @app.get("/api/sessions/{session_id}")
@@ -156,6 +218,7 @@ def create_app(settings=None, backend_factory=make_backend) -> FastAPI:
         with sessions_lock:
             if sessions.pop(session_id, None) is None:
                 raise HTTPException(404, "No such chat")
+        save()
         return {"deleted": session_id}
 
     @app.patch("/api/sessions/{session_id}")
@@ -169,6 +232,7 @@ def create_app(settings=None, backend_factory=make_backend) -> FastAPI:
                 if session.messages:
                     session.messages.append({"role": "notice", "text": f"Switched to {body.model}. "
                                              "It does not see the earlier messages in this chat."})
+            save()
         return session.summary()
 
     @app.post("/api/sessions/{session_id}/messages")
@@ -184,6 +248,7 @@ def create_app(settings=None, backend_factory=make_backend) -> FastAPI:
         if session.title == "New chat":
             session.title = _title(text)
         session.messages.append({"role": "user", "text": text})
+        save()
 
         def work():
             try:
@@ -210,6 +275,7 @@ def create_app(settings=None, backend_factory=make_backend) -> FastAPI:
                 session.messages.append(message)
                 events.put(("error", message))
             finally:
+                save()
                 session.lock.release()
                 events.put(None)
 

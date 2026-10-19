@@ -19,6 +19,10 @@ class FakeBackend:
         self.fail = fail
         self.on_wait = None
         self.questions = []
+        self.seeded = []
+
+    def seed(self, turns):
+        self.seeded += turns
 
     def respond(self, question, execute):
         self.questions.append(question)
@@ -36,18 +40,29 @@ def backends():
 
 
 @pytest.fixture
-def client(db_path, backends):
-    settings = Settings(
+def settings(db_path, tmp_path):
+    return Settings(
         db_path=db_path, context_path=Path("unused"), cache_dir=Path("unused"),
         llm_provider="gemini", llm_model="", gemini_api_key="key", anthropic_api_key="",
+        chats_path=tmp_path / "chats.json",
     )
+
+
+@pytest.fixture
+def make_client(settings, backends):
+    """A new app (as after a server restart) over the same chats file."""
 
     def factory(settings, provider, model):
         backend = FakeBackend(model, fail=model == "gemini-3.1-flash-lite")
         backends.append(backend)
         return backend
 
-    return TestClient(create_app(settings, backend_factory=factory))
+    return lambda: TestClient(create_app(settings, backend_factory=factory))
+
+
+@pytest.fixture
+def client(make_client):
+    return make_client()
 
 
 def events(response) -> list[tuple[str, dict]]:
@@ -136,3 +151,61 @@ def test_render_markdown_escapes_html():
     html = render_markdown("**bold** <b>raw</b> & more")
     assert "<strong>bold</strong>" in html and "&lt;b&gt;raw" in html and "&amp; more" in html
     assert "<b>" not in html
+
+
+# --- Saved chats -------------------------------------------------------------
+
+
+def test_chats_survive_a_restart(make_client, settings, backends):
+    first = make_client()
+    sid = first.post("/api/sessions", json={}).json()["id"]
+    first.post(f"/api/sessions/{sid}/messages", json={"text": "How did Jaiswal do in Tests?"})
+    first.post("/api/sessions", json={"model": "gemini-3.5-flash"})
+    assert settings.chats_path.is_file()
+
+    restarted = make_client()
+    titles = [s["title"] for s in restarted.get("/api/sessions").json()]
+    assert titles == ["New chat", "How did Jaiswal do in Tests?"]
+    roles = [m["role"] for m in restarted.get(f"/api/sessions/{sid}").json()["messages"]]
+    assert roles == ["user", "assistant"]
+
+
+def test_a_restored_chat_keeps_its_context(make_client, backends):
+    first = make_client()
+    sid = first.post("/api/sessions", json={}).json()["id"]
+    first.post(f"/api/sessions/{sid}/messages", json={"text": "How did Jaiswal do in Tests?"})
+    assert backends[0].seeded == []  # a brand-new chat has nothing to restore
+
+    restarted = make_client()
+    restarted.post(f"/api/sessions/{sid}/messages", json={"text": "And in T20s?"})
+    restored = backends[-1]
+    assert [role for role, _ in restored.seeded] == ["user", "assistant"]
+    assert restored.seeded[0][1] == "How did Jaiswal do in Tests?"
+    assert restored.questions == ["And in T20s?"]
+
+
+def test_only_answered_questions_since_a_model_switch_are_restored(make_client, backends):
+    first = make_client()
+    sid = first.post("/api/sessions", json={}).json()["id"]
+    first.post(f"/api/sessions/{sid}/messages", json={"text": "Before the switch"})
+    first.patch(f"/api/sessions/{sid}", json={"model": "gemini-3.1-flash-lite"})  # this fake model fails
+    first.post(f"/api/sessions/{sid}/messages", json={"text": "Fails"})
+    first.patch(f"/api/sessions/{sid}", json={"model": "gemini-3.5-flash"})
+    first.post(f"/api/sessions/{sid}/messages", json={"text": "After"})
+
+    make_client().post(f"/api/sessions/{sid}/messages", json={"text": "Follow-up"})
+    assert [text for _, text in backends[-1].seeded][::2] == ["After"]
+
+
+def test_deleted_chats_stay_deleted(make_client):
+    first = make_client()
+    sid = first.post("/api/sessions", json={}).json()["id"]
+    first.delete(f"/api/sessions/{sid}")
+    assert make_client().get("/api/sessions").json() == []
+
+
+def test_a_damaged_chats_file_is_set_aside(make_client, settings):
+    settings.chats_path.write_text("{not json", "utf-8")
+    client = make_client()
+    assert client.get("/api/sessions").json() == []
+    assert settings.chats_path.with_name("chats.json.damaged").is_file()

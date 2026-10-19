@@ -70,7 +70,9 @@ splash screen with the CricAssist logo (the i's dotted with red leather balls,
 the final t drawn as a bat), a ChatGPT-style thread, a side panel of chat
 sessions, and a model picker. While the assistant works, each stats tool it
 calls appears live; each answer can be expanded to show the tools behind it.
-Chats are kept in memory for as long as the server runs, and switching the
+Chats are saved to `data/processed/chats.json` after every change and come
+back when the server restarts; continuing an old chat gives the model its
+earlier questions and answers, so follow-ups still make sense. Switching the
 model mid-chat starts a fresh conversation with the new model. It listens on
 this computer only.
 

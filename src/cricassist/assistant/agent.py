@@ -110,6 +110,12 @@ class GeminiBackend:
                     raise AssistantError("Gemini rejected the API key. Check GEMINI_API_KEY in .env.") from e
                 raise AssistantError(f"Gemini error {e.code}: {e.message}") from e
 
+    def seed(self, turns: list[tuple[str, str]]) -> None:
+        """Earlier questions and answers as plain text, so a restored chat keeps its context."""
+        types = self._types
+        for role, text in turns:
+            self.contents.append(types.Content(role="user" if role == "user" else "model", parts=[types.Part(text=text)]))
+
     def respond(self, question: str, execute: Executor) -> str:
         types = self._types
         self.contents.append(types.Content(role="user", parts=[types.Part(text=question)]))
@@ -170,6 +176,11 @@ class ClaudeBackend:
             raise AssistantError(f"Anthropic error {e.status_code}: {e.message}") from e
         except anthropic.APIConnectionError as e:
             raise AssistantError("Could not reach the Anthropic API. Check the internet connection.") from e
+
+    def seed(self, turns: list[tuple[str, str]]) -> None:
+        """Earlier questions and answers as plain text, so a restored chat keeps its context."""
+        for role, text in turns:
+            self.messages.append({"role": "user" if role == "user" else "assistant", "content": text})
 
     def respond(self, question: str, execute: Executor) -> str:
         self.messages.append({"role": "user", "content": question})
