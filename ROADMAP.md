@@ -78,7 +78,7 @@ Answer: numbers only from stats tools, context quoted with Cricinfo links
 Submission:
 - [x] Fix remaining issues; all tests pass (Oct 19: 159 tests, 10 of 10 known stats, no secrets or stray files tracked)
 - [x] README: what it does, setup, how to build both databases, how to run, architecture, data sources and licences
-- [x] Merge the work branch into `main` so the submitted repo is complete (pull requests #4 and #5)
+- [x] Merge the work branch into `main` so the submitted repo is complete (pull request #4, then a final merge after the check-over)
 - [x] Fresh-clone check: setup steps work from scratch (Oct 19: clean venv install, 159 tests, full build, 10 of 10 stats, web app; fixed Windows setup steps and `eval --summary`)
 
 Demo:
