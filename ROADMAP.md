@@ -76,14 +76,14 @@ Answer: numbers only from stats tools, context quoted with Cricinfo links
 
 ### Wed Oct 21: Submission and demo
 Submission:
-- [ ] Fix remaining issues; all tests pass
+- [x] Fix remaining issues; all tests pass (Oct 19: 159 tests, 10 of 10 known stats, no secrets or stray files tracked)
 - [x] README: what it does, setup, how to build both databases, how to run, architecture, data sources and licences
-- [ ] Merge the work branch into `main` so the submitted repo is complete
+- [x] Merge the work branch into `main` so the submitted repo is complete (pull requests #4 and #5)
 - [x] Fresh-clone check: setup steps work from scratch (Oct 19: clean venv install, 159 tests, full build, 10 of 10 stats, web app; fixed Windows setup steps and `eval --summary`)
 
 Demo:
-- [ ] Demo script: 3 rehearsed questions (see Demo questions) showing stats depth, honesty about gaps, and a combined answer, plus backups
-- [ ] Both databases pre-built and tested on the demo machine
+- [x] Demo questions: 3 questions (see Demo questions) showing stats depth, honesty about gaps, and a combined answer, plus backups; no written script
+- [x] Both databases pre-built and tested on the demo machine (stats database built and checked; context database built, empty)
 - [ ] Fallback: screen recording of a full run, in case the network or API fails live
 - [x] Web app (`cricassist web`): local chat UI with splash and logo, chat sessions, model picker, live tool calls
 
