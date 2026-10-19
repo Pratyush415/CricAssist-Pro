@@ -18,6 +18,7 @@ class FakeBackend:
         self.model = model
         self.fail = fail
         self.on_wait = None
+        self.on_draft = None
         self.questions = []
         self.seeded = []
 
@@ -28,9 +29,13 @@ class FakeBackend:
         self.questions.append(question)
         if self.fail:
             raise AssistantError("Gemini's free daily quota for this model is used up.")
+        if self.on_draft:
+            self.on_draft("")
         execute("batting_summary", {"player": "Jaiswal", "format": "TEST"})
         if self.on_wait:
             self.on_wait("Gemini free-tier rate limit; waiting 5s...")
+        if self.on_draft:
+            self.on_draft("Jaiswal made **123**")
         return "Jaiswal made **123** runs.\n\n| Inns | Runs |\n|---|---|\n| 2 | 123 |\n\n<script>alert(1)</script>"
 
 
@@ -105,7 +110,9 @@ def test_asking_streams_tools_waits_and_the_answer(client, backends):
     sid = client.post("/api/sessions", json={}).json()["id"]
     response = client.post(f"/api/sessions/{sid}/messages", json={"text": "How did Jaiswal do in Tests?"})
     kinds = [k for k, _ in events(response)]
-    assert kinds == ["session", "tool", "wait", "answer"]
+    assert kinds == ["session", "draft", "tool", "wait", "draft", "answer"]
+    drafts = [d["html"] for k, d in events(response) if k == "draft"]
+    assert drafts == ["", "<p>Jaiswal made <strong>123</strong></p>"]  # streamed text arrives rendered
     answer = events(response)[-1][1]
     assert answer["tool_calls"][0]["name"] == "batting_summary"
     assert "<strong>123</strong>" in answer["html"] and "<table>" in answer["html"]

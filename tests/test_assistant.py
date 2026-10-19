@@ -84,29 +84,36 @@ def test_prompt_keeps_numbers_to_tool_results():
 
 
 class FakeGeminiModels:
-    """Replays scripted responses and records what was sent."""
+    """Streams scripted replies (each a list of chunks) and records what was sent."""
 
-    def __init__(self, responses):
-        self.responses = list(responses)
+    def __init__(self, replies):
+        self.replies = list(replies)
         self.sent = []
 
-    def generate_content(self, model, contents, config):
+    def generate_content_stream(self, model, contents, config):
         self.sent.append(list(contents))
-        return self.responses.pop(0)
+        return iter(self.replies.pop(0))
+
+
+def gemini_chunk(parts):
+    from google.genai import types
+
+    return NS(candidates=[NS(content=types.Content(role="model", parts=parts), finish_reason="STOP")])
 
 
 def gemini_reply(calls=None, text=None):
+    """A streamed reply: tool calls in one chunk, then the text split over two chunks."""
     from google.genai import types
 
-    parts = [types.Part(function_call=types.FunctionCall(id=f"c{i}", name=n, args=a)) for i, (n, a) in enumerate(calls or [])]
+    chunks = []
+    if calls:
+        chunks.append(gemini_chunk([
+            types.Part(function_call=types.FunctionCall(id=f"c{i}", name=n, args=a)) for i, (n, a) in enumerate(calls)
+        ]))
     if text:
-        parts.append(types.Part(text=text))
-    content = types.Content(role="model", parts=parts)
-    return NS(
-        candidates=[NS(content=content, finish_reason="STOP")],
-        function_calls=[p.function_call for p in parts if p.function_call],
-        text=text,
-    )
+        half = len(text) // 2
+        chunks += [gemini_chunk([types.Part(text=text[:half])]), gemini_chunk([types.Part(text=text[half:])])]
+    return chunks
 
 
 def test_gemini_loop_runs_tools_and_returns_the_answer(db):
@@ -115,9 +122,13 @@ def test_gemini_loop_runs_tools_and_returns_the_answer(db):
         gemini_reply(calls=[("batting_summary", {"player": "Jaiswal", "format": "TEST"}), ("find_players", {"query": "Hasan"})]),
         gemini_reply(text="Jaiswal made 123 runs."),
     ]))
+    drafts = []
+    backend.on_draft = drafts.append
     answer = Assistant(db, backend).ask("How did Jaiswal do?")
     assert answer.text == "Jaiswal made 123 runs."
     assert [c.name for c in answer.tool_calls] == ["batting_summary", "find_players"]
+    # The answer streamed in: cleared at each turn, then growing to the full text.
+    assert drafts == ["", "", "Jaiswal mad", "Jaiswal made 123 runs."]
     # Both results went back in one turn, matched to their calls.
     returned = backend.client.models.sent[1][-1]
     assert [p.function_response.id for p in returned.parts] == ["c0", "c1"]
@@ -141,7 +152,7 @@ def test_gemini_daily_quota_is_reported(db):
             {"@type": "type.googleapis.com/google.rpc.QuotaFailure", "violations": [{"quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier"}]},
         ]}})
 
-    backend.client = NS(models=NS(generate_content=over_quota))
+    backend.client = NS(models=NS(generate_content_stream=over_quota))
     with pytest.raises(AssistantError, match="daily quota"):
         Assistant(db, backend).ask("?")
 
@@ -149,14 +160,29 @@ def test_gemini_daily_quota_is_reported(db):
 # --- Claude loop -------------------------------------------------------------
 
 
+class FakeClaudeStream:
+    def __init__(self, reply):
+        self.reply = reply
+        self.text_stream = iter([b.text for b in reply.content if b.type == "text"])
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def get_final_message(self):
+        return self.reply
+
+
 class FakeClaudeMessages:
     def __init__(self, responses):
         self.responses = list(responses)
         self.sent = []
 
-    def create(self, **kwargs):
+    def stream(self, **kwargs):
         self.sent.append({**kwargs, "messages": list(kwargs["messages"])})  # as sent, before later turns
-        return self.responses.pop(0)
+        return FakeClaudeStream(self.responses.pop(0))
 
 
 def claude_reply(stop_reason, blocks):
@@ -174,8 +200,11 @@ def test_claude_loop_runs_tools_and_returns_the_answer(db):
         claude_reply("end_turn", [NS(type="text", text="Jaiswal made 123 runs.")]),
     ])
     backend.client = NS(beta=NS(messages=messages))
+    drafts = []
+    backend.on_draft = drafts.append
     answer = Assistant(db, backend).ask("How did Jaiswal do?")
     assert answer.text == "Jaiswal made 123 runs."
+    assert drafts == ["", "Checking.", "", "Jaiswal made 123 runs."]
     first = messages.sent[0]
     assert first["model"] == "claude-opus-5-5" and first["fallbacks"] and first["output_config"] == {"effort": "medium"}
     assert first["tools"][0]["input_schema"]["type"] == "object"

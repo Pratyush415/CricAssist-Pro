@@ -69,7 +69,8 @@ A local chat interface over the same assistant (`src/cricassist/web/`): a
 splash screen with the CricAssist logo (the i's dotted with red leather balls,
 the final t drawn as a bat), a ChatGPT-style thread, a side panel of chat
 sessions, and a model picker. While the assistant works, each stats tool it
-calls appears live; each answer can be expanded to show the tools behind it.
+calls appears live, and the answer types itself out as the model writes it
+(streamed); each answer can be expanded to show the tools behind it.
 Chats are saved to `data/processed/chats.json` after every change and come
 back when the server restarts; continuing an old chat gives the model its
 earlier questions and answers, so follow-ups still make sense. Switching the

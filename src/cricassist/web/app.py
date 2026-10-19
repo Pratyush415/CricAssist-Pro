@@ -44,6 +44,7 @@ CLAUDE_MODELS = [
     ("claude-sonnet-5-5", "Claude Sonnet 5.5"),
 ]
 TITLE_LENGTH = 48
+DRAFT_INTERVAL = 0.08  # seconds between streamed draft updates sent to the browser
 
 
 def render_markdown(text: str) -> str:
@@ -256,6 +257,21 @@ def create_app(settings=None, backend_factory=make_backend) -> FastAPI:
                 assistant.on_tool_call = lambda call: events.put(("tool", _call_dict(call)))
                 if hasattr(assistant.backend, "on_wait"):
                     assistant.backend.on_wait = lambda message: events.put(("wait", {"message": message}))
+                if hasattr(assistant.backend, "on_draft"):
+                    last_sent = [0.0]
+
+                    def on_draft(text: str) -> None:
+                        # Clearing always goes through; growing text at most ~12 times a second.
+                        if not text:
+                            events.put(("draft", {"html": ""}))
+                            return
+                        now = time.monotonic()
+                        if now - last_sent[0] < DRAFT_INTERVAL:
+                            return
+                        last_sent[0] = now
+                        events.put(("draft", {"html": render_markdown(text)}))
+
+                    assistant.backend.on_draft = on_draft
                 answer = assistant.ask(text)
                 message = {
                     "role": "assistant",

@@ -251,7 +251,9 @@ async function ask(text) {
     const { node, content } = botShell();
     content.classList.add("working");
     const live = el("ul", { class: "live" });
-    content.append(el("div", { class: "dots" }, el("span"), el("span"), el("span")), live);
+    const dots = el("div", { class: "dots" }, el("span"), el("span"), el("span"));
+    const draft = el("div", { class: "draft" });
+    content.append(dots, live, draft);
     thread.append(node);
     scrollToEnd();
 
@@ -272,6 +274,13 @@ async function ask(text) {
       },
       tool: (call) => { live.append(el("li", { class: call.is_error ? "err" : "" }, "· " + describeCall(call))); scrollToEnd(); },
       wait: (w) => { live.append(el("li", {}, w.message)); scrollToEnd(); },
+      draft: (d) => {
+        // The answer as it streams in; an empty draft means the model went back to its tools.
+        draft.innerHTML = d.html;
+        dots.hidden = Boolean(d.html);
+        content.classList.toggle("streaming", Boolean(d.html));
+        scrollToEnd();
+      },
       answer: (m) => { node.replaceWith(botMessage(m)); scrollToEnd(); },
       error: (m) => { node.replaceWith(errorMessage(m.text)); scrollToEnd(); },
     });

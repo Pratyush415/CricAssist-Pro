@@ -10,6 +10,7 @@ questions work.
 import json
 import time
 from collections.abc import Callable
+from itertools import chain
 from dataclasses import dataclass, field
 
 from cricassist.assistant.prompts import SYSTEM_PROMPT
@@ -68,6 +69,7 @@ class GeminiBackend:
         )
         self.contents = []
         self.on_wait: Callable[[str], None] | None = None  # told when we pause for a rate limit
+        self.on_draft: Callable[[str], None] | None = None  # given the answer so far as it streams in
 
     @staticmethod
     def _quota_info(error) -> tuple[float | None, bool]:
@@ -85,12 +87,19 @@ class GeminiBackend:
                 daily = any("PerDay" in v.get("quotaId", "") for v in d.get("violations", []))
         return delay, daily
 
-    def _generate(self):
+    def _start_stream(self):
+        """Open a streamed reply, retrying rate limits and server errors.
+
+        Errors arrive when the first chunk is read, so that read happens here,
+        inside the retries. Returns an iterator over all the chunks."""
         from google.genai import errors
 
         for attempt in range(4):
             try:
-                return self.client.models.generate_content(model=self.model, contents=self.contents, config=self.config)
+                chunks = iter(self.client.models.generate_content_stream(
+                    model=self.model, contents=self.contents, config=self.config))
+                first = next(chunks, None)
+                return chain([first] if first is not None else [], chunks)
             except errors.APIError as e:
                 if e.code == 429:
                     delay, daily = self._quota_info(e)
@@ -116,20 +125,45 @@ class GeminiBackend:
         for role, text in turns:
             self.contents.append(types.Content(role="user" if role == "user" else "model", parts=[types.Part(text=text)]))
 
+    def _stream_round(self) -> tuple[list, str, list, str | None]:
+        """One model turn, streamed: (all parts, answer text, function calls, finish reason).
+
+        Text is passed to on_draft as it arrives. Every part is kept, including
+        empty ones that carry thought signatures, which Gemini needs back."""
+        from google.genai import errors
+
+        parts, text, calls, finish = [], "", [], None
+        if self.on_draft:
+            self.on_draft("")  # a new turn: clear any draft from the last one
+        try:
+            for chunk in self._start_stream():
+                candidate = chunk.candidates[0] if chunk.candidates else None
+                if candidate is None:
+                    continue
+                finish = candidate.finish_reason or finish
+                for part in (candidate.content.parts or []) if candidate.content else []:
+                    parts.append(part)
+                    if part.function_call:
+                        calls.append(part.function_call)
+                    elif part.text and not part.thought:
+                        text += part.text
+                        if self.on_draft:
+                            self.on_draft(text)
+        except errors.APIError as e:
+            raise AssistantError(f"Gemini error {e.code} while answering: {e.message}") from e
+        return parts, text, calls, finish
+
     def respond(self, question: str, execute: Executor) -> str:
         types = self._types
         self.contents.append(types.Content(role="user", parts=[types.Part(text=question)]))
         for _ in range(MAX_TOOL_ROUNDS):
-            response = self._generate()
-            candidate = response.candidates[0] if response.candidates else None
-            if candidate is None or candidate.content is None:
-                reason = candidate.finish_reason if candidate else "no candidates"
-                return f"(The model returned no answer: {reason}.)"
+            parts, text, calls, finish = self._stream_round()
+            if not parts:
+                return f"(The model returned no answer: {finish or 'empty reply'}.)"
             # Keep the model's turn as-is: it carries thought signatures Gemini needs back.
-            self.contents.append(candidate.content)
-            calls = response.function_calls or []
+            self.contents.append(types.Content(role="model", parts=parts))
             if not calls:
-                return response.text or ""
+                return text
             parts = []
             for call in calls:
                 result, is_error = execute(call.name, dict(call.args or {}))
@@ -154,20 +188,29 @@ class ClaudeBackend:
         self.system = system
         self.tools = [{"name": t.name, "description": t.description, "input_schema": t.parameters} for t in tools]
         self.messages = []
+        self.on_draft: Callable[[str], None] | None = None  # given the answer so far as it streams in
 
     def _create(self):
+        """One model turn, streamed; returns the final message."""
         anthropic = self._anthropic
         kwargs = dict(model=self.model, max_tokens=16000, system=self.system, tools=self.tools, messages=self.messages)
+        if self.model in _CLAUDE_FALLBACK_MODELS:
+            # On a safety decline, the API retries the same request on the fallback model.
+            kwargs.update(
+                output_config={"effort": "medium"},
+                betas=["server-side-fallback-2026-06-01"],
+                fallbacks=[{"model": "claude-opus-4-8"}],
+            )
+        if self.on_draft:
+            self.on_draft("")  # a new turn: clear any draft from the last one
         try:
-            if self.model in _CLAUDE_FALLBACK_MODELS:
-                # On a safety decline, the API retries the same request on the fallback model.
-                return self.client.beta.messages.create(
-                    **kwargs,
-                    output_config={"effort": "medium"},
-                    betas=["server-side-fallback-2026-06-01"],
-                    fallbacks=[{"model": "claude-opus-4-8"}],
-                )
-            return self.client.beta.messages.create(**kwargs)
+            with self.client.beta.messages.stream(**kwargs) as stream:
+                text = ""
+                for delta in stream.text_stream:
+                    text += delta
+                    if self.on_draft:
+                        self.on_draft(text)
+                return stream.get_final_message()
         except anthropic.AuthenticationError as e:
             raise AssistantError("Anthropic rejected the API key. Check ANTHROPIC_API_KEY in .env.") from e
         except anthropic.RateLimitError as e:
