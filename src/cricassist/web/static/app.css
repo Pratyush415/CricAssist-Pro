@@ -81,7 +81,7 @@ button, select, textarea { font: inherit; color: inherit; }
   height: .76em;
   width: calc(.76em * 52 / 100);
   margin-left: .01em;
-  margin-bottom: .005em;
+  margin-bottom: .07em;                                        /* toe on the baseline, handle level with the A */
   filter: drop-shadow(0 .03em .05em rgba(0, 0, 0, .4));
 }
 
