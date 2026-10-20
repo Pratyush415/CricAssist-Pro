@@ -30,6 +30,36 @@ def build_db(args: argparse.Namespace) -> int:
     return 0
 
 
+def verify_db(args: argparse.Namespace) -> int:
+    from cricassist.stats.db import load_manifest, load_schema
+    from cricassist.stats.ingest import csv_entries, verify_database, verify_files, verify_headers
+
+    manifest = load_manifest()
+    db_path = Path(args.db_path) if args.db_path else load_settings().db_path
+    raw_dir = Path(args.raw_dir)
+    problems = []
+    if not args.db_only:
+        print(f"Checking the CSV files in {raw_dir}" + (" (sizes only)" if args.skip_checksums else "") + "...")
+        found = verify_files(raw_dir, manifest, checksums=not args.skip_checksums)
+        if not found:
+            names = [e["name"] for e in csv_entries(manifest)]
+            found = verify_headers(raw_dir, load_schema(), names)
+        print(f"  {'OK' if not found else f'{len(found)} problem(s)'}: {len(csv_entries(manifest))} files")
+        problems += found
+    if not args.files_only:
+        print(f"Checking the database {db_path}...")
+        found = verify_database(db_path, manifest)
+        print(f"  {'OK' if not found else f'{len(found)} problem(s)'}")
+        problems += found
+    if problems:
+        print("\nProblems:", file=sys.stderr)
+        for problem in problems:
+            print(f"  - {problem}", file=sys.stderr)
+        return 1
+    print("\nAll checks passed. Nothing was changed.")
+    return 0
+
+
 def build_context(args: argparse.Namespace) -> int:
     from cricassist.context.build import build_context as run_build
     from cricassist.context.build import load_scrape_list
@@ -203,6 +233,15 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--db-path", help="database file to write (default: CRICASSIST_DB_PATH)")
     p.add_argument("--skip-checksums", action="store_true", help="check file sizes only, not SHA-256")
     p.set_defaults(func=build_db)
+
+    p = sub.add_parser("verify-db", help="check the CSV files and the built database without changing anything")
+    p.add_argument("--raw-dir", default="data/raw", help="folder with the CSV files (default: data/raw)")
+    p.add_argument("--db-path", help="database to check (default: CRICASSIST_DB_PATH)")
+    p.add_argument("--skip-checksums", action="store_true", help="check file sizes only, not SHA-256")
+    only = p.add_mutually_exclusive_group()
+    only.add_argument("--files-only", action="store_true", help="check only the CSV files")
+    only.add_argument("--db-only", action="store_true", help="check only the built database")
+    p.set_defaults(func=verify_db)
 
     p = sub.add_parser("build-context", help="build the vector database of match reports and player profiles")
     p.add_argument("--no-fetch", action="store_true", help="use cached pages only; make no web requests")

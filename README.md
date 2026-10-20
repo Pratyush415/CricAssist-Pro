@@ -62,7 +62,10 @@ cricassist build-db
 This checks each file's size, SHA-256 checksum and columns against
 `src/cricassist/stats/dataset/manifest.json` and `schema.json`, loads them
 into `data/processed/cricassist.db`, and checks row counts and keys. About a
-minute.
+minute. It rebuilds from scratch each time and only replaces the old database
+once every check passes; stop the web app or chat first, as they keep the file
+open. To check the files and database without rebuilding, run
+`cricassist verify-db`.
 
 **4. Ask questions.**
 
@@ -71,7 +74,7 @@ cricassist web     # web app at http://127.0.0.1:8000
 cricassist chat    # or chat in the terminal
 ```
 
-The tests need neither the dataset nor a key: `pytest` runs 159 tests on a
+The tests need neither the dataset nor a key: `pytest` runs 162 tests on a
 three-match sample in `tests/data/`.
 
 ## The web app
@@ -233,6 +236,7 @@ cricassist build-context --local-only --source-dir path/to/documents   # .html, 
 | Command | What it does |
 |---|---|
 | `cricassist build-db` | Verify the CSVs and build the stats database (`--skip-checksums`, `--raw-dir`) |
+| `cricassist verify-db` | Check the CSVs and the built database without changing anything (`--skip-checksums`, `--files-only`, `--db-only`) |
 | `cricassist web` | Open the web app (`--port`, `--no-browser`) |
 | `cricassist chat ["question"]` | Chat in the terminal, or ask one question (`--model`, `--provider`, `--hide-tools`) |
 | `cricassist eval` | Run the 15-question evaluation (`--model`, `--only`, `--redo`, `--summary`, `--fresh`) |
@@ -279,7 +283,7 @@ src/cricassist/
   evaluation/           the 15 questions and the grader
   web/                  web app server and page
 scripts/                known-stats check, test-data and scrape-list builders
-tests/                  159 tests on a three-match sample
+tests/                  162 tests on a three-match sample
 docs/                   evaluation results and screenshots
 data/raw/               the dataset CSVs (not committed)
 data/processed/         built databases, saved chats, eval results (not committed)

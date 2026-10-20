@@ -132,3 +132,35 @@ def test_cli_build_db_reports_failure(tmp_path, capsys):
     assert code == 1
     assert "bytes, manifest says" in capsys.readouterr().err
     assert not (tmp_path / "x.db").exists()
+
+
+# --- verify-db ---------------------------------------------------------------
+
+
+def test_verify_database_passes_on_a_good_build(db_path):
+    from cricassist.stats.ingest import verify_database
+
+    assert verify_database(db_path, TEST_MANIFEST) == []
+
+
+def test_verify_database_reports_problems(db_path, tmp_path):
+    from cricassist.stats.ingest import verify_database
+
+    assert "No database" in verify_database(tmp_path / "missing.db", TEST_MANIFEST)[0]
+    manifest = json.loads(json.dumps(TEST_MANIFEST))
+    next(f for f in manifest["files"] if f["name"] == "matches.csv")["rows"] += 1
+    manifest["snapshot_date"] = "1999-01-01"
+    problems = verify_database(db_path, manifest)
+    assert any(p.startswith("matches: 3 rows, manifest says 4") for p in problems)
+    assert any("snapshot" in p for p in problems)
+
+
+def test_verify_db_command_changes_nothing(db_path, capsys):
+    before = db_path.stat().st_mtime_ns
+    # The packaged manifest describes the full dataset, so the small test files and database fail its checks.
+    code = main(["verify-db", "--raw-dir", str(DATA_DIR), "--db-path", str(db_path), "--skip-checksums"])
+    assert code == 1
+    err = capsys.readouterr().err
+    assert "bytes, manifest says" in err and "manifest says" in err
+    assert db_path.stat().st_mtime_ns == before
+    assert main(["verify-db", "--db-only", "--db-path", str(db_path.parent / "none.db")]) == 1
