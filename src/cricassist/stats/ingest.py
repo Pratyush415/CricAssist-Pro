@@ -17,7 +17,7 @@ from cricassist.stats.db import (
     load_schema,
     table_name,
 )
-from cricassist.stats.views import create_derived
+from cricassist.stats.views import DERIVED, create_derived
 
 
 class IngestError(Exception):
@@ -202,3 +202,41 @@ def build_database(
         raise IngestError(errors)
     os.replace(tmp_path, db_path)
     return report
+
+
+def verify_database(db_path: Path, manifest: dict | None = None) -> list[str]:
+    """Check a built database without changing it: every dataset table has the
+    manifest's row count, the derived stats tables exist, and the database was
+    built from the manifest's snapshot. Returns the problems found."""
+    manifest = manifest or load_manifest()
+    db_path = Path(db_path)
+    if not db_path.is_file():
+        return [f"No database at {db_path}. Run `cricassist build-db`."]
+    problems = []
+    con = connect(db_path)
+    try:
+        existing = {r[0] for r in con.execute(
+            "SELECT table_name FROM information_schema.tables WHERE table_schema = 'main'").fetchall()}
+        for entry in csv_entries(manifest):
+            table = table_name(entry["name"])
+            if table not in existing:
+                problems.append(f"{table}: table missing")
+                continue
+            rows = con.execute(f'SELECT count(*) FROM "{table}"').fetchone()[0]
+            if rows != entry["rows"]:
+                problems.append(f"{table}: {rows} rows, manifest says {entry['rows']}")
+        for name in DERIVED:
+            if name not in existing:
+                problems.append(f"{name}: stats table missing (rebuild with `cricassist build-db`)")
+        if "dataset_info" not in existing:
+            problems.append("dataset_info: table missing")
+        else:
+            info = dict(con.execute("SELECT key, value FROM dataset_info").fetchall())
+            if info.get("snapshot_date") != manifest["snapshot_date"]:
+                problems.append(
+                    f"dataset_info: built from the {info.get('snapshot_date')} snapshot, "
+                    f"manifest is {manifest['snapshot_date']}"
+                )
+    finally:
+        con.close()
+    return problems
