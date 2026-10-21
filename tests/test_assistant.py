@@ -158,6 +158,23 @@ def test_gemini_daily_quota_is_reported(db):
         Assistant(db, backend).ask("?")
 
 
+def test_gemini_overload_suggests_another_model(db, monkeypatch):
+    from google.genai import errors
+
+    monkeypatch.setattr(agent.time, "sleep", lambda seconds: None)  # skip the real waits between retries
+    backend = GeminiBackend("key", "gemini-test", SYSTEM_PROMPT, TOOLS)
+    calls = []
+
+    def overloaded(**kwargs):
+        calls.append(1)
+        raise errors.ServerError(503, {"error": {"code": 503, "message": "high demand", "status": "UNAVAILABLE"}})
+
+    backend.client = NS(models=NS(generate_content_stream=overloaded))
+    with pytest.raises(AssistantError, match="overloaded.*model picker"):
+        Assistant(db, backend).ask("?")
+    assert len(calls) == 4  # tried, then retried three times
+
+
 # --- Claude loop -------------------------------------------------------------
 
 

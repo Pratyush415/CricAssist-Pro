@@ -74,7 +74,7 @@ cricassist web     # web app at http://127.0.0.1:8000
 cricassist chat    # or chat in the terminal
 ```
 
-The tests need neither the dataset nor a key: `pytest` runs 162 tests on a
+The tests need neither the dataset nor a key: `pytest` runs 163 tests on a
 three-match sample in `tests/data/`.
 
 ## The web app
@@ -283,7 +283,7 @@ src/cricassist/
   evaluation/           the 15 questions and the grader
   web/                  web app server and page
 scripts/                known-stats check, test-data and scrape-list builders
-tests/                  162 tests on a three-match sample
+tests/                  163 tests on a three-match sample
 docs/                   evaluation results and screenshots
 data/raw/               the dataset CSVs (not committed)
 data/processed/         built databases, saved chats, eval results (not committed)
