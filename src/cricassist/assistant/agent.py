@@ -155,6 +155,8 @@ class GeminiBackend:
                         if self.on_draft:
                             self.on_draft(text)
         except errors.APIError as e:
+            if e.code in (500, 503):
+                raise AssistantError(f"Gemini became overloaded while answering ({e.code}: {e.message}) Try again shortly, or {SWITCH_MODEL}.") from e
             raise AssistantError(f"Gemini error {e.code} while answering: {e.message}") from e
         return parts, text, calls, finish
 
