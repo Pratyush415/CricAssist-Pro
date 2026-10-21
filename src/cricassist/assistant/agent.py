@@ -9,6 +9,9 @@ questions work.
 
 import json
 import time
+
+# Every model has its own free quota and load, so switching usually works.
+SWITCH_MODEL = "choose another model (in the web app's model picker, or with --model)"
 from collections.abc import Callable
 from itertools import chain
 from dataclasses import dataclass, field
@@ -104,19 +107,21 @@ class GeminiBackend:
                 if e.code == 429:
                     delay, daily = self._quota_info(e)
                     if daily:
-                        raise AssistantError("Gemini's free daily quota for this model is used up. Try again tomorrow, or set CRICASSIST_LLM_MODEL to another model.") from e
+                        raise AssistantError(f"Gemini's free daily quota for this model is used up. Try again tomorrow, or {SWITCH_MODEL}.") from e
                     if attempt < 3:
                         wait = min(delay or 20.0, 60.0) + 1
                         if self.on_wait:
                             self.on_wait(f"Gemini free-tier rate limit; waiting {wait:.0f}s...")
                         time.sleep(wait)
                         continue
-                    raise AssistantError("Gemini rate limit reached. Wait a minute and try again.") from e
+                    raise AssistantError(f"Gemini rate limit reached. Wait a minute and try again, or {SWITCH_MODEL}.") from e
                 if e.code in (500, 503) and attempt < 3:
                     time.sleep(5 * (attempt + 1))
                     continue
                 if e.code in (400, 401, 403) and "API key" in str(e):
                     raise AssistantError("Gemini rejected the API key. Check GEMINI_API_KEY in .env.") from e
+                if e.code in (500, 503):
+                    raise AssistantError(f"Gemini is overloaded right now ({e.code}: {e.message}) Try again shortly, or {SWITCH_MODEL}.") from e
                 raise AssistantError(f"Gemini error {e.code}: {e.message}") from e
 
     def seed(self, turns: list[tuple[str, str]]) -> None:
