@@ -78,6 +78,7 @@ def test_prompt_keeps_numbers_to_tool_results():
     assert "must come from a tool result" in SYSTEM_PROMPT
     assert "Do not add up, count or average across rows" in SYSTEM_PROMPT
     assert "rankings are not in the data" in SYSTEM_PROMPT
+    assert "Only answer questions about cricket" in SYSTEM_PROMPT
 
 
 # --- Gemini loop -------------------------------------------------------------
