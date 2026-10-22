@@ -86,12 +86,15 @@ def _dataset_info(con, args: dict) -> dict:
 
 
 _context_store = None
+_live = None  # LiveWikipedia, or False when live lookups are off
 
 
-def set_context_store(store) -> None:
-    """Use this ContextStore for search_written_context (tests, or a custom path)."""
-    global _context_store
+def set_context_store(store, live=False) -> None:
+    """Use this ContextStore (and LiveWikipedia, or False for none) for search_written_context:
+    for tests, or a custom path."""
+    global _context_store, _live
     _context_store = store
+    _live = live if store is not None else None
 
 
 def _get_context_store():
@@ -100,11 +103,26 @@ def _get_context_store():
         from cricassist.config import load_settings
         from cricassist.context.store import ContextStore
 
-        path = load_settings().context_path
-        if not path.exists():
+        settings = load_settings()
+        if not settings.context_path.exists() and not settings.context_live:
             return None
-        _context_store = ContextStore(path)
+        _context_store = ContextStore(settings.context_path)
     return _context_store
+
+
+def _get_live():
+    global _live
+    if _live is None:
+        from cricassist.config import load_settings
+        from cricassist.context.live import LiveWikipedia
+        from cricassist.sources.wikipedia import WikipediaClient
+
+        settings = load_settings()
+        store = _get_context_store()
+        # Requests stay one at a time; a shorter pause keeps a first-time lookup to several seconds.
+        client = WikipediaClient(settings.wiki_cache_dir, delay=0.5)
+        _live = LiveWikipedia(store, client) if settings.context_live and store else False
+    return _live or None
 
 
 EMPTY_CONTEXT = (
@@ -112,19 +130,32 @@ EMPTY_CONTEXT = (
     "`cricassist build-context`). Answer from the stats tools only, and tell the journalist that no "
     "written background is available."
 )
+PASSAGE_NOTE = (
+    "Background text only. Say where each passage comes from (its source, e.g. Wikipedia) and give its "
+    "URL; never take numbers from passages, use the stats tools for every figure. Passages are the closest "
+    "matches found: if none is actually about the topic asked, say no written context covers it."
+)
 
 
 def _search_context(con, args: dict) -> dict:
+    from cricassist.sources.wikipedia import WikipediaError
+
     store = _get_context_store()
-    if store is None or store.count() == 0:
+    if store is None:
         return {"passages": [], "note": EMPTY_CONTEXT}
-    kind = args.get("kind") or None
-    passages = store.search(args["query"], n=int(args.get("n", 5)), kind=kind)
-    return {
-        "passages": passages,
-        "note": "Background text only. Say where each passage comes from (its source, e.g. Wikipedia) and "
-        "give its URL; never take numbers from passages, use the stats tools for every figure.",
-    }
+    result = {}
+    live = _get_live()
+    if live:
+        try:
+            added = live.ensure(args["query"])
+            if added:
+                result["added_from_wikipedia"] = added
+        except WikipediaError as e:
+            result["live_lookup"] = f"Could not reach Wikipedia ({e}); searched the stored passages only."
+    if store.count() == 0:
+        return {**result, "passages": [], "note": EMPTY_CONTEXT}
+    passages = store.search(args["query"], n=int(args.get("n", 5)), kind=args.get("kind") or None)
+    return {**result, "passages": passages, "note": PASSAGE_NOTE}
 
 
 def _recent(con, args: dict) -> dict:
@@ -267,14 +298,18 @@ TOOLS = [
     ),
     Tool(
         "search_written_context",
-        "Search written context by meaning: Wikipedia articles on finals, tournaments and players (how a "
-        "player bowls or bats, career story, what happened in a match and why it mattered). Use it for "
-        "background the stats cannot give. Returns passages with their source and URL. Never take numbers "
-        "from them.",
+        "Search written context by meaning: Wikipedia articles on cricket players, matches, series, "
+        "tournaments, rivalries, grounds and history (how a player bowls or bats, career story, what "
+        "happened and why it mattered). If the topic is not stored yet, it is looked up on Wikipedia "
+        "(cricket articles only) and added. Use it for background the stats cannot give. Returns passages "
+        "with their source and URL. Never take numbers from them.",
         _schema(
             {
-                "query": {"type": "string", "description": "What to look for, in plain words, e.g. 'Head century 2023 World Cup final'."},
-                "kind": {"type": "string", "enum": ["match_report", "tournament", "player_profile"]},
+                "query": {"type": "string", "description": "A short topic, the way a Wikipedia title would name it: "
+                          "'Eden Gardens', 'India tour of Australia 2018', 'Bodyline', 'Jasprit Bumrah'. "
+                          "Long descriptive phrases find worse matches; call again for a second topic."},
+                "kind": {"type": "string", "enum": ["match_report", "tournament", "player_profile", "topic"],
+                         "description": "Usually leave out: it can hide relevant passages."},
                 "n": {"type": "integer", "description": "How many passages, default 5."},
             },
             ["query"],

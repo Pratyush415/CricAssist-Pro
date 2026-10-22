@@ -93,6 +93,7 @@ Demo:
 - [x] Build the context database: 125 of 129 lookups found, 2,084 passages
 - [x] Assistant cites Wikipedia with links and never takes numbers from passages; the evaluation counts passage-only numbers as unsourced
 - [x] **Done when:** context questions answered from Wikipedia with links (3 of 3 correct and sourced; overall 14 of 15 correct, 15 of 15 sourced)
+- [x] Any cricket topic on demand (`context/live.py`): the context search also looks the topic up on Wikipedia and adds up to 3 new articles that Wikipedia files in a cricket category; cached, so repeats are instant
 
 ## Demo questions
 Three questions, one for each thing the project must show. Three keep the demo

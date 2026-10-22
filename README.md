@@ -13,7 +13,7 @@ get an answer whose every number comes from a ball-by-ball database of
 | **Assistant** | Gemini (free tier) or Claude, calling 18 tools: 16 stats queries, a coverage lookup and a written-context search. Every figure in an answer must come from a tool result. When the data cannot answer, it says so. |
 | **Accuracy** | 10 of 10 published stats match ESPNcricinfo. Evaluation: 14 of 15 questions correct, 15 of 15 with no unsourced numbers ([docs/evaluation.md](docs/evaluation.md)). |
 | **Interfaces** | A local web app (streaming answers, chat sessions, model picker) and a command-line chat. |
-| **Written context** | 125 Wikipedia articles on finals, tournaments and players (2,084 passages) in a ChromaDB vector database, collected by a rate-limited, cached scraper. The assistant quotes them with links for background and never takes numbers from them. |
+| **Written context** | Wikipedia articles on any cricket topic in a ChromaDB vector database: 125 collected up front for the demo matches and players, and any other cricket topic (a series, rivalry, ground or era) looked up and added on demand. Quoted with links for background; never a source of numbers. |
 
 ## Requirements
 
@@ -74,7 +74,7 @@ cricassist web     # web app at http://127.0.0.1:8000
 cricassist chat    # or chat in the terminal
 ```
 
-The tests need neither the dataset nor a key: `pytest` runs 173 tests on a
+The tests need neither the dataset nor a key: `pytest` runs 178 tests on a
 three-match sample in `tests/data/`.
 
 ## The web app
@@ -224,6 +224,19 @@ How it is built (`cricassist build-context`, about 10 minutes the first time):
 3. **Embed** (`context/store.py`). Local embeddings (all-MiniLM-L6-v2; no API
    key, about 80 MB downloaded on first use) in ChromaDB.
 
+**Any cricket topic, on demand** (`context/live.py`). When the assistant
+searches for a topic that is not stored yet, such as "Eden Gardens", "Bodyline"
+or "India tour of Australia 2018", it also searches Wikipedia, fetches up to 3
+matching articles, keeps only those Wikipedia files in a cricket category
+("Cricket grounds in West Bengal", "Indian cricketers", ...), adds them to the
+database and searches again. Nothing that is not cricket gets in. Lookups
+follow the same rules (one request at a time, cached), take several seconds
+the first time and are instant after that, and the database grows with use.
+Set `CRICASSIST_CONTEXT_LIVE=0` to search only the stored passages.
+Wikipedia does not cover everything: its article on the 2018-19 India tour of
+Australia, for example, does not discuss Kohli and Starc, and the assistant
+then says no written context covers the topic.
+
 When answering, the assistant cites passages as Wikipedia with their links,
 never presents them as ESPNcricinfo or expert opinion, and never takes a
 number from them: every figure still comes from the stats tools, and the
@@ -274,6 +287,7 @@ Settings come from `.env` (see `.env.example`) or the environment.
 | `CRICASSIST_CHATS_PATH` | `data/processed/chats.json` | Saved web chats |
 | `CRICASSIST_CONTEXT_PATH` | `data/processed/context` | Written-context database |
 | `CRICASSIST_WIKI_CACHE_DIR` | `data/raw/wikipedia_cache` | Cached Wikipedia responses |
+| `CRICASSIST_CONTEXT_LIVE` | `1` | Look up Wikipedia for cricket topics not yet stored (`0` to turn off) |
 
 **Gemini's free tier** allows a few requests per minute and a limited number
 per model per day. The assistant waits out per-minute limits ("waiting 20s…");
@@ -297,11 +311,11 @@ src/cricassist/
     tools.py            the 18 tools the model can call
     prompts.py          the system prompt (the rules for numbers)
   sources/              Wikipedia and ESPNcricinfo fetchers, parser, scrape list
-  context/              passages and the ChromaDB store
+  context/              passages, the ChromaDB store and on-demand Wikipedia lookups
   evaluation/           the 15 questions and the grader
   web/                  web app server and page
 scripts/                known-stats check, test-data and scrape-list builders
-tests/                  173 tests on a three-match sample
+tests/                  178 tests on a three-match sample
 docs/                   evaluation results and screenshots
 data/raw/               the dataset CSVs (not committed)
 data/processed/         built databases, saved chats, eval results (not committed)
