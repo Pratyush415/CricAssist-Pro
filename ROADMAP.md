@@ -16,7 +16,7 @@ context from ESPNcricinfo match reports and player profiles.
 | R1 | Statistical queries go to a structured database, never LLM memory or text parsing | Stats tools query DuckDB; the system prompt forbids numbers that did not come from a stats tool |
 | R2 | Cricsheet.org ball-by-ball data | The Kaggle dataset is built from Cricsheet (ODC-By licence); attributed in the README |
 | R3 | Kaggle "The Ultimate Ball-by-Ball Cricket Dataset" | Loaded into DuckDB (`data/raw/` → `data/processed/`) |
-| R4 | ESPNcricinfo scraper (rate-limited) for match reports and player profiles, embedded into a vector database | Polite, cached scraper → ChromaDB with local embeddings → `search_cricinfo_context` tool |
+| R4 | ESPNcricinfo scraper (rate-limited) for match reports and player profiles, embedded into a vector database | Done with Wikipedia, approved by the interviewer on Oct 22 because ESPNcricinfo's terms forbid scraping for AI tools: polite, cached scraper → ChromaDB with local embeddings → `search_written_context` tool |
 
 **Rule:** the vector database holds text only. Numbers are never taken from
 it; every figure in an answer must come from a stats tool.
@@ -28,7 +28,7 @@ Journalist question
         │
      Claude (decides which tools to call)
      ├── stats tools ───► DuckDB (ball-by-ball) ───► exact numbers
-     └── context tool ──► ChromaDB (Cricinfo text) ─► passages + source URLs
+     └── context tool ──► ChromaDB (Wikipedia text) ─► passages + source URLs
         │
 Answer: numbers only from stats tools, context quoted with Cricinfo links
 ```
@@ -69,7 +69,7 @@ Answer: numbers only from stats tools, context quoted with Cricinfo links
 - [x] Scraper (`sources/`) for match reports and player profiles: a few seconds between requests, every page cached locally, honest user agent, reads robots.txt, stops when refused
 - [x] Clean text, split into passages, keep source URL, title and date with each passage
 - [x] Embed into ChromaDB with a local embedding model (works offline, no extra API key)
-- [x] `search_cricinfo_context` tool for the assistant, returning passages with URLs
+- [x] `search_written_context` tool for the assistant, returning passages with URLs (renamed from `search_cricinfo_context` once the source became Wikipedia)
 - [x] `cricassist build-context` command to rebuild the vector database from the cache (or from a folder of documents you may use: `--source-dir`)
 - [x] Test set of 15 journalist questions with verified answers, mixing stats-only, context-only and combined questions (`cricassist eval`)
 - [x] **Done when:** at least 13 of 15 correct, no unsourced numbers, context answers cite Cricinfo URLs (14 of 15 correct, 15 of 15 sourced, see `docs/evaluation.md`; context answers say none is available, as the database is empty)
@@ -86,6 +86,13 @@ Demo:
 - [x] Both databases pre-built and tested on the demo machine (stats database built and checked; context database built, empty)
 - [ ] Fallback: screen recording of a full run, in case the network or API fails live
 - [x] Web app (`cricassist web`): local chat UI with splash and logo, chat sessions, model picker, live tool calls
+
+### Thu Oct 22: Written context from Wikipedia (R4)
+- [x] Wikipedia source for the scraper (`sources/wikipedia.py`): official API, descriptive User-Agent, 1 request a second, `maxlag`, cached
+- [x] Pick articles for the scrape list: finals' own articles, tournament articles, player biographies (also searched by the name players are known by)
+- [x] Build the context database: 125 of 129 lookups found, 2,084 passages
+- [x] Assistant cites Wikipedia with links and never takes numbers from passages; the evaluation counts passage-only numbers as unsourced
+- [x] **Done when:** context questions answered from Wikipedia with links (3 of 3 correct and sourced; overall 14 of 15 correct, 15 of 15 sourced)
 
 ## Demo questions
 Three questions, one for each thing the project must show. Three keep the demo
@@ -124,7 +131,7 @@ quota on the day before presenting; run the evaluation on another model.
 | ~~Oct 16–17~~ | ~~Run `cricassist build-db` locally on the full dataset~~ (done Oct 16: about a minute, all row counts match) |
 | ~~By Oct 19~~ | ~~AI API key in local `.env`~~ (done: Gemini free-tier key) |
 | ~~By Oct 19~~ | ~~Demo questions~~ (done: 3 from Pratyush, 3 chosen to cover the remaining features) |
-| By Oct 20 | Interviewer's answer on R4, given ESPNcricinfo's terms (Pratyush is emailing them) |
+| ~~By Oct 20~~ | ~~Interviewer's answer on R4~~ (Oct 22: use any source, not necessarily ESPNcricinfo; Wikipedia chosen) |
 
 ## Risks
 - **Missing matches:** Cricsheet does not have every match (about 160 men's
@@ -143,11 +150,12 @@ quota on the day before presenting; run the evaluation on another model.
 - **Numbers leaking from scraped text:** the model could quote a figure from a
   retrieved passage. Mitigated by the "numbers only from stats tools" rule and
   checked in the test set.
-- **No ESPNcricinfo text:** the pipeline is built and tested, but the live
-  context database is empty: the site refuses automated requests and its terms
-  forbid scraping for AI tools. The assistant says no written context is
-  available and answers from the stats. A source the interviewer approves can
-  be loaded with `cricassist build-context --source-dir` without code changes.
+- **Written context from Wikipedia, not ESPNcricinfo:** ESPNcricinfo's terms
+  forbid scraping for AI tools and its site refuses automated requests. On
+  Oct 22 the interviewer approved another source; the context database now
+  holds 125 Wikipedia articles (2,084 passages), cited with links. Wikipedia is
+  not expert editorial opinion, and the assistant is told never to present it
+  as ESPNcricinfo.
 - **Scraper breakage or blocking:** Cricinfo may change its pages or block
   requests. Mitigated by caching every page, so the vector database can be
   rebuilt without re-scraping and the demo runs offline.

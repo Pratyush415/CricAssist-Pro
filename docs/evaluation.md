@@ -57,7 +57,16 @@ Earlier runs failed the sourcing check in ways that led to fixes:
 
 ## Written context
 
-The two context questions and the combined one were answered with the context
-database empty (ESPNcricinfo refuses automated collection; see the README), so
-"correct" means the assistant said no written context was available and did
-not fill the gap from memory.
+The first runs (19 October) had an empty context database, because
+ESPNcricinfo refuses automated collection, so the context questions passed by
+saying no written context was available. On 22 October, with the interviewer's
+approval, the context database was filled from Wikipedia (125 articles, 2,084
+passages), the three questions were updated to expect answers that cite
+Wikipedia with a link, and they were rerun on `gemini-3.7-flash`: all three
+correct and fully sourced. The Bumrah question is now answered from his
+Wikipedia article (short run-up, hyperextended elbow, front-on action), and the
+2023 final combines the scorecard from the database with Wikipedia's account
+of the match.
+
+Numbers that appear only in a Wikipedia passage now count as unsourced: every
+figure must come from the stats tools.

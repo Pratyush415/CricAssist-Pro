@@ -30,7 +30,7 @@ SAMPLE_ARGS = {
     "venue_summary": {"venue": "Kanpur", "format": "TEST"},
     "leaders": {"stat": "runs", "limit": 3},
     "best_innings": {"kind": "team_highest", "limit": 3},
-    "search_cricinfo_context": {"query": "2023 World Cup final"},
+    "search_written_context": {"query": "2023 World Cup final"},
     "match_scorecard": {"match_id": 1439892},
 }
 

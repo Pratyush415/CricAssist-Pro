@@ -103,3 +103,29 @@ def test_provider_errors_fail_one_question(db):
 
     grades = run_evaluation(lambda: Assistant(db, Broken()), [QUESTIONS["highest_ipl_score"]], log=lambda m: None)
     assert grades[0].error and not grades[0].correct
+
+
+def test_numbers_from_written_context_are_not_a_source(db):
+    """A figure the model copies from a Wikipedia passage is unsourced: figures must come from stats tools."""
+
+    class PassageCopier:
+        model = "copier"
+
+        def respond(self, question, execute):
+            execute("search_written_context", {"query": "anything"})
+            return "Wikipedia says he took 99 wickets (https://en.wikipedia.org/wiki/X)."
+
+    from cricassist.assistant import tools
+
+    passage = {"passages": [{"text": "He took 99 wickets.", "url": "https://en.wikipedia.org/wiki/X",
+                             "title": "X", "date": None, "kind": "player_profile", "source": "Wikipedia",
+                             "relevance": 0.9}], "note": ""}
+    original = tools.TOOLS_BY_NAME["search_written_context"]
+    tools.TOOLS_BY_NAME["search_written_context"] = original.__class__(
+        original.name, original.description, original.parameters, lambda con, a: passage)
+    try:
+        grade = run_evaluation(lambda: Assistant(db, PassageCopier()), [QUESTIONS["bumrah_bowling_action"]],
+                               log=lambda m: None)[0]
+    finally:
+        tools.TOOLS_BY_NAME["search_written_context"] = original
+    assert grade.unsourced == [99.0]

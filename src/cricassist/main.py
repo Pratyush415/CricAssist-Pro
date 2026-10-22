@@ -62,24 +62,31 @@ def verify_db(args: argparse.Namespace) -> int:
 
 def build_context(args: argparse.Namespace) -> int:
     from cricassist.context.build import build_context as run_build
-    from cricassist.context.build import load_scrape_list
+    from cricassist.context.build import build_wikipedia_context, load_scrape_list
     from cricassist.context.store import ContextStore
     from cricassist.sources.cricinfo_client import CricinfoClient
+    from cricassist.sources.wikipedia import WikipediaClient
 
     settings = load_settings()
     store = ContextStore(settings.context_path)
     if args.reset:
         store.clear()
-    client = None if args.local_only else CricinfoClient(settings.cache_dir, delay=args.delay)
-    report = run_build(
-        store,
-        client=client,
-        scrape_list=None if args.local_only else load_scrape_list(),
-        source_dir=Path(args.source_dir) if args.source_dir else None,
-        fetch=not args.no_fetch,
-        limit=args.limit,
-    )
-    if client is not None:
+
+    if not args.local_only and args.source == "wikipedia":
+        client = WikipediaClient(settings.wiki_cache_dir, delay=args.delay or 1.0, offline=args.no_fetch)
+        report = build_wikipedia_context(store, client, load_scrape_list(), limit=args.limit)
+        print(f"  looked up:           {report.pages_listed}")
+        print(f"  articles found:      {report.documents}")
+        print(f"  not found:           {report.not_found}")
+        print(f"  requests made:       {report.fetched} (the rest came from the cache)")
+        if report.refused_reason:
+            print(f"  stopped early: {report.refused_reason}")
+        print(f"Added {report.passages} passages from {report.documents} Wikipedia articles")
+
+    if not args.local_only and args.source == "cricinfo":
+        client = CricinfoClient(settings.cache_dir, delay=args.delay or 5.0)
+        report = run_build(store, client=client, scrape_list=load_scrape_list(),
+                           fetch=not args.no_fetch, limit=args.limit)
         print(f"  pages on the list:   {report.pages_listed}")
         print(f"  fetched now:         {report.fetched}")
         print(f"  from the cache:      {report.from_cache}")
@@ -88,10 +95,13 @@ def build_context(args: argparse.Namespace) -> int:
         if report.refused_reason:
             print(f"  not collected:       {report.pages_listed - report.fetched - report.from_cache - report.not_found}")
             print(f"  reason: {report.refused_reason}")
+        print(f"Added {report.passages} passages from {report.documents} ESPNcricinfo pages")
+
     if args.source_dir:
-        print(f"  local documents:     {report.local_documents}")
-    print(f"Added {report.passages} passages from {report.documents} documents; "
-          f"{report.total_passages} passages in {settings.context_path}")
+        report = run_build(store, source_dir=Path(args.source_dir))
+        print(f"Added {report.passages} passages from {report.local_documents} local documents")
+
+    print(f"{store.count()} passages in {settings.context_path}")
     return 0
 
 
@@ -243,12 +253,15 @@ def main(argv: list[str] | None = None) -> int:
     only.add_argument("--db-only", action="store_true", help="check only the built database")
     p.set_defaults(func=verify_db)
 
-    p = sub.add_parser("build-context", help="build the vector database of match reports and player profiles")
+    p = sub.add_parser("build-context", help="build the vector database of written context (Wikipedia by default)")
+    p.add_argument("--source", choices=["wikipedia", "cricinfo"], default="wikipedia",
+                   help="where to collect articles for the scrape list (default: wikipedia)")
     p.add_argument("--no-fetch", action="store_true", help="use cached pages only; make no web requests")
     p.add_argument("--source-dir", help="also add documents you may use from this folder (.html, .txt, .md, .jsonl)")
-    p.add_argument("--local-only", action="store_true", help="skip the ESPNcricinfo scrape list; use --source-dir only")
-    p.add_argument("--limit", type=int, help="only the first N pages of the scrape list")
-    p.add_argument("--delay", type=float, default=5.0, help="seconds between requests (default 5, minimum 3)")
+    p.add_argument("--local-only", action="store_true", help="skip the scrape list; use --source-dir only")
+    p.add_argument("--limit", type=int, help="only the first N entries of the scrape list")
+    p.add_argument("--delay", type=float,
+                   help="seconds between requests (default 1 for Wikipedia, 5 for ESPNcricinfo; minimum 1 and 3)")
     p.add_argument("--reset", action="store_true", help="empty the vector database first")
     p.set_defaults(func=build_context)
 
@@ -277,8 +290,10 @@ def main(argv: list[str] | None = None) -> int:
     p.set_defaults(func=chat)
 
     args = parser.parse_args(argv)
-    if getattr(args, "delay", None) is not None and args.delay < 3:
-        parser.error("--delay must be at least 3 seconds")
+    if getattr(args, "delay", None) is not None:
+        minimum = 3 if args.source == "cricinfo" else 1
+        if args.delay < minimum:
+            parser.error(f"--delay must be at least {minimum} seconds for {args.source}")
     if not args.command:
         parser.print_help()
         return 0

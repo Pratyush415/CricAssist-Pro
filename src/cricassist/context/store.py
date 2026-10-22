@@ -6,7 +6,7 @@ from pathlib import Path
 from cricassist.context.passages import split_passages
 from cricassist.sources.parsers import Document
 
-COLLECTION = "cricinfo_context"
+COLLECTION = "written_context"
 BATCH = 100
 
 
