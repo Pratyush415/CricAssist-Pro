@@ -275,7 +275,7 @@ def test_build_context_when_the_site_refuses(tmp_path, store):
 def test_context_tool_when_empty(db, store):
     tools.set_context_store(store)
     try:
-        result, is_error = run_tool(db, "search_cricinfo_context", {"query": "final"})
+        result, is_error = run_tool(db, "search_written_context", {"query": "final"})
         result = json.loads(result)
         assert not is_error and result["passages"] == [] and "No written context" in result["note"]
     finally:
@@ -286,9 +286,9 @@ def test_context_tool_returns_passages_with_urls(db, store):
     store.add([parse_page(REPORT_HTML, URL, kind="match_report")])
     tools.set_context_store(store)
     try:
-        result = json.loads(run_tool(db, "search_cricinfo_context", {"query": "captain chase final", "n": 2})[0])
+        result = json.loads(run_tool(db, "search_written_context", {"query": "captain chase final", "n": 2})[0])
         assert result["passages"][0]["url"] == URL
-        assert "never take numbers" in result["note"]
+        assert "never take numbers" in result["note"] and "Wikipedia" in result["note"]
     finally:
         tools.set_context_store(None)
 
@@ -300,5 +300,156 @@ def test_build_context_cli(tmp_path, monkeypatch, capsys):
     monkeypatch.setenv("CRICASSIST_CONTEXT_PATH", str(tmp_path / "ctx"))
     monkeypatch.setattr(store_module, "default_embedding_function", WordEmbedding)
     assert main(["build-context", "--local-only", "--source-dir", str(FIXTURES / "local")]) == 0
-    assert "from 2 documents" in capsys.readouterr().out
+    assert "from 2 local documents" in capsys.readouterr().out
     assert build_module  # imported for monkeypatch targets
+
+
+# --- Wikipedia ---------------------------------------------------------------
+
+from urllib.parse import parse_qs, urlparse  # noqa: E402
+
+from cricassist.context.build import (  # noqa: E402
+    WikiTarget,
+    build_wikipedia_context,
+    find_article,
+    known_as,
+    wikipedia_targets,
+)
+from cricassist.sources.wikipedia import WikipediaClient, WikipediaError, clean_extract  # noqa: E402
+
+ARTICLES = {
+    "2023 Cricket World Cup final": "The final was a One Day International cricket match played in Ahmedabad.\n\n"
+                                    "== Match ==\nAustralia chose to bowl and Travis Head scored a century in the chase.\n\n"
+                                    "== References ==\n1. A source that must not be kept.",
+    "2023 Cricket World Cup": "The 2023 Cricket World Cup was the 13th edition of the tournament.",
+    "Jasprit Bumrah": "Jasprit Bumrah is an Indian international cricketer known for his unusual bowling action.",
+    "Jasprit (film)": "Jasprit is a 2019 film about a cook.",
+}
+SEARCHES = {
+    "2023 ICC Cricket World Cup final": ["2023 Cricket World Cup", "2023 Cricket World Cup final"],
+    "Jasprit Jasbirsingh Bumrah cricketer": ["Jasprit (film)", "Jasprit Bumrah"],
+}
+
+
+class FakeWikipedia:
+    """Answers the MediaWiki API from the dictionaries above and records each request."""
+
+    def __init__(self, status=200):
+        self.status = status
+        self.requests = []
+
+    def __call__(self, url, headers):
+        self.requests.append((url, headers))
+        if self.status != 200:
+            return self.status, ""
+        q = {k: v[0] for k, v in parse_qs(urlparse(url).query).items()}
+        if q.get("list") == "search":
+            hits = SEARCHES.get(q["srsearch"], [])
+            return 200, json.dumps({"query": {"search": [{"title": t} for t in hits]}})
+        title = q["titles"]
+        if title not in ARTICLES:
+            return 200, json.dumps({"query": {"pages": [{"title": title, "missing": True}]}})
+        page = {"title": title, "extract": ARTICLES[title],
+                "fullurl": "https://en.wikipedia.org/wiki/" + title.replace(" ", "_")}
+        return 200, json.dumps({"query": {"pages": [page]}})
+
+
+def wiki_client(tmp_path, site, clock=None, **kwargs):
+    clock = clock or FakeClock()
+    return WikipediaClient(tmp_path / "wiki", opener=site, sleep=clock.sleep, clock=clock.clock, **kwargs)
+
+
+def test_clean_extract_drops_reference_sections():
+    text = clean_extract(ARTICLES["2023 Cricket World Cup final"])
+    assert "Match" in text and "Travis Head" in text
+    assert "References" not in text and "must not be kept" not in text and "==" not in text
+
+
+def test_wikipedia_client_identifies_itself_waits_and_caches(tmp_path):
+    site, clock = FakeWikipedia(), FakeClock()
+    client = wiki_client(tmp_path, site, clock, delay=1.0)
+    assert client.search("2023 ICC Cricket World Cup final")[1] == "2023 Cricket World Cup final"
+    article = client.article("2023 Cricket World Cup final")
+    assert article.url == "https://en.wikipedia.org/wiki/2023_Cricket_World_Cup_final"
+    assert client.article("2023 Cricket World Cup final").title == article.title  # from the cache
+    assert len(site.requests) == 2 and clock.slept == [1.0]
+    url, headers = site.requests[0]
+    assert "CricAssistPro" in headers["User-Agent"] and "github.com" in headers["User-Agent"]
+    assert "maxlag=5" in url
+    assert client.article("No such page") is None
+
+
+def test_wikipedia_client_backs_off_then_gives_up(tmp_path):
+    site, clock = FakeWikipedia(status=429), FakeClock()
+    with pytest.raises(WikipediaError):
+        wiki_client(tmp_path, site, clock).search("anything")
+    assert len(site.requests) == 4 and [s for s in clock.slept if s >= 5] == [5, 10, 15]
+
+
+def test_wikipedia_offline_uses_only_the_cache(tmp_path):
+    online = wiki_client(tmp_path, FakeWikipedia())
+    online.search("Jasprit Jasbirsingh Bumrah cricketer")
+    offline_site = FakeWikipedia()
+    offline = wiki_client(tmp_path, offline_site, offline=True)
+    assert offline.search("Jasprit Jasbirsingh Bumrah cricketer") == ["Jasprit (film)", "Jasprit Bumrah"]
+    with pytest.raises(WikipediaError, match="no-fetch"):
+        offline.article("Jasprit Bumrah")
+    assert offline_site.requests == []
+
+
+def test_wikipedia_targets():
+    targets = wikipedia_targets({
+        "matches": [
+            {"match_id": 1, "date": "2023-11-19", "event": "ICC Cricket World Cup", "reason": "Final (male), since 2019"},
+            {"match_id": 2, "date": "2022-10-23", "event": "ICC Men's T20 World Cup", "reason": "Demo Q3"},
+            {"match_id": 3, "date": "2022-10-27", "event": "ICC Men's T20 World Cup", "reason": "Demo Q3"},
+        ],
+        "players": [{"player_id": "p1", "name": "JJ Bumrah", "full_name": "Jasprit Jasbirsingh Bumrah"}],
+    })
+    assert [(t.query, t.kind) for t in targets] == [
+        ("2023 ICC Cricket World Cup final", "match_report"),
+        ("2022 ICC Men's T20 World Cup", "tournament"),  # both 2022 matches share the tournament article
+        ("Jasprit Jasbirsingh Bumrah cricketer", "player_profile"),
+    ]
+    assert targets[2].title_must_include == ["Bumrah"]
+
+
+def test_find_article_prefers_the_final_and_checks_the_subject(tmp_path):
+    client = wiki_client(tmp_path, FakeWikipedia())
+    final = find_article(client, WikiTarget("2023 ICC Cricket World Cup final", "match_report", "1", ["2023"]))
+    assert final.title == "2023 Cricket World Cup final"  # not the tournament, though search ranked it first
+    player = find_article(client, WikiTarget("Jasprit Jasbirsingh Bumrah cricketer", "player_profile", "p1", ["Bumrah"]))
+    assert player.title == "Jasprit Bumrah"  # the film's title lacks the surname
+    assert find_article(client, WikiTarget("Nobody cricketer", "player_profile", "x", ["Nobody"])) is None
+
+
+def test_build_wikipedia_context(tmp_path, store):
+    scrape_list = {
+        "matches": [{"match_id": 1, "date": "2023-11-19", "event": "ICC Cricket World Cup", "reason": "Final"}],
+        "players": [
+            {"player_id": "p1", "name": "JJ Bumrah", "full_name": "Jasprit Jasbirsingh Bumrah"},
+            {"player_id": "p2", "name": "A Nobody", "full_name": "Arthur Nobody"},
+        ],
+    }
+    report = build_wikipedia_context(store, wiki_client(tmp_path, FakeWikipedia()), scrape_list, log=lambda m: None)
+    assert (report.pages_listed, report.documents, report.not_found) == (3, 2, 1)
+    hits = store.search("bowling action", n=3)
+    assert {h["source"] for h in hits} == {"Wikipedia"}
+    assert any(h["url"].endswith("/Jasprit_Bumrah") for h in hits)
+
+
+def test_known_as():
+    assert known_as("S Mandhana", "Smriti Shriniwas Mandhana") == "Smriti Mandhana"
+    assert known_as("C Athapaththu", "Athapaththu Mudiyanselage Chamari Jayangani Kumai Athapaththu") == "Chamari Athapaththu"
+    assert known_as("Junaid Siddique", "Muhammad Junaid Siddique") == "Junaid Siddique"  # no initials: use as is
+    assert known_as("V Kohli", None) == "V Kohli"
+
+
+def test_find_article_falls_back_to_the_usual_name(tmp_path):
+    SEARCHES["Jasprit Bumrah cricketer"] = ["Jasprit Bumrah"]
+    try:
+        target = WikiTarget("Jasprit Jasbirsingh Unknown cricketer", "player_profile", "p1", ["Bumrah"],
+                            ["Jasprit Bumrah cricketer"])
+        assert find_article(wiki_client(tmp_path, FakeWikipedia()), target).title == "Jasprit Bumrah"
+    finally:
+        del SEARCHES["Jasprit Bumrah cricketer"]

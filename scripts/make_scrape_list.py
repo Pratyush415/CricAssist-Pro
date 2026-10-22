@@ -1,4 +1,4 @@
-"""One-off script: choose the ESPNcricinfo pages to scrape for match reports and player profiles.
+"""One-off script: choose the matches and players to collect written context for.
 
 Usage: python scripts/make_scrape_list.py [path/to/cricassist.db]
 
@@ -44,7 +44,7 @@ KOHLI_2022_T20WC_SQL = """
 
 def top_players(con, where: str, limit: int) -> list[tuple]:
     return con.execute(
-        f"""SELECT p.player_id, p.name, p.cricinfo_id, p.country, count(*) AS matches
+        f"""SELECT p.player_id, p.name, p.full_name, p.cricinfo_id, p.country, count(*) AS matches
             FROM player_matches pm JOIN players p USING (player_id)
             WHERE p.cricinfo_id IS NOT NULL AND {where}
             GROUP BY ALL ORDER BY matches DESC LIMIT {limit}"""
@@ -73,14 +73,15 @@ def main() -> None:
 
     players: dict[str, dict] = {}
 
-    def add_player(player_id, name, cricinfo_id, country, reason):
+    def add_player(player_id, name, full_name, cricinfo_id, country, reason):
         players.setdefault(
             player_id,
-            {"player_id": player_id, "name": name, "cricinfo_id": cricinfo_id, "country": country, "reason": reason},
+            {"player_id": player_id, "name": name, "full_name": full_name, "cricinfo_id": cricinfo_id,
+             "country": country, "reason": reason},
         )
 
     for name in DEMO_PLAYERS:
-        row = con.execute("SELECT player_id, name, cricinfo_id, country FROM players WHERE name = ?", [name]).fetchone()
+        row = con.execute("SELECT player_id, name, full_name, cricinfo_id, country FROM players WHERE name = ?", [name]).fetchone()
         add_player(*row, "Demo question")
     groups = [
         ("type = 'Intl' AND pm.gender = 'male' AND start_date >= '2019-01-01'", 60, "Most-capped men's international, 2019 on"),
@@ -88,8 +89,8 @@ def main() -> None:
         ("collection = 'ipl' AND start_date >= '2023-01-01'", 30, "Most IPL matches, 2023 on"),
     ]
     for where, limit, reason in groups:
-        for player_id, name, cricinfo_id, country, _ in top_players(con, where, limit):
-            add_player(player_id, name, cricinfo_id, country, reason)
+        for player_id, name, full_name, cricinfo_id, country, _ in top_players(con, where, limit):
+            add_player(player_id, name, full_name, cricinfo_id, country, reason)
             if len(players) >= 100:
                 break
 

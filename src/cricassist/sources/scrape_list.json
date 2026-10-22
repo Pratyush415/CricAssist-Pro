@@ -244,6 +244,7 @@
   {
    "player_id": "8cf9814c",
    "name": "Mohammed Shami",
+   "full_name": "Mohammed Shami Ahmed",
    "cricinfo_id": 481896,
    "country": "India",
    "reason": "Demo question"
@@ -251,6 +252,7 @@
   {
    "player_id": "8fd1a8f5",
    "name": "DW Steyn",
+   "full_name": "Dale Willem Steyn",
    "cricinfo_id": 47492,
    "country": "South Africa",
    "reason": "Demo question"
@@ -258,6 +260,7 @@
   {
    "player_id": "ba607b88",
    "name": "V Kohli",
+   "full_name": "Virat Kohli",
    "cricinfo_id": 253802,
    "country": "India",
    "reason": "Demo question"
@@ -265,6 +268,7 @@
   {
    "player_id": "462411b3",
    "name": "JJ Bumrah",
+   "full_name": "Jasprit Jasbirsingh Bumrah",
    "cricinfo_id": 625383,
    "country": "India",
    "reason": "Demo question"
@@ -272,6 +276,7 @@
   {
    "player_id": "8a75e999",
    "name": "Babar Azam",
+   "full_name": "Mohammad Babar Azam",
    "cricinfo_id": 348144,
    "country": "Pakistan",
    "reason": "Most-capped men's international, 2019 on"
@@ -279,6 +284,7 @@
   {
    "player_id": "5d1e7582",
    "name": "BKG Mendis",
+   "full_name": "Balapuwaduge Kusal Gimhan Mendis",
    "cricinfo_id": 629074,
    "country": "Sri Lanka",
    "reason": "Most-capped men's international, 2019 on"
@@ -286,6 +292,7 @@
   {
    "player_id": "2f26ac1a",
    "name": "Mohammad Rizwan",
+   "full_name": "Mohammad Rizwan",
    "cricinfo_id": 323389,
    "country": "Pakistan",
    "reason": "Most-capped men's international, 2019 on"
@@ -293,6 +300,7 @@
   {
    "player_id": "0404d43c",
    "name": "Liton Das",
+   "full_name": "Litton Kumer Das",
    "cricinfo_id": 536936,
    "country": "Bangladesh",
    "reason": "Most-capped men's international, 2019 on"
@@ -300,6 +308,7 @@
   {
    "player_id": "99b75528",
    "name": "JC Buttler",
+   "full_name": "Joseph Charles Buttler",
    "cricinfo_id": 308967,
    "country": "England",
    "reason": "Most-capped men's international, 2019 on"
@@ -307,6 +316,7 @@
   {
    "player_id": "249d60c9",
    "name": "AU Rashid",
+   "full_name": "Adil Usman Rashid",
    "cricinfo_id": 244497,
    "country": "England",
    "reason": "Most-capped men's international, 2019 on"
@@ -314,41 +324,47 @@
   {
    "player_id": "eade4650",
    "name": "DJ Mitchell",
+   "full_name": "Daryl Joseph Mitchell",
    "cricinfo_id": 381743,
+   "country": "New Zealand",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
+   "player_id": "e4a0deae",
+   "name": "MJ Santner",
+   "full_name": "Mitchell Josef Santner",
+   "cricinfo_id": 502714,
    "country": "New Zealand",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
    "player_id": "740742ef",
    "name": "RG Sharma",
+   "full_name": "Rohit Gurunath Sharma",
    "cricinfo_id": 34102,
    "country": "India",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
-   "player_id": "e4a0deae",
-   "name": "MJ Santner",
-   "cricinfo_id": 502714,
-   "country": "New Zealand",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
-   "player_id": "45a7e761",
-   "name": "Shaheen Shah Afridi",
-   "cricinfo_id": 1072470,
-   "country": "Pakistan",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
    "player_id": "1fc6ef83",
    "name": "SD Hope",
+   "full_name": "Shai Diego Hope",
    "cricinfo_id": 581379,
    "country": "West Indies",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
+   "player_id": "45a7e761",
+   "name": "Shaheen Shah Afridi",
+   "full_name": "Shaheen Shah Afridi",
+   "cricinfo_id": 1072470,
+   "country": "Pakistan",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
    "player_id": "14f96089",
    "name": "A Zampa",
+   "full_name": "Adam Zampa",
    "cricinfo_id": 379504,
    "country": "Australia",
    "reason": "Most-capped men's international, 2019 on"
@@ -356,6 +372,7 @@
   {
    "player_id": "8ee36b18",
    "name": "P Nissanka",
+   "full_name": "Pathum Nissanka Silva",
    "cricinfo_id": 1028655,
    "country": "Sri Lanka",
    "reason": "Most-capped men's international, 2019 on"
@@ -363,6 +380,7 @@
   {
    "player_id": "6a26221c",
    "name": "AK Markram",
+   "full_name": "Aiden Kyle Markram",
    "cricinfo_id": 600498,
    "country": "South Africa",
    "reason": "Most-capped men's international, 2019 on"
@@ -370,6 +388,7 @@
   {
    "player_id": "26d041c4",
    "name": "Sikandar Raza",
+   "full_name": "Sikandar Raza Butt",
    "cricinfo_id": 299572,
    "country": "Zimbabwe",
    "reason": "Most-capped men's international, 2019 on"
@@ -377,6 +396,7 @@
   {
    "player_id": "1747ea18",
    "name": "DS Airee",
+   "full_name": "Dipendra Singh Airee",
    "cricinfo_id": 794707,
    "country": "Nepal",
    "reason": "Most-capped men's international, 2019 on"
@@ -384,6 +404,7 @@
   {
    "player_id": "0f721006",
    "name": "JO Holder",
+   "full_name": "Jason Omar Holder",
    "cricinfo_id": 391485,
    "country": "West Indies",
    "reason": "Most-capped men's international, 2019 on"
@@ -391,6 +412,7 @@
   {
    "player_id": "1a3cc554",
    "name": "RK Paudel",
+   "full_name": "Rohit Kumar Paudel",
    "cricinfo_id": 1072488,
    "country": "Nepal",
    "reason": "Most-capped men's international, 2019 on"
@@ -398,6 +420,7 @@
   {
    "player_id": "a343262c",
    "name": "JE Root",
+   "full_name": "Joseph Edward Root",
    "cricinfo_id": 303669,
    "country": "England",
    "reason": "Most-capped men's international, 2019 on"
@@ -405,6 +428,7 @@
   {
    "player_id": "0a8fce53",
    "name": "Mustafizur Rahman",
+   "full_name": "Mustafizur Rahman",
    "cricinfo_id": 330902,
    "country": "Bangladesh",
    "reason": "Most-capped men's international, 2019 on"
@@ -412,13 +436,23 @@
   {
    "player_id": "b17e2f24",
    "name": "KL Rahul",
+   "full_name": "Kannaur Lokesh Rahul",
    "cricinfo_id": 422108,
    "country": "India",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
+   "player_id": "95a5e066",
+   "name": "MG Erasmus",
+   "full_name": "Merwe Gerhard Erasmus",
+   "cricinfo_id": 519070,
+   "country": "Namibia",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
    "player_id": "e824e6ee",
    "name": "TWM Latham",
+   "full_name": "Thomas William Maxwell Latham",
    "cricinfo_id": 388802,
    "country": "New Zealand",
    "reason": "Most-capped men's international, 2019 on"
@@ -426,20 +460,15 @@
   {
    "player_id": "cf494ffe",
    "name": "PR Stirling",
+   "full_name": "Paul Robert Stirling",
    "cricinfo_id": 303427,
    "country": "Ireland",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
-   "player_id": "95a5e066",
-   "name": "MG Erasmus",
-   "cricinfo_id": 519070,
-   "country": "Namibia",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
    "player_id": "69d03465",
    "name": "AT Carey",
+   "full_name": "Alex Tyson Carey",
    "cricinfo_id": 326434,
    "country": "Australia",
    "reason": "Most-capped men's international, 2019 on"
@@ -447,6 +476,7 @@
   {
    "player_id": "30a45b23",
    "name": "SPD Smith",
+   "full_name": "Steven Peter Devereux Smith",
    "cricinfo_id": 267192,
    "country": "Australia",
    "reason": "Most-capped men's international, 2019 on"
@@ -454,6 +484,7 @@
   {
    "player_id": "3fb19989",
    "name": "MA Starc",
+   "full_name": "Mitchell Aaron Starc",
    "cricinfo_id": 311592,
    "country": "Australia",
    "reason": "Most-capped men's international, 2019 on"
@@ -461,6 +492,7 @@
   {
    "player_id": "372455c4",
    "name": "Q de Kock",
+   "full_name": "Quinton de Kock",
    "cricinfo_id": 379143,
    "country": "South Africa",
    "reason": "Most-capped men's international, 2019 on"
@@ -468,6 +500,7 @@
   {
    "player_id": "3241e3fd",
    "name": "N Pooran",
+   "full_name": "Nicholas Pooran",
    "cricinfo_id": 604302,
    "country": "West Indies",
    "reason": "Most-capped men's international, 2019 on"
@@ -475,13 +508,23 @@
   {
    "player_id": "6f02fe2a",
    "name": "Waseem Muhammad",
+   "full_name": "Muhammad Waseem",
    "cricinfo_id": 1241277,
    "country": "United Arab Emirates",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
+   "player_id": "4ae1755b",
+   "name": "HC Brook",
+   "full_name": "Harry Cherrington Brook",
+   "cricinfo_id": 911707,
+   "country": "England",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
    "player_id": "3feda4fa",
    "name": "RL Chase",
+   "full_name": "Roston Lamar Chase",
    "cricinfo_id": 391832,
    "country": "West Indies",
    "reason": "Most-capped men's international, 2019 on"
@@ -489,20 +532,15 @@
   {
    "player_id": "f53b3e1d",
    "name": "Karan KC",
+   "full_name": "Karan Khatri Chhetri",
    "cricinfo_id": 800675,
    "country": "Nepal",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
-   "player_id": "4ae1755b",
-   "name": "HC Brook",
-   "cricinfo_id": 911707,
-   "country": "England",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
    "player_id": "e85d03d6",
    "name": "BM Scholtz",
+   "full_name": "Bernard Martinus Scholtz",
    "cricinfo_id": 330223,
    "country": "Namibia",
    "reason": "Most-capped men's international, 2019 on"
@@ -510,6 +548,7 @@
   {
    "player_id": "732c038e",
    "name": "KIC Asalanka",
+   "full_name": "Kariyawasam Indipalage Charith Asalanka",
    "cricinfo_id": 784367,
    "country": "Sri Lanka",
    "reason": "Most-capped men's international, 2019 on"
@@ -517,6 +556,7 @@
   {
    "player_id": "3ff033bb",
    "name": "MD Shanaka",
+   "full_name": "Madagamagamage Dasun Shanaka",
    "cricinfo_id": 437316,
    "country": "Sri Lanka",
    "reason": "Most-capped men's international, 2019 on"
@@ -524,27 +564,15 @@
   {
    "player_id": "e3386c8a",
    "name": "K Bhurtel",
+   "full_name": "Kushal Bhurtel",
    "cricinfo_id": 794713,
    "country": "Nepal",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
-   "player_id": "dbe50b21",
-   "name": "HH Pandya",
-   "cricinfo_id": 625371,
-   "country": "India",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
-   "player_id": "1777c020",
-   "name": "Fakhar Zaman",
-   "cricinfo_id": 512191,
-   "country": "Pakistan",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
    "player_id": "a97c8ec2",
    "name": "PWH de Silva",
+   "full_name": "Pinnaduwage Wanindu Hasaranga de Silva",
    "cricinfo_id": 784379,
    "country": "Sri Lanka",
    "reason": "Most-capped men's international, 2019 on"
@@ -552,13 +580,31 @@
   {
    "player_id": "b0946605",
    "name": "AS Joseph",
+   "full_name": "Alzarri Shaheim Joseph",
    "cricinfo_id": 670031,
    "country": "West Indies",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
+   "player_id": "1777c020",
+   "name": "Fakhar Zaman",
+   "full_name": "Fakhar Zaman",
+   "cricinfo_id": 512191,
+   "country": "Pakistan",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
+   "player_id": "dbe50b21",
+   "name": "HH Pandya",
+   "full_name": "Hardik Himanshu Pandya",
+   "cricinfo_id": 625371,
+   "country": "India",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
    "player_id": "fe93fd9d",
    "name": "RA Jadeja",
+   "full_name": "Ravindrasinh Anirudhsinh Jadeja",
    "cricinfo_id": 234675,
    "country": "India",
    "reason": "Most-capped men's international, 2019 on"
@@ -566,6 +612,7 @@
   {
    "player_id": "1adb8ee8",
    "name": "Sompal Kami",
+   "full_name": "Sompal Kami",
    "cricinfo_id": 701215,
    "country": "Nepal",
    "reason": "Most-capped men's international, 2019 on"
@@ -573,6 +620,7 @@
   {
    "player_id": "dcbea954",
    "name": "Aasif Sheikh",
+   "full_name": "Aasif Sheikh",
    "cricinfo_id": 1058514,
    "country": "Nepal",
    "reason": "Most-capped men's international, 2019 on"
@@ -580,83 +628,95 @@
   {
    "player_id": "b410bd3d",
    "name": "S Lamichhane",
+   "full_name": "Sandeep Lamichhane",
    "cricinfo_id": 960361,
    "country": "Nepal",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
-   "player_id": "271f83cd",
-   "name": "SA Yadav",
-   "cricinfo_id": 446507,
-   "country": "India",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
    "player_id": "b59db04f",
    "name": "SA Edwards",
+   "full_name": "Scott Andrew Edwards",
    "cricinfo_id": 1127317,
    "country": "Netherlands",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
-   "player_id": "b699df47",
-   "name": "MP O'Dowd",
-   "cricinfo_id": 643197,
-   "country": "Netherlands",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
-   "player_id": "24bb1c2f",
-   "name": "Haris Rauf",
-   "cricinfo_id": 1161606,
-   "country": "Pakistan",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
-   "player_id": "9a46c4e5",
-   "name": "GD Phillips",
-   "cricinfo_id": 823509,
-   "country": "New Zealand",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
-   "player_id": "c58b0108",
-   "name": "Mehedi Hasan Miraz",
-   "cricinfo_id": 629063,
-   "country": "Bangladesh",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
-   "player_id": "b08252b8",
-   "name": "RP Burl",
-   "cricinfo_id": 495964,
-   "country": "Zimbabwe",
-   "reason": "Most-capped men's international, 2019 on"
-  },
-  {
-   "player_id": "fc55ec67",
-   "name": "MR Adair",
-   "cricinfo_id": 526441,
-   "country": "Ireland",
+   "player_id": "271f83cd",
+   "name": "SA Yadav",
+   "full_name": "Suryakumar Ashok Yadav",
+   "cricinfo_id": 446507,
+   "country": "India",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
    "player_id": "7fca84b7",
    "name": "BA King",
+   "full_name": "Brandon Alexander King",
    "cricinfo_id": 670035,
    "country": "West Indies",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
+   "player_id": "9a46c4e5",
+   "name": "GD Phillips",
+   "full_name": "Glenn Dominic Phillips",
+   "cricinfo_id": 823509,
+   "country": "New Zealand",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
+   "player_id": "24bb1c2f",
+   "name": "Haris Rauf",
+   "full_name": "Haris Rauf",
+   "cricinfo_id": 1161606,
+   "country": "Pakistan",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
+   "player_id": "b08252b8",
+   "name": "RP Burl",
+   "full_name": "Ryan Ponsonby Burl",
+   "cricinfo_id": 495964,
+   "country": "Zimbabwe",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
    "player_id": "59ea70a4",
    "name": "HT Tector",
+   "full_name": "Harry Tom Tector",
    "cricinfo_id": 961407,
    "country": "Ireland",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
+   "player_id": "fc55ec67",
+   "name": "MR Adair",
+   "full_name": "Mark Richard Adair",
+   "cricinfo_id": 526441,
+   "country": "Ireland",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
+   "player_id": "c58b0108",
+   "name": "Mehedi Hasan Miraz",
+   "full_name": "Mehidy Hasan Miraz",
+   "cricinfo_id": 629063,
+   "country": "Bangladesh",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
+   "player_id": "b699df47",
+   "name": "MP O'Dowd",
+   "full_name": "Maxwell Patrick O'Dowd",
+   "cricinfo_id": 643197,
+   "country": "Netherlands",
+   "reason": "Most-capped men's international, 2019 on"
+  },
+  {
    "player_id": "84dc72db",
    "name": "Junaid Siddique (2)",
+   "full_name": "Muhammad Junaid Siddique",
    "cricinfo_id": 1203754,
    "country": "United Arab Emirates",
    "reason": "Most-capped men's international, 2019 on"
@@ -664,6 +724,7 @@
   {
    "player_id": "df5a6881",
    "name": "DP Conway",
+   "full_name": "Devon Philip Conway",
    "cricinfo_id": 379140,
    "country": "New Zealand",
    "reason": "Most-capped men's international, 2019 on"
@@ -671,20 +732,23 @@
   {
    "player_id": "e62dd25d",
    "name": "K Rabada",
+   "full_name": "Kagiso Rabada",
    "cricinfo_id": 550215,
    "country": "South Africa",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
-   "player_id": "6e3f5a5c",
-   "name": "R Ngarava",
-   "cricinfo_id": 806241,
-   "country": "Zimbabwe",
+   "player_id": "1274d7ab",
+   "name": "Nazmul Hossain Shanto",
+   "full_name": "Najmul Hossain Shanto",
+   "cricinfo_id": 629058,
+   "country": "Bangladesh",
    "reason": "Most-capped men's international, 2019 on"
   },
   {
    "player_id": "201fef33",
    "name": "DB Sharma",
+   "full_name": "Deepti Bhagwan Sharma",
    "cricinfo_id": 597811,
    "country": "India",
    "reason": "Most-capped women's international, 2019 on"
@@ -692,6 +756,7 @@
   {
    "player_id": "5d2eda89",
    "name": "S Mandhana",
+   "full_name": "Smriti Shriniwas Mandhana",
    "cricinfo_id": 597806,
    "country": "India",
    "reason": "Most-capped women's international, 2019 on"
@@ -699,6 +764,7 @@
   {
    "player_id": "b05e45e4",
    "name": "AE Jones",
+   "full_name": "Amy Ellen Jones",
    "cricinfo_id": 515874,
    "country": "England",
    "reason": "Most-capped women's international, 2019 on"
@@ -706,6 +772,7 @@
   {
    "player_id": "53cd8da6",
    "name": "H Kaur",
+   "full_name": "Harmanpreet Kaur Bhullar",
    "cricinfo_id": 372317,
    "country": "India",
    "reason": "Most-capped women's international, 2019 on"
@@ -713,6 +780,7 @@
   {
    "player_id": "e60f81c9",
    "name": "L Wolvaardt",
+   "full_name": "Laura Wolvaardt",
    "cricinfo_id": 922481,
    "country": "South Africa",
    "reason": "Most-capped women's international, 2019 on"
@@ -720,6 +788,7 @@
   {
    "player_id": "6d76bc23",
    "name": "S Luus",
+   "full_name": "Sune Luus",
    "cricinfo_id": 487007,
    "country": "South Africa",
    "reason": "Most-capped women's international, 2019 on"
@@ -727,6 +796,7 @@
   {
    "player_id": "cb08b611",
    "name": "JI Rodrigues",
+   "full_name": "Jemimah Ivan Rodrigues",
    "cricinfo_id": 883405,
    "country": "India",
    "reason": "Most-capped women's international, 2019 on"
@@ -734,6 +804,7 @@
   {
    "player_id": "4ba0289e",
    "name": "HC Knight",
+   "full_name": "Heather Clare Knight",
    "cricinfo_id": 358259,
    "country": "England",
    "reason": "Most-capped women's international, 2019 on"
@@ -741,6 +812,7 @@
   {
    "player_id": "52d1dbc8",
    "name": "BL Mooney",
+   "full_name": "Bethany Louise Mooney",
    "cricinfo_id": 381258,
    "country": "Australia",
    "reason": "Most-capped women's international, 2019 on"
@@ -748,6 +820,7 @@
   {
    "player_id": "cdb82f1c",
    "name": "S Ecclestone",
+   "full_name": "Sophie Ecclestone",
    "cricinfo_id": 878039,
    "country": "England",
    "reason": "Most-capped women's international, 2019 on"
@@ -755,6 +828,7 @@
   {
    "player_id": "f3a18a0c",
    "name": "NR Sciver",
+   "full_name": "Natalie Ruth Sciver-Brunt",
    "cricinfo_id": 515905,
    "country": "England",
    "reason": "Most-capped women's international, 2019 on"
@@ -762,6 +836,7 @@
   {
    "player_id": "bc969efb",
    "name": "A Gardner",
+   "full_name": "Ashleigh Katherine Gardner",
    "cricinfo_id": 858809,
    "country": "Australia",
    "reason": "Most-capped women's international, 2019 on"
@@ -769,6 +844,7 @@
   {
    "player_id": "a139c379",
    "name": "DN Wyatt",
+   "full_name": "Danielle Nicole Wyatt-Hodge",
    "cricinfo_id": 254168,
    "country": "England",
    "reason": "Most-capped women's international, 2019 on"
@@ -776,6 +852,7 @@
   {
    "player_id": "d32cf49a",
    "name": "HK Matthews",
+   "full_name": "Hayley Kristen Matthews",
    "cricinfo_id": 474308,
    "country": "West Indies",
    "reason": "Most-capped women's international, 2019 on"
@@ -783,6 +860,7 @@
   {
    "player_id": "865eae1f",
    "name": "ML Green",
+   "full_name": "Madeline Lee Green",
    "cricinfo_id": 438265,
    "country": "New Zealand",
    "reason": "Most-capped women's international, 2019 on"
@@ -790,6 +868,7 @@
   {
    "player_id": "d8f59089",
    "name": "Shafali Verma",
+   "full_name": "Shafali Verma",
    "cricinfo_id": 1182523,
    "country": "India",
    "reason": "Most-capped women's international, 2019 on"
@@ -797,20 +876,15 @@
   {
    "player_id": "2904b4b6",
    "name": "Aliya Riaz",
+   "full_name": "Aliya Riaz",
    "cricinfo_id": 572645,
    "country": "Pakistan",
    "reason": "Most-capped women's international, 2019 on"
   },
   {
-   "player_id": "be150fc8",
-   "name": "EA Perry",
-   "cricinfo_id": 275487,
-   "country": "Australia",
-   "reason": "Most-capped women's international, 2019 on"
-  },
-  {
    "player_id": "721e0199",
    "name": "RM Ghosh",
+   "full_name": "Richa Manabendra Ghosh",
    "cricinfo_id": 1212830,
    "country": "India",
    "reason": "Most-capped women's international, 2019 on"
@@ -818,69 +892,95 @@
   {
    "player_id": "ac56b5a7",
    "name": "AC Jayangani",
+   "full_name": "Athapaththu Mudiyanselage Chamari Jayangani Kumai Athapaththu",
    "cricinfo_id": 318853,
    "country": "Sri Lanka",
    "reason": "Most-capped women's international, 2019 on"
   },
   {
+   "player_id": "be150fc8",
+   "name": "EA Perry",
+   "full_name": "Ellyse Alexandra Perry",
+   "cricinfo_id": 275487,
+   "country": "Australia",
+   "reason": "Most-capped women's international, 2019 on"
+  },
+  {
    "player_id": "5f547c8b",
    "name": "Rashid Khan",
+   "full_name": "Rashid Khan Arman",
    "cricinfo_id": 793463,
    "country": "Afghanistan",
    "reason": "Most IPL matches, 2023 on"
   },
   {
-   "player_id": "5b8c830e",
-   "name": "KH Pandya",
-   "cricinfo_id": 471342,
-   "country": "India",
-   "reason": "Most IPL matches, 2023 on"
-  },
-  {
-   "player_id": "39a2dfa8",
-   "name": "R Tewatia",
-   "cricinfo_id": 423838,
-   "country": "India",
-   "reason": "Most IPL matches, 2023 on"
-  },
-  {
    "player_id": "9418198b",
    "name": "P Simran Singh",
+   "full_name": "Prabhsimran Singh",
    "cricinfo_id": 1161024,
    "country": "India",
    "reason": "Most IPL matches, 2023 on"
   },
   {
-   "player_id": "b4b99816",
-   "name": "Shubman Gill",
-   "cricinfo_id": 1070173,
+   "player_id": "5b8c830e",
+   "name": "KH Pandya",
+   "full_name": "Krunal Himanshu Pandya",
+   "cricinfo_id": 471342,
    "country": "India",
    "reason": "Most IPL matches, 2023 on"
   },
   {
    "player_id": "2e81a32d",
    "name": "B Kumar",
+   "full_name": "Bhuvneshwar Kumar Singh",
    "cricinfo_id": 326016,
    "country": "India",
    "reason": "Most IPL matches, 2023 on"
   },
   {
-   "player_id": "244048f6",
-   "name": "Arshdeep Singh",
-   "cricinfo_id": 1125976,
+   "player_id": "39a2dfa8",
+   "name": "R Tewatia",
+   "full_name": "Rahul Tewatia",
+   "cricinfo_id": 423838,
+   "country": "India",
+   "reason": "Most IPL matches, 2023 on"
+  },
+  {
+   "player_id": "b4b99816",
+   "name": "Shubman Gill",
+   "full_name": "Shubman Gill",
+   "cricinfo_id": 1070173,
    "country": "India",
    "reason": "Most IPL matches, 2023 on"
   },
   {
    "player_id": "2f49c897",
    "name": "Mohammed Siraj",
+   "full_name": "Mohammed Siraj",
    "cricinfo_id": 940973,
+   "country": "India",
+   "reason": "Most IPL matches, 2023 on"
+  },
+  {
+   "player_id": "244048f6",
+   "name": "Arshdeep Singh",
+   "full_name": "Arshdeep Singh",
+   "cricinfo_id": 1125976,
+   "country": "India",
+   "reason": "Most IPL matches, 2023 on"
+  },
+  {
+   "player_id": "752f7486",
+   "name": "Ishan Kishan",
+   "full_name": "Ishan Pranav Kumar Pandey Kishan",
+   "cricinfo_id": 720471,
    "country": "India",
    "reason": "Most IPL matches, 2023 on"
   },
   {
    "player_id": "6c19c6e5",
    "name": "YBK Jaiswal",
+   "full_name": "Yashasvi Bhupendra Kumar Jaiswal",
    "cricinfo_id": 1151278,
    "country": "India",
    "reason": "Most IPL matches, 2023 on"
@@ -888,20 +988,15 @@
   {
    "player_id": "800d2d97",
    "name": "JM Sharma",
+   "full_name": "Jitesh Mohan Sharma",
    "cricinfo_id": 721867,
-   "country": "India",
-   "reason": "Most IPL matches, 2023 on"
-  },
-  {
-   "player_id": "752f7486",
-   "name": "Ishan Kishan",
-   "cricinfo_id": 720471,
    "country": "India",
    "reason": "Most IPL matches, 2023 on"
   },
   {
    "player_id": "57ee1fde",
    "name": "YS Chahal",
+   "full_name": "Yuzvendra Singh Chahal",
    "cricinfo_id": 430246,
    "country": "India",
    "reason": "Most IPL matches, 2023 on"
@@ -909,13 +1004,23 @@
   {
    "player_id": "bcf325d2",
    "name": "Dhruv Jurel",
+   "full_name": "Dhruv Chand Jurel",
    "cricinfo_id": 1175488,
    "country": "India",
    "reason": "Most IPL matches, 2023 on"
   },
   {
+   "player_id": "f1f99156",
+   "name": "TH David",
+   "full_name": "Timothy Hays David",
+   "cricinfo_id": 892749,
+   "country": "Australia",
+   "reason": "Most IPL matches, 2023 on"
+  },
+  {
    "player_id": "235c2bb6",
    "name": "H Klaasen",
+   "full_name": "Heinrich Klaasen",
    "cricinfo_id": 436757,
    "country": "South Africa",
    "reason": "Most IPL matches, 2023 on"
@@ -923,20 +1028,15 @@
   {
    "player_id": "a4e37e47",
    "name": "S Dube",
+   "full_name": "Shivam Dube",
    "cricinfo_id": 714451,
    "country": "India",
    "reason": "Most IPL matches, 2023 on"
   },
   {
-   "player_id": "f1f99156",
-   "name": "TH David",
-   "cricinfo_id": 892749,
-   "country": "Australia",
-   "reason": "Most IPL matches, 2023 on"
-  },
-  {
    "player_id": "d9273ee7",
    "name": "MP Stoinis",
+   "full_name": "Marcus Peter Stoinis",
    "cricinfo_id": 325012,
    "country": "Australia",
    "reason": "Most IPL matches, 2023 on"

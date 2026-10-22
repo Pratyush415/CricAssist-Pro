@@ -16,6 +16,9 @@ from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from importlib import resources
 
+# Tools that return text passages rather than stats; their numbers are not a valid source.
+TEXT_TOOLS = {"search_written_context"}
+
 # Small numbers turn up as list positions, "top 3", "1st innings" and so on.
 SMALL_NUMBERS = {0, 1, 2, 3}
 
@@ -92,7 +95,9 @@ def run_question(q: dict, make_assistant: Callable) -> Grade:
     except Exception as e:  # a provider error (quota, network) fails this question, not the run
         return Grade(q["id"], q["type"], q["question"], q["expected"], error=f"{type(e).__name__}: {e}")
     calls = [{"name": c.name, "args": c.args, "is_error": c.is_error} for c in answer.tool_calls]
-    return grade_answer(q, answer.text, calls, [c.result for c in answer.tool_calls])
+    # Numbers must come from the stats tools: written-context passages do not count as a source.
+    stats_results = [c.result for c in answer.tool_calls if c.name not in TEXT_TOOLS]
+    return grade_answer(q, answer.text, calls, stats_results)
 
 
 def run_evaluation(

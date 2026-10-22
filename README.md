@@ -13,7 +13,7 @@ get an answer whose every number comes from a ball-by-ball database of
 | **Assistant** | Gemini (free tier) or Claude, calling 18 tools: 16 stats queries, a coverage lookup and a written-context search. Every figure in an answer must come from a tool result. When the data cannot answer, it says so. |
 | **Accuracy** | 10 of 10 published stats match ESPNcricinfo. Evaluation: 14 of 15 questions correct, 15 of 15 with no unsourced numbers ([docs/evaluation.md](docs/evaluation.md)). |
 | **Interfaces** | A local web app (streaming answers, chat sessions, model picker) and a command-line chat. |
-| **Written context** | A complete scraping, embedding and retrieval pipeline (ChromaDB). It does not collect ESPNcricinfo pages, because the site's terms forbid it; see [ESPNcricinfo](#espncricinfo-and-written-context). |
+| **Written context** | 125 Wikipedia articles on finals, tournaments and players (2,084 passages) in a ChromaDB vector database, collected by a rate-limited, cached scraper. The assistant quotes them with links for background and never takes numbers from them. |
 
 ## Requirements
 
@@ -22,7 +22,7 @@ get an answer whose every number comes from a ball-by-ball database of
 | R1 | Statistical answers come from a structured database, never LLM memory or text parsing | Done. Enforced by the system prompt and measured by the evaluation's sourcing check. |
 | R2 | Cricsheet ball-by-ball data | Done |
 | R3 | Kaggle "The Ultimate Ball-by-Ball Cricket Dataset" | Done. Loaded into DuckDB with checksum, schema and row-count checks. |
-| R4 | Rate-limited ESPNcricinfo scraper feeding a vector database | Pipeline built and tested. ESPNcricinfo's terms and bot protection prevent collecting its pages, so the live database is empty. |
+| R4 | Rate-limited scraper for match reports and player profiles, embedded into a vector database | Done, with Wikipedia as the source. ESPNcricinfo's terms forbid it and its site blocks scrapers, so the interviewer approved another source; see [Written context](#written-context). |
 
 ## Quick start
 
@@ -74,7 +74,7 @@ cricassist web     # web app at http://127.0.0.1:8000
 cricassist chat    # or chat in the terminal
 ```
 
-The tests need neither the dataset nor a key: `pytest` runs 163 tests on a
+The tests need neither the dataset nor a key: `pytest` runs 173 tests on a
 three-match sample in `tests/data/`.
 
 ## The web app
@@ -119,7 +119,7 @@ flowchart LR
     M -- "tool calls" --> T[16 stats tools<br/>assistant/tools.py]
     T --> DB[(DuckDB<br/>ball-by-ball data)]
     DB --> T
-    M -. "search_cricinfo_context" .-> V[(ChromaDB<br/>written context)]
+    M -. "search_written_context" .-> V[(ChromaDB<br/>Wikipedia passages)]
     T -- "results with coverage" --> M
     M --> A[Answer: numbers only<br/>from tool results]
 ```
@@ -180,6 +180,7 @@ daily quota, so results are saved after each question.
 |---|---|---|
 | [Cricsheet](https://cricsheet.org) ball-by-ball data, via the Kaggle dataset "The Ultimate Ball-by-Ball Cricket Dataset" (snapshot 2026-10-10) | All stats | Open Data Commons Attribution License 1.0 |
 | ESPNcricinfo ball tracking (line, length, shot), included in the Kaggle dataset | Line, length and shot breakdowns | As distributed with the dataset |
+| [Wikipedia](https://en.wikipedia.org) articles, via the MediaWiki API | Written context | CC BY-SA 4.0; answers link to each article |
 
 What the data covers: men's and women's Tests, ODIs and T20Is from December
 2001, and the IPL, WPL, BBL, WBBL, PSL, CPL, BPL, LPL, SA20, ILT20, MLC and The
@@ -198,38 +199,54 @@ What it does not cover, and the assistant says so when it matters:
 - No ICC rankings, matches before December 2001, or domestic first-class and
   List A cricket.
 
-## ESPNcricinfo and written context
+## Written context
 
-The assistant has a `search_cricinfo_context` tool for background the numbers
-cannot give: what happened in a match, how a player plays. The pipeline behind
-it is complete and tested:
+The assistant's `search_written_context` tool gives background the numbers
+cannot: what happened in a match and why it mattered, how a player bats or
+bowls. It searches **Wikipedia** articles on the 34 matches and 100 players in
+`sources/scrape_list.json`: each final's own article (or its tournament's),
+the 2022 T20 World Cup, the Kanpur 2024 series, and each player's biography.
+125 of the 129 lookups found an article, giving 2,084 passages.
 
-1. A fetcher (`sources/cricinfo_client.py`) for the 34 matches and 100 players
-   on `sources/scrape_list.json`. It reads robots.txt first, waits at least 3
-   seconds between requests, identifies itself honestly, caches every page,
-   and stops for the run when refused.
-2. A parser (`sources/parsers.py`) and overlapping passages that keep their
-   source URL, title and date (`context/passages.py`).
-3. Local embeddings (all-MiniLM-L6-v2; no API key, about 80 MB downloaded on
-   first use) in ChromaDB (`context/store.py`).
+How it is built (`cricassist build-context`, about 10 minutes the first time):
 
-**Why the live database is empty.** ESPNcricinfo's terms of use (Disney terms,
-section 2.B(x)) prohibit collecting its content "using a robot, spider, script,
-or other automated means, including... for the purposes of creating or
-developing any AI Tool, data mining or web scraping" without written
-permission, and the site refuses automated requests, including robots.txt
-(HTTP 403). The fetcher makes one request, is refused, and stops. It does not
-disguise itself as a browser or work around the block, which is also why
-`python-espncricinfo` (which bypasses the bot protection with a headless
-browser) is not used. The assistant therefore tells users that no written
-context is available and answers from the stats. Passages are background only:
-the prompt forbids taking numbers from them.
+1. **Scrape** (`sources/wikipedia.py`). Uses Wikipedia's official API the way
+   Wikimedia asks: a descriptive User-Agent with a contact URL, one request at
+   a time at least 1 second apart, `maxlag` so Wikipedia can ask it to back
+   off, and every response cached in `data/raw/wikipedia_cache/`, so rebuilds
+   make no requests. Search results are checked: a final's own article is
+   preferred over its tournament's, a player's article must carry their
+   surname and be about cricket, and players are also searched by the name
+   they are known by ("Smriti Mandhana", not "Smriti Shriniwas Mandhana").
+2. **Clean and split** (`context/build.py`, `context/passages.py`). Reference
+   sections are dropped and the text is split into overlapping passages of
+   about 180 words, each keeping its article title and URL.
+3. **Embed** (`context/store.py`). Local embeddings (all-MiniLM-L6-v2; no API
+   key, about 80 MB downloaded on first use) in ChromaDB.
 
-Any text you have the right to use can be loaded without code changes:
+When answering, the assistant cites passages as Wikipedia with their links,
+never presents them as ESPNcricinfo or expert opinion, and never takes a
+number from them: every figure still comes from the stats tools, and the
+evaluation counts a number found only in a passage as unsourced.
 
 ```bash
+cricassist build-context                 # Wikipedia (default): fetch what is not cached, then build
+cricassist build-context --no-fetch      # rebuild from the cache only
 cricassist build-context --local-only --source-dir path/to/documents   # .html, .txt, .md or .jsonl
 ```
+
+**Why not ESPNcricinfo.** The brief named ESPNcricinfo, and a fetcher for it
+remains (`sources/cricinfo_client.py`, `--source cricinfo`): it reads
+robots.txt, waits at least 3 seconds between requests, identifies itself
+honestly, caches pages and stops when refused. But ESPNcricinfo's terms of use
+(Disney terms, section 2.B(x)) prohibit collecting its content "using a robot,
+spider, script, or other automated means, including... for the purposes of
+creating or developing any AI Tool, data mining or web scraping" without
+written permission, and the site refuses automated requests, even robots.txt
+(HTTP 403). The fetcher does not disguise itself or work around the block,
+which is also why `python-espncricinfo` (it bypasses the bot protection with a
+headless browser) is not used. The interviewer approved using another source,
+and Wikipedia's API and licence allow exactly this use.
 
 ## Commands
 
@@ -240,7 +257,7 @@ cricassist build-context --local-only --source-dir path/to/documents   # .html, 
 | `cricassist web` | Open the web app (`--port`, `--no-browser`) |
 | `cricassist chat ["question"]` | Chat in the terminal, or ask one question (`--model`, `--provider`, `--hide-tools`) |
 | `cricassist eval` | Run the 15-question evaluation (`--model`, `--only`, `--redo`, `--summary`, `--fresh`) |
-| `cricassist build-context` | Build the written-context database (`--no-fetch`, `--source-dir`, `--local-only`, `--delay`, `--reset`) |
+| `cricassist build-context` | Build the written-context database from Wikipedia (`--source`, `--no-fetch`, `--source-dir`, `--local-only`, `--limit`, `--delay`, `--reset`) |
 | `python scripts/check_known_stats.py` | Compare 10 stats with ESPNcricinfo's figures |
 | `pytest` | Run the tests (no dataset or key needed) |
 
@@ -256,6 +273,7 @@ Settings come from `.env` (see `.env.example`) or the environment.
 | `CRICASSIST_DB_PATH` | `data/processed/cricassist.db` | Stats database |
 | `CRICASSIST_CHATS_PATH` | `data/processed/chats.json` | Saved web chats |
 | `CRICASSIST_CONTEXT_PATH` | `data/processed/context` | Written-context database |
+| `CRICASSIST_WIKI_CACHE_DIR` | `data/raw/wikipedia_cache` | Cached Wikipedia responses |
 
 **Gemini's free tier** allows a few requests per minute and a limited number
 per model per day. The assistant waits out per-minute limits ("waiting 20s…");
@@ -278,12 +296,12 @@ src/cricassist/
     agent.py            conversation loop for Gemini and Claude
     tools.py            the 18 tools the model can call
     prompts.py          the system prompt (the rules for numbers)
-  sources/              ESPNcricinfo fetcher, parser and scrape list
+  sources/              Wikipedia and ESPNcricinfo fetchers, parser, scrape list
   context/              passages and the ChromaDB store
   evaluation/           the 15 questions and the grader
   web/                  web app server and page
 scripts/                known-stats check, test-data and scrape-list builders
-tests/                  163 tests on a three-match sample
+tests/                  173 tests on a three-match sample
 docs/                   evaluation results and screenshots
 data/raw/               the dataset CSVs (not committed)
 data/processed/         built databases, saved chats, eval results (not committed)
@@ -304,4 +322,6 @@ data/processed/         built databases, saved chats, eval results (not committe
 
 Ball-by-ball data from [Cricsheet](https://cricsheet.org), used under the Open
 Data Commons Attribution License 1.0, via the Kaggle dataset "The Ultimate
-Ball-by-Ball Cricket Dataset".
+Ball-by-Ball Cricket Dataset". Written context from
+[Wikipedia](https://en.wikipedia.org), used under the Creative Commons
+Attribution-ShareAlike 4.0 licence; each passage keeps the URL of its article.

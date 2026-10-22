@@ -20,6 +20,7 @@ class Settings:
     gemini_api_key: str
     anthropic_api_key: str
     chats_path: Path = Path("data/processed/chats.json")  # web app chat sessions
+    wiki_cache_dir: Path = Path("data/raw/wikipedia_cache")  # Wikipedia API responses
 
 
 def load_dotenv(path: Path = Path(".env")) -> None:
@@ -52,4 +53,5 @@ def load_settings() -> Settings:
         gemini_api_key=os.getenv("GEMINI_API_KEY", ""),
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
         chats_path=Path(os.getenv("CRICASSIST_CHATS_PATH", "data/processed/chats.json")),
+        wiki_cache_dir=Path(os.getenv("CRICASSIST_WIKI_CACHE_DIR", "data/raw/wikipedia_cache")),
     )

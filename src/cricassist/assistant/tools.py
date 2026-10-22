@@ -89,7 +89,7 @@ _context_store = None
 
 
 def set_context_store(store) -> None:
-    """Use this ContextStore for search_cricinfo_context (tests, or a custom path)."""
+    """Use this ContextStore for search_written_context (tests, or a custom path)."""
     global _context_store
     _context_store = store
 
@@ -108,10 +108,9 @@ def _get_context_store():
 
 
 EMPTY_CONTEXT = (
-    "No written context is available: the context database is empty because no ESPNcricinfo pages "
-    "have been collected (the site refuses automated requests and its terms forbid scraping for AI "
-    "tools without permission). Answer from the stats tools only, and tell the journalist that no "
-    "match report or profile text is available."
+    "No written context is available: the context database is empty (it is filled by "
+    "`cricassist build-context`). Answer from the stats tools only, and tell the journalist that no "
+    "written background is available."
 )
 
 
@@ -123,8 +122,8 @@ def _search_context(con, args: dict) -> dict:
     passages = store.search(args["query"], n=int(args.get("n", 5)), kind=kind)
     return {
         "passages": passages,
-        "note": "Background text only. Quote words with the URL; never take numbers from passages, "
-        "use the stats tools for every figure.",
+        "note": "Background text only. Say where each passage comes from (its source, e.g. Wikipedia) and "
+        "give its URL; never take numbers from passages, use the stats tools for every figure.",
     }
 
 
@@ -267,14 +266,15 @@ TOOLS = [
         lambda con, a: q.match_scorecard(con, int(a["match_id"])),
     ),
     Tool(
-        "search_cricinfo_context",
-        "Search written context (match reports and player profiles) by meaning, for background the stats "
-        "cannot give: what happened in a match, how a player plays, notable moments. Returns passages with "
-        "their source URL. Never take numbers from them.",
+        "search_written_context",
+        "Search written context by meaning: Wikipedia articles on finals, tournaments and players (how a "
+        "player bowls or bats, career story, what happened in a match and why it mattered). Use it for "
+        "background the stats cannot give. Returns passages with their source and URL. Never take numbers "
+        "from them.",
         _schema(
             {
                 "query": {"type": "string", "description": "What to look for, in plain words, e.g. 'Head century 2023 World Cup final'."},
-                "kind": {"type": "string", "enum": ["match_report", "player_profile"]},
+                "kind": {"type": "string", "enum": ["match_report", "tournament", "player_profile"]},
                 "n": {"type": "integer", "description": "How many passages, default 5."},
             },
             ["query"],
