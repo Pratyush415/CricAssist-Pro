@@ -129,6 +129,28 @@ class WikipediaClient:
         data = self._get({"action": "query", "list": "search", "srsearch": query, "srlimit": str(limit)})
         return [r["title"] for r in data.get("query", {}).get("search", [])]
 
+    def categories(self, title: str) -> list[str]:
+        """The article's visible categories, e.g. "Category:Indian cricketers"."""
+        data = self._get({
+            "action": "query", "prop": "categories", "titles": title, "redirects": "1",
+            "clshow": "!hidden", "cllimit": "max",
+        })
+        pages = data.get("query", {}).get("pages", [])
+        return [c["title"] for c in pages[0].get("categories", [])] if pages else []
+
+    def article_and_categories(self, title: str) -> tuple[Article | None, list[str]]:
+        """The article and its visible categories in one request (used for on-demand lookups)."""
+        data = self._get({
+            "action": "query", "prop": "extracts|info|categories", "titles": title, "redirects": "1",
+            "explaintext": "1", "exsectionformat": "wiki", "inprop": "url", "clshow": "!hidden", "cllimit": "max",
+        })
+        pages = data.get("query", {}).get("pages", [])
+        if not pages or pages[0].get("missing") or not pages[0].get("extract"):
+            return None, []
+        page = pages[0]
+        categories = [c["title"] for c in page.get("categories", [])]
+        return Article(title=page["title"], url=page["fullurl"], text=clean_extract(page["extract"])), categories
+
     def article(self, title: str) -> Article | None:
         """The article's plain text (following redirects), or None if there is no such page."""
         data = self._get({

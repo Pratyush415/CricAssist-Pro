@@ -35,6 +35,10 @@ class ContextStore:
     def count(self) -> int:
         return self.collection.count()
 
+    def has_title(self, title: str) -> bool:
+        """Whether passages from a document with this title are stored."""
+        return bool(self.collection.get(where={"title": title}, limit=1)["ids"])
+
     def clear(self) -> None:
         self.client.delete_collection(COLLECTION)
         self.collection = self._collection()

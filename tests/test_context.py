@@ -325,6 +325,12 @@ ARTICLES = {
     "Jasprit Bumrah": "Jasprit Bumrah is an Indian international cricketer known for his unusual bowling action.",
     "Jasprit (film)": "Jasprit is a 2019 film about a cook.",
 }
+CATEGORIES = {
+    "2023 Cricket World Cup final": ["Category:Cricket World Cup finals"],
+    "2023 Cricket World Cup": ["Category:2023 Cricket World Cup"],
+    "Jasprit Bumrah": ["Category:Indian cricketers"],
+    "Jasprit (film)": ["Category:2019 films"],
+}
 SEARCHES = {
     "2023 ICC Cricket World Cup final": ["2023 Cricket World Cup", "2023 Cricket World Cup final"],
     "Jasprit Jasbirsingh Bumrah cricketer": ["Jasprit (film)", "Jasprit Bumrah"],
@@ -349,8 +355,12 @@ class FakeWikipedia:
         title = q["titles"]
         if title not in ARTICLES:
             return 200, json.dumps({"query": {"pages": [{"title": title, "missing": True}]}})
-        page = {"title": title, "extract": ARTICLES[title],
-                "fullurl": "https://en.wikipedia.org/wiki/" + title.replace(" ", "_")}
+        page = {"title": title, "fullurl": "https://en.wikipedia.org/wiki/" + title.replace(" ", "_")}
+        props = q.get("prop", "")
+        if "extracts" in props:
+            page["extract"] = ARTICLES[title]
+        if "categories" in props:
+            page["categories"] = [{"title": c} for c in CATEGORIES.get(title, [])]
         return 200, json.dumps({"query": {"pages": [page]}})
 
 
@@ -453,3 +463,65 @@ def test_find_article_falls_back_to_the_usual_name(tmp_path):
         assert find_article(wiki_client(tmp_path, FakeWikipedia()), target).title == "Jasprit Bumrah"
     finally:
         del SEARCHES["Jasprit Bumrah cricketer"]
+
+
+
+# --- On-demand Wikipedia lookups ---------------------------------------------
+
+from cricassist.context.live import LiveWikipedia, is_cricket, kind_of  # noqa: E402
+
+
+def test_is_cricket_and_kind_of():
+    assert is_cricket(["Category:Indian cricketers"]) and not is_cricket(["Category:2019 films"])
+    assert kind_of(["Category:Indian cricketers"]) == "player_profile"
+    assert kind_of(["Category:Cricket World Cup finals"]) == "match_report"
+    assert kind_of(["Category:Border–Gavaskar Trophy series", "Category:Cricket"]) == "tournament"
+    assert kind_of(["Category:Cricket grounds in West Bengal"]) == "topic"
+
+
+def test_live_lookup_adds_only_new_cricket_articles(tmp_path, store):
+    SEARCHES["Jasprit"] = ["Jasprit (film)", "Jasprit Bumrah"]
+    try:
+        site = FakeWikipedia()
+        live = LiveWikipedia(store, wiki_client(tmp_path, site))
+        assert live.ensure("Jasprit") == ["Jasprit Bumrah"]  # the film is not cricket: left out
+        assert store.has_title("Jasprit Bumrah") and not store.has_title("Jasprit (film)")
+        searches = [u for u, _ in site.requests if "list=search" in u]
+        assert "srsearch=Jasprit&" in searches[0]  # the plain topic is searched first
+        before = len(site.requests)
+        assert live.ensure("Jasprit") == []  # already stored, and every response is cached
+        assert len(site.requests) == before
+    finally:
+        del SEARCHES["Jasprit"]
+
+
+def test_live_lookup_stops_at_the_limit(tmp_path, store):
+    SEARCHES["World Cup"] = ["2023 Cricket World Cup final", "2023 Cricket World Cup", "Jasprit Bumrah"]
+    try:
+        live = LiveWikipedia(store, wiki_client(tmp_path, FakeWikipedia()), max_new=2)
+        assert live.ensure("World Cup") == ["2023 Cricket World Cup final", "2023 Cricket World Cup"]
+    finally:
+        del SEARCHES["World Cup"]
+
+
+def test_context_tool_looks_up_wikipedia(db, store, tmp_path):
+    SEARCHES["Jasprit"] = ["Jasprit Bumrah"]
+    tools.set_context_store(store, live=LiveWikipedia(store, wiki_client(tmp_path, FakeWikipedia())))
+    try:
+        result = json.loads(run_tool(db, "search_written_context", {"query": "Jasprit"})[0])
+        assert result["added_from_wikipedia"] == ["Jasprit Bumrah"]
+        assert result["passages"][0]["url"].endswith("/Jasprit_Bumrah")
+    finally:
+        tools.set_context_store(None)
+        del SEARCHES["Jasprit"]
+
+
+def test_context_tool_works_when_wikipedia_is_unreachable(db, store, tmp_path):
+    store.add([parse_page(REPORT_HTML, URL, kind="match_report")])
+    tools.set_context_store(store, live=LiveWikipedia(store, wiki_client(tmp_path, FakeWikipedia(status=503))))
+    try:
+        result = json.loads(run_tool(db, "search_written_context", {"query": "captain chase final"})[0])
+        assert "Could not reach Wikipedia" in result["live_lookup"]
+        assert result["passages"][0]["url"] == URL  # the stored passages still answer
+    finally:
+        tools.set_context_store(None)
